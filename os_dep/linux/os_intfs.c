@@ -2173,22 +2173,20 @@ static int _netdev_open(struct net_device *pnetdev)
 	}
 #endif
 
-	if (!rtw_is_hw_init_completed(padapter)) { // ips 
+	if (!dev_is_hw_start(dvobj)) { 
 		dev_clr_surprise_removed(dvobj);
 		dev_clr_drv_stopped(dvobj);
 		RTW_ENABLE_FUNC(dvobj, DF_RX_BIT);
 		RTW_ENABLE_FUNC(dvobj, DF_TX_BIT);
 
-		status = rtk_hal_init(padapter);
-		if (status == _FAIL)
-			goto netdev_open_error;
-
 		status = rtw_hw_start(dvobj);
 		if (status == _FAIL)
 			goto netdev_open_error;
 
+		status = rtk_hal_init(padapter);
+		if (status == _FAIL)
+			goto netdev_open_error;
 		rtw_led_control(padapter, LED_CTL_NO_LINK);
-
 
 		#if 0 /*#ifdef CONFIG_CORE_DM_CHK_TIMER*/
 		if (0){
@@ -2201,14 +2199,11 @@ static int _netdev_open(struct net_device *pnetdev)
 	}
 
 	if (padapter->netif_up == _FALSE) {
-		RTW_INFO("%s NEO doing rtw_hw_iface_init\n", __func__);
 		if (rtw_hw_iface_init(padapter) == _FALSE) {
 			rtw_warn_on(1);
 			goto netdev_open_error;
 		}
-	}
 
-	{
 		rtw_hal_iface_init(padapter);
 
 		#ifdef CONFIG_RTW_NAPI
@@ -2218,9 +2213,6 @@ static int _netdev_open(struct net_device *pnetdev)
 		}
 		#endif
 
-		#ifdef CONFIG_IOCTL_CFG80211
-		rtw_cfg80211_init_wdev_data(padapter);
-		#endif
 		/* rtw_netif_carrier_on(pnetdev); */ /* call this func when rtw_joinbss_event_callback return success */
 		rtw_netif_wake_queue(pnetdev);
 
@@ -2228,7 +2220,6 @@ static int _netdev_open(struct net_device *pnetdev)
 		if (is_primary_adapter(padapter))
 			netdev_br_init(pnetdev);
 		#endif /* CONFIG_BR_EXT */
-
 
 		padapter->net_closed = _FALSE;
 		padapter->netif_up = _TRUE;
