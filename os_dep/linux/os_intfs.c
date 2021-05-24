@@ -2162,9 +2162,16 @@ static int _netdev_open(struct net_device *pnetdev)
 	uint status;
 	_adapter *padapter = (_adapter *)rtw_netdev_priv(pnetdev);
 	struct dvobj_priv *dvobj = adapter_to_dvobj(padapter);
-	struct pwrctrl_priv *pwrctrlpriv = adapter_to_pwrctl(padapter);
 
 	RTW_INFO(FUNC_NDEV_FMT" start\n", FUNC_NDEV_ARG(pnetdev));
+
+#ifdef DIRTY_FOR_WORK
+	if(pnetdev->priv_flags & IFF_DONT_BRIDGE)
+	{
+		RTW_INFO("Unable to be bridged !! Unlock for this iface !!\n");
+		pnetdev->priv_flags &= ~(IFF_DONT_BRIDGE);
+	}
+#endif
 
 	if (!rtw_is_hw_init_completed(padapter)) { // ips 
 		dev_clr_surprise_removed(dvobj);
@@ -2225,7 +2232,6 @@ static int _netdev_open(struct net_device *pnetdev)
 
 		padapter->net_closed = _FALSE;
 		padapter->netif_up = _TRUE;
-		pwrctrlpriv->bips_processing = _FALSE;
 	}
 
 	RTW_INFO(FUNC_NDEV_FMT" Success (netif_up=%d)\n", FUNC_NDEV_ARG(pnetdev), padapter->netif_up);
