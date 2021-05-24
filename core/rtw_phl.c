@@ -719,6 +719,8 @@ _free_hal :
 
 u8 rtw_hw_start(struct dvobj_priv *dvobj)
 {
+	if (dev_is_hw_start(dvobj))
+		return _FAIL;
 
 	if (rtw_phl_start(GET_PHL_INFO(dvobj)) != RTW_PHL_STATUS_SUCCESS)
 		return _FAIL;
@@ -728,6 +730,7 @@ u8 rtw_hw_start(struct dvobj_priv *dvobj)
 	dvobj_to_pci(dvobj)->irq_enabled = 1;
 	#endif
 
+	dev_set_hw_start(dvobj);
 	
 	return _SUCCESS;
 }
