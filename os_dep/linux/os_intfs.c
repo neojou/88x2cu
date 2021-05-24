@@ -1196,8 +1196,7 @@ u8 devobj_data_init(struct dvobj_priv *dvobj)
 {
 	u8 ret = _SUCCESS;
 
-// NEO
-//	dev_set_drv_stopped(dvobj); /*init*/
+	dev_set_drv_stopped(dvobj); /*init*/
 
 	/*init data of dvobj*/
 	rtw_rfctl_init(dvobj);
@@ -1432,6 +1431,11 @@ u8 rtw_init_drv_sw(_adapter *padapter)
 #ifdef CONFIG_RTW_CFGVENDOR_RANDOM_MAC_OUI
 	_rtw_memset(pwdev_priv->pno_mac_addr, 0xFF, ETH_ALEN);
 #endif
+
+#ifdef CONFIG_STA_CMD_DISPR
+	rtw_connect_req_init(padapter);
+	rtw_disconnect_req_init(padapter);
+#endif /* CONFIG_STA_CMD_DISPR */
 
 exit:
 	return ret8;

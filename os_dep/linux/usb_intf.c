@@ -1166,13 +1166,10 @@ _adapter *rtw_usb_primary_adapter_init(struct dvobj_priv *dvobj,
 	if (padapter == NULL)
 		goto exit;
 
-	if (rtw_load_registry(padapter) != _SUCCESS)
-		goto free_adapter;
-
 	padapter->dvobj = dvobj;
 
-
-	dev_set_drv_stopped(dvobj);/*init*/
+	if (rtw_load_registry(padapter) != _SUCCESS)
+		goto free_adapter;
 
 	dvobj->padapters[dvobj->iface_nums++] = padapter;
 	padapter->iface_id = IFACE_ID0;
