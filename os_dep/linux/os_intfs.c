@@ -1197,6 +1197,7 @@ u8 devobj_data_init(struct dvobj_priv *dvobj)
 	u8 ret = _SUCCESS;
 
 	dev_set_drv_stopped(dvobj); /*init*/
+	dev_clr_hw_start(dvobj); /* init */
 
 	/*init data of dvobj*/
 	rtw_rfctl_init(dvobj);

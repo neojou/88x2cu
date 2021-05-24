@@ -739,6 +739,8 @@ void rtw_hw_stop(struct dvobj_priv *dvobj)
 	//intr init flag
 	dvobj_to_pci(dvobj)->irq_enabled = 0;
 	#endif
+
+	dev_clr_hw_start(dvobj);
 }
 
 
