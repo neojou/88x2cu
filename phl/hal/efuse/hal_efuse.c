@@ -91,7 +91,6 @@ u32 efuse_hidden_handle(struct efuse_t *efuse)
 	return hal_status;
 }
 
-#if 0 //NEO
 
 enum rtw_hal_status efuse_set_hw_cap(struct efuse_t *efuse)
 {
@@ -103,6 +102,7 @@ enum rtw_hal_status efuse_set_hw_cap(struct efuse_t *efuse)
 	u8 domain = 0xFF;
 	u8 rf_board_opt = 0xFF;
 
+#if 0 //NEO
 	status = rtw_efuse_get_info(efuse, EFUSE_INFO_RF_PKG_TYPE, &pkg_type,
 				    sizeof(pkg_type));
 
@@ -110,6 +110,7 @@ enum rtw_hal_status efuse_set_hw_cap(struct efuse_t *efuse)
 		PHL_WARN("%s: Get pkg type fail! Status(%x)\n", __FUNCTION__, status);
 	}
 
+#endif //NEO
 	status = rtw_efuse_get_info(efuse, EFUSE_INFO_RF_RFE, &rfe_type,
 				    sizeof(rfe_type));
 
@@ -117,6 +118,7 @@ enum rtw_hal_status efuse_set_hw_cap(struct efuse_t *efuse)
 		PHL_WARN("%s: Get rfe type fail! Status(%x)\n", __FUNCTION__, status);
 	}
 
+#if 0 //NEO
 	status = rtw_efuse_get_info(efuse, EFUSE_INFO_RF_XTAL, &xcap,
 				    sizeof(xcap));
 
@@ -139,14 +141,21 @@ enum rtw_hal_status efuse_set_hw_cap(struct efuse_t *efuse)
 	}
 
 	hal_com->dev_hw_cap.pkg_type = pkg_type;
+#endif //NEO
+
+	pr_info("%s NEO rfe_type = %d\n", __func__, rfe_type);
 	hal_com->dev_hw_cap.rfe_type = rfe_type;
+
+#if 0 //NEO
 	hal_com->dev_hw_cap.xcap = xcap;
 	hal_com->dev_hw_cap.domain = domain;
 	hal_com->dev_hw_cap.rf_board_opt = rf_board_opt;
+#endif //NEO
 
 	return status;
 }
 
+#if 0 //NEO
 enum rtw_hal_status rtw_efuse_logicmap_buf_load(void *efuse, u8* buf, bool is_limit)
 {
 	enum rtw_hal_status status = RTW_HAL_STATUS_FAILURE;
@@ -677,7 +686,7 @@ enum rtw_hal_status rtw_efuse_get_info(void *efuse,
 	if(TEST_STATUS_FLAG(efuse_info->status, EFUSE_STATUS_PROCESS) == false)
 		return RTW_HAL_STATUS_EFUSE_UNINIT;
 
-//	if(info_type <= EFUSE_INFO_MAC_MAX)
+	if(info_type <= EFUSE_INFO_MAC_MAX)
 		hal_status = rtw_hal_mac_get_efuse_info(hal_com,
 												efuse_info->shadow_map,
 												info_type,
@@ -692,7 +701,7 @@ enum rtw_hal_status rtw_efuse_get_info(void *efuse,
 											   info_type,
 											   value,
 											   size,
-											   efuse_info->is_map_valid);
+#endif //NEO											   efuse_info->is_map_valid);
 	else if (info_type <= EFUSE_INFO_RF_MAX)
 		hal_status = rtw_hal_rf_get_efuse_info(hal_com,
 											   efuse_info->shadow_map,
@@ -700,6 +709,7 @@ enum rtw_hal_status rtw_efuse_get_info(void *efuse,
 											   value,
 											   size,
 											   efuse_info->is_map_valid);
+#if 0 //NEO
 	else
 		hal_status = rtw_hal_btc_get_efuse_info(hal_com,
 												efuse_info->shadow_map,
@@ -733,13 +743,14 @@ void rtw_efuse_process(void *efuse, char *ic_name)
 	//efuse_hidden_handle(efuse_info);
 
 	SET_STATUS_FLAG(efuse_info->status, EFUSE_STATUS_PROCESS);
-#if 0 //NEO
+
 	/*
 	 * We can set the hw cap after we got the shadow map.
 	 * The efuse get info API will check the efuse is processed or not.
 	 */
 	efuse_set_hw_cap(efuse_info);
 
+#if 0 //NEO
 	if (RTW_DRV_MODE_EQC == efuse_info->phl_com->drv_mode) {
 		rtw_hal_rf_get_default_rfe_type(efuse_info->hal_com);
 		rtw_hal_rf_get_default_xtal(efuse_info->hal_com);

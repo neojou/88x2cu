@@ -96,6 +96,8 @@ void rtw_hal_rf_dm_init(struct hal_info_t *hal_info)
 	halrf_dm_init(hal_info->rf);
 }
 
+#endif //NEO
+
 enum rtw_hal_status
 rtw_hal_rf_get_efuse_info(struct rtw_hal_com_t *hal_com,
 	u8 *efuse_map, enum rtw_efuse_info info_type, void *value,
@@ -111,6 +113,8 @@ rtw_hal_rf_get_efuse_info(struct rtw_hal_com_t *hal_com,
 	else
 		return RTW_HAL_STATUS_FAILURE;
 }
+
+#if 0 //NEO
 
 enum rtw_hal_status rtw_hal_rf_read_pwr_table(
 	struct rtw_hal_com_t *hal_com, u8 rf_path, u16 rate,

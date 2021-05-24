@@ -16,7 +16,8 @@ endif
 # Base directory
 path_halrf_d1 := $(phl_path)/phy/rf
 
-halrf-y += $(path_halrf_d1)/halrf_init.o
+halrf-y += $(path_halrf_d1)/halrf.o \
+			$(path_halrf_d1)/halrf_init.o
 
 #halrf-y += $(path_halrf_d1)/halrf.o \
 			$(path_halrf_d1)/halrf_pmac.o \
@@ -51,13 +52,15 @@ halrf-y += $(path_halrf_8852a)/halrf_8852a.o \
 			$(path_halrf_8852a)/halrf_psd_8852a.o
 endif
 
-ifeq ($(CONFIG_RTL8852B), y)
-ic := 8852b
+ifeq ($(CONFIG_RTL8822C), y)
+ic := 8822c
 
 # Level 2 directory
-path_halrf_8852b := $(path_halrf_d1)/halrf_$(ic)
+path_halrf_8822c := $(path_halrf_d1)/halrf_$(ic)
 
-halrf-y += $(path_halrf_8852b)/halrf_8852b.o\
+halrf-y += $(path_halrf_8822c)/halrf_efuse_8822c.o
+
+#halrf-y += $(path_halrf_8852b)/halrf_8852b.o\
 			$(path_halrf_8852b)/halrf_8852b_api.o \
 			$(path_halrf_8852b)/halrf_hwimg_8852b.o\
 			$(path_halrf_8852b)/halrf_iqk_8852b.o\
@@ -65,7 +68,6 @@ halrf-y += $(path_halrf_8852b)/halrf_8852b.o\
 			$(path_halrf_8852b)/halrf_dack_8852b.o \
 			$(path_halrf_8852b)/halrf_dpk_8852b.o \
 			$(path_halrf_8852b)/halrf_set_pwr_table_8852b.o\
-			$(path_halrf_8852b)/halrf_efuse_8852b.o\
 			$(path_halrf_8852b)/halrf_tssi_8852b.o
 endif
 

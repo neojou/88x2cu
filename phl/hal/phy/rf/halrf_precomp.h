@@ -28,14 +28,9 @@
 
 /*@--------------------------[Define] ---------------------------------------*/
 
-#ifdef CONFIG_RTL8852A
-    #define RF_8852A_SUPPORT
+#ifdef CONFIG_RTL8822C
+	#define RF_8822C_SUPPORT
 #endif
-
-#ifdef CONFIG_RTL8852B
-    #define RF_8852B_SUPPORT
-#endif
-
 
 #define	MASKBYTE0		0xff
 #define	MASKBYTE1		0xff00
@@ -58,8 +53,6 @@
 #include "halrf_ic_sw_info.h"
 
 #if 0 //NEO
-/*---[Include structure & prototype] ----------------------------------------*/
-
 #include "halrf_hw_cfg.h"
 #include "halrf_hw_cfg_ex.h"
 #include "halrf_interface.h"
@@ -73,6 +66,7 @@
 #include "halrf_dpk.h"
 
 #include "halrf_dack.h"
+
 #if 0 //NEO
 #include "halrf_pmac.h"
 //#include "halrf_dbg_cmd.h"
@@ -88,55 +82,14 @@
 #include "halrf_psd.h"
 #include "halrf_kfree.h"
 #include "halrf_hwimg.h"
-#ifdef RF_8852A_SUPPORT
-#include "halrf_8852a/halrf_dack_8852a.h"
-#include "halrf_8852a/halrf_hwimg_8852a.h"
-#include "halrf_8852a/halrf_kfree_8852a.h"
-#endif
-
-#ifdef RF_8852B_SUPPORT
-#include "halrf_8852b/halrf_dack_8852b.h"
-#include "halrf_8852b/halrf_hwimg_8852b.h"
-//#include "halrf_8852b/halrf_kfree_8852b.h"
-#endif
 
 #endif //NEO
 
 #include "halrf.h"
 #include "halrf_ex.h"
 
-#if 0 //NEO
-#ifdef RF_8852A_SUPPORT
-	#include "halrf_8852a/halrf_efuse_8852a.h"
-	#include "halrf_8852a/halrf_reg_cfg_8852a.h"
-	#include "halrf_8852a/halrf_8852a.h"
-	#include "halrf_8852a/halrf_8852a_api.h"
-	#include "halrf_8852a/halrf_8852a_api_ex.h"
-	#include "halrf_8852a/halrf_iqk_8852a.h"
-	#include "halrf_8852a/halrf_dpk_8852a.h"
-	#include "halrf_8852a/halrf_txgapk_8852a.h"
-	#include "halrf_8852a/halrf_version_rtl8852a.h"
-	#include "halrf_8852a/halrf_set_pwr_table_8852a.h"
-	#include "halrf_8852a/halrf_tssi_8852a.h"
-	#include "halrf_8852a/halrf_psd_8852a.h"
+#ifdef RF_8822C_SUPPORT
+#include "halrf_8822c/halrf_efuse_8822c.h"
 #endif
 
-#ifdef RF_8852B_SUPPORT
-	#include "halrf_8852b/halrf_efuse_8852b.h"
-	#include "halrf_8852b/halrf_reg_cfg_8852b.h"
-	#include "halrf_8852b/halrf_8852b.h"
-	#include "halrf_8852b/halrf_8852b_api.h"
-	#include "halrf_8852b/halrf_8852b_api_ex.h"
-	#include "halrf_8852b/halrf_iqk_8852b.h"
-	#include "halrf_8852b/halrf_dpk_8852b.h"
-//	#include "halrf_8852b/halrf_txgapk_8852b.h"
-	#include "halrf_8852b/halrf_version_rtl8852b.h"
-	#include "halrf_8852b/halrf_set_pwr_table_8852b.h"
-	#include "halrf_8852b/halrf_tssi_8852b.h"
-#endif
-
-
-#endif //NEO
-
-
-#endif
+#endif  /* __HALRF_PRECOMP_H__ */
