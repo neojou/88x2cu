@@ -2499,17 +2499,16 @@ rtw_hal_mac_hal_init(struct rtw_phl_com_t *phl_com,
 		fwdl_info.fw_from_hdr = 0;
 	else
 		fwdl_info.fw_from_hdr = 1;
-
+#endif //NEO
 	mac_status = mac->ops->hal_init(mac, &init_info->trx_info, &fwdl_info, &init_info->intf_info);
 
 	if (mac_status == MACSUCCESS) {
 		hstatus = RTW_HAL_STATUS_SUCCESS;
-		hal_mac_print_fw_version(hal_info);
+		//hal_mac_print_fw_version(hal_info);
 	} else {
 		hstatus = RTW_HAL_STATUS_MAC_INIT_FAILURE;
 		PHL_ERR("%s : mac_status %d!\n", __func__, mac_status);
 	}
-#endif //NEO
 
 	return hstatus;
 }

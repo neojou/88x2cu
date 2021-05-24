@@ -157,7 +157,7 @@ static struct mac_ax_intf_ops mac8852a_pcie_ops = {
 static struct mac_ops mac8822c_ops = {
 	NULL, /* intf_ops */
 	/*System level*/
-	NULL, /* mac_hal_init, */ /* hal_init */
+	mac_hal_init, /* hal_init */
 	mac_hal_fast_init, /* hal_fast_init */
 #if 0 // NEO
 	NULL, /* mac_hal_deinit,*/ /* hal_deinit */

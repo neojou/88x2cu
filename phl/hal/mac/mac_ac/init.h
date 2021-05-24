@@ -48,14 +48,12 @@ struct mac_adapter *get_mac_adapter(enum mac_intf intf,
 					  struct mac_pltfm_cb *pltfm_cb);
 #endif
 
-#if 0 // NEO
-u32 cmac_func_en(struct mac_ax_adapter *adapter, u8 band, u8 en);
-u32 mac_sys_init(struct mac_ax_adapter *adapter);
-u32 mac_hal_init(struct mac_ax_adapter *adapter,
-		 struct mac_ax_trx_info *trx_info,
-		 struct mac_ax_fwdl_info *fwdl_info,
-		 struct mac_ax_intf_info *intf_info);
-#endif // if 0 NEO
+u32 cmac_func_en(struct mac_adapter *adapter, u8 band, u8 en);
+u32 mac_sys_init(struct mac_adapter *adapter);
+u32 mac_hal_init(struct mac_adapter *adapter,
+		 struct mac_trx_info *trx_info,
+		 struct mac_fwdl_info *fwdl_info,
+		 struct mac_intf_info *intf_info);
 u32 mac_hal_fast_init(struct mac_adapter *adapter,
 		      struct mac_trx_info *trx_info,
 		      struct mac_fwdl_info *fwdl_info,
