@@ -90,6 +90,7 @@
 
 #ifdef RF_8822C_SUPPORT
 #include "halrf_8822c/halrf_efuse_8822c.h"
+#include "halrf_8822c/halrf_8822c_api.h"
 #endif
 
 #endif  /* __HALRF_PRECOMP_H__ */

@@ -58,7 +58,8 @@ ic := 8822c
 # Level 2 directory
 path_halrf_8822c := $(path_halrf_d1)/halrf_$(ic)
 
-halrf-y += $(path_halrf_8822c)/halrf_efuse_8822c.o
+halrf-y += $(path_halrf_8822c)/halrf_efuse_8822c.o \
+			$(path_halrf_8822c)/halrf_8822c_api.o
 
 #halrf-y += $(path_halrf_8852b)/halrf_8852b.o\
 			$(path_halrf_8852b)/halrf_8852b_api.o \

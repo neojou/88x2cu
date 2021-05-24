@@ -1418,6 +1418,8 @@ void halrf_watchdog(void *rf_void)
 	halrf_iqk_tracking(rf);
 }
 
+#endif //NEO
+
 u8 halrf_get_default_rfe_type(void *rf_void)
 {
 	struct rf_info *rf = (struct rf_info *)rf_void;
@@ -1427,8 +1429,14 @@ u8 halrf_get_default_rfe_type(void *rf_void)
 	if (hal_com->chip_id == CHIP_WIFI6_8852A)
 		return halrf_get_default_rfe_type_8852a(rf);
 #endif
+#ifdef RF_8822C_SUPPORT
+	if (hal_com->chip_id == CHIP_WIFI5_8822C)
+		return halrf_get_default_rfe_type_8822c(rf);
+#endif
 	return 1;
 }
+
+#if 0 //NEO
 
 u8 halrf_get_default_xtal(void *rf_void)
 {

@@ -649,6 +649,8 @@ enum rtw_hal_status rtw_hal_rf_trigger_dpk_tracking(struct hal_info_t *hal_info)
 	return hal_status;
 }
 
+#endif //NEO
+
 enum rtw_hal_status
 rtw_hal_rf_get_default_rfe_type(struct rtw_hal_com_t *hal_com)
 {
@@ -657,6 +659,8 @@ rtw_hal_rf_get_default_rfe_type(struct rtw_hal_com_t *hal_com)
 	hal_com->dev_hw_cap.rfe_type = halrf_get_default_rfe_type(hal_info->rf);
 	return RTW_HAL_STATUS_SUCCESS;
 }
+
+#if 0 //NEO
 
 enum rtw_hal_status
 rtw_hal_rf_get_default_xtal(struct rtw_hal_com_t *hal_com)

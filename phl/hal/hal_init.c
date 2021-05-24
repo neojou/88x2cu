@@ -1278,7 +1278,6 @@ enum rtw_hal_status rtw_hal_preload(struct rtw_phl_com_t *phl_com, void *hal)
 	return hal_status;
 }
 
-#if 0 // NEO TODO
 enum rtw_hal_status hal_rfe_type_chk(struct rtw_phl_com_t *phl_com,
 				     struct hal_info_t *hal_info)
 {
@@ -1290,7 +1289,7 @@ enum rtw_hal_status hal_rfe_type_chk(struct rtw_phl_com_t *phl_com,
 	else {
 		if(phl_com->dev_cap.bypass_rfe_chk == true){
 			rtw_hal_rf_get_default_rfe_type(hal_info->hal_com);
-			rtw_hal_rf_get_default_xtal(hal_info->hal_com);
+			//rtw_hal_rf_get_default_xtal(hal_info->hal_com);
 			PHL_WARN("%s: Use default RFE type(0x%x) / XTAL(0x%x) configuration for empty EFUSE\n",
 				 __FUNCTION__,
 				 hal_info->hal_com->dev_hw_cap.rfe_type,
@@ -1302,8 +1301,6 @@ enum rtw_hal_status hal_rfe_type_chk(struct rtw_phl_com_t *phl_com,
 	return hal_status;
 }
 
-#endif // if 0 NEO
-
 enum rtw_hal_status rtw_hal_start(struct rtw_phl_com_t *phl_com, void *hal)
 {
 	struct hal_info_t *hal_info = (struct hal_info_t *)hal;
@@ -1313,14 +1310,11 @@ enum rtw_hal_status rtw_hal_start(struct rtw_phl_com_t *phl_com, void *hal)
 	enum rf_type tx, rx;
 #endif
 
-#if 0 // NEO
 	hal_status = hal_rfe_type_chk(phl_com, hal_info);
 	if(hal_status != RTW_HAL_STATUS_SUCCESS){
 		PHL_ERR("%s: Unknown RFE type!!!\n", __FUNCTION__);
 		return hal_status;
 	}
-
-#endif // if 0 NEO
 
 	hal_status = hal_ops->hal_start(phl_com, hal_info);
 	if (hal_status != RTW_HAL_STATUS_SUCCESS)
