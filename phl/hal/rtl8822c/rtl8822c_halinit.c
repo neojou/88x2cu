@@ -321,10 +321,10 @@ enum rtw_hal_status hal_start_8822c(struct rtw_phl_com_t *phl_com,
 {
 	enum rtw_hal_status hal_status = RTW_HAL_STATUS_FAILURE;
 
-#if 0 // NEO
 	/* Read phy parameter files */
 	rtw_hal_dl_all_para_file(phl_com, init_info->ic_name, hal);
 
+#if 0 // NEO
 	hal_status = rtw_hal_mac_hal_init(phl_com, hal, init_info);
 	if (hal_status != RTW_HAL_STATUS_SUCCESS)
 		goto hal_init_fail;
