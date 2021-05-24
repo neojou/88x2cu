@@ -1289,7 +1289,7 @@ enum rtw_hal_status hal_rfe_type_chk(struct rtw_phl_com_t *phl_com,
 	else {
 		if(phl_com->dev_cap.bypass_rfe_chk == true){
 			rtw_hal_rf_get_default_rfe_type(hal_info->hal_com);
-			//rtw_hal_rf_get_default_xtal(hal_info->hal_com);
+			rtw_hal_rf_get_default_xtal(hal_info->hal_com);
 			PHL_WARN("%s: Use default RFE type(0x%x) / XTAL(0x%x) configuration for empty EFUSE\n",
 				 __FUNCTION__,
 				 hal_info->hal_com->dev_hw_cap.rfe_type,

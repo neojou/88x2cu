@@ -252,16 +252,15 @@ u32 halrf_mac_get_pwr_reg_8852a(struct rf_info *rf, enum phl_phy_idx phy,
 
 u8 halrf_get_default_rfe_type_8822c(struct rf_info *rf)
 {
-	return 1;
+	return 4;
+}
+
+u8 halrf_get_default_xtal_8822c(struct rf_info *rf)
+{
+	return 0x4b;
 }
 
 #if 0 //NEO
-
-u8 halrf_get_default_xtal_8852a(struct rf_info *rf)
-{
-	return 0x50;
-}
-
 void halrf_set_gpio_8852a(struct rf_info *rf, enum phl_phy_idx phy, u8 band)
 {
 #ifndef RF_8852B_SUPPORT

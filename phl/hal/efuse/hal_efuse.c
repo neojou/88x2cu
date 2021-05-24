@@ -118,7 +118,6 @@ enum rtw_hal_status efuse_set_hw_cap(struct efuse_t *efuse)
 		PHL_WARN("%s: Get rfe type fail! Status(%x)\n", __FUNCTION__, status);
 	}
 
-#if 0 //NEO
 	status = rtw_efuse_get_info(efuse, EFUSE_INFO_RF_XTAL, &xcap,
 				    sizeof(xcap));
 
@@ -126,6 +125,7 @@ enum rtw_hal_status efuse_set_hw_cap(struct efuse_t *efuse)
 		PHL_WARN("%s: Get xcap fail! Status(%x)\n", __FUNCTION__, status);
 	}
 
+#if 0 //NEO
 	status = rtw_efuse_get_info(efuse, EFUSE_INFO_RF_CHAN_PLAN, &domain,
 				    sizeof(domain));
 
@@ -143,11 +143,10 @@ enum rtw_hal_status efuse_set_hw_cap(struct efuse_t *efuse)
 	hal_com->dev_hw_cap.pkg_type = pkg_type;
 #endif //NEO
 
-	pr_info("%s NEO rfe_type = %d\n", __func__, rfe_type);
 	hal_com->dev_hw_cap.rfe_type = rfe_type;
-
-#if 0 //NEO
 	hal_com->dev_hw_cap.xcap = xcap;
+	pr_info("%s NEO xcap = 0x%x\n", __func__, hal_com->dev_hw_cap.xcap);
+#if 0 //NEO
 	hal_com->dev_hw_cap.domain = domain;
 	hal_com->dev_hw_cap.rf_board_opt = rf_board_opt;
 #endif //NEO

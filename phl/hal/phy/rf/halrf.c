@@ -1436,20 +1436,19 @@ u8 halrf_get_default_rfe_type(void *rf_void)
 	return 1;
 }
 
-#if 0 //NEO
-
 u8 halrf_get_default_xtal(void *rf_void)
 {
 	struct rf_info *rf = (struct rf_info *)rf_void;
 	struct rtw_hal_com_t *hal_com = rf->hal_com;
 	
-#ifdef RF_8852A_SUPPORT
-	if (hal_com->chip_id == CHIP_WIFI6_8852A)
-		return halrf_get_default_xtal_8852a(rf);
+#ifdef RF_8822C_SUPPORT
+	if (hal_com->chip_id == CHIP_WIFI5_8822C)
+		return halrf_get_default_xtal_8822c(rf);
 #endif
 	return 0x3f;
 }
 
+#if 0 //NEO
 bool halrf_iqk_get_ther_rek(void *rf_void)
 {
 	struct rf_info *rf = (struct rf_info *)rf_void;

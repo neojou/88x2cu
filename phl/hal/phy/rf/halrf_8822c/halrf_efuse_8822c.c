@@ -38,6 +38,10 @@ bool halrf_get_efuse_info_8822c(struct rf_info *rf, u8 *efuse_map,
 			offset = EFUSE_INFO_RF_RFE_8822C_ADDR;
 			default_value = EFUSE_INFO_RF_RFE_8822C_VALUE;
 			break;
+		case EFUSE_INFO_RF_XTAL:
+			offset = EFUSE_INFO_RF_XTAL_8822C_ADDR;
+			default_value = EFUSE_INFO_RF_XTAL_8822C_VALUE;
+			break;
 		default:
 			return false;
 	}

@@ -660,7 +660,6 @@ rtw_hal_rf_get_default_rfe_type(struct rtw_hal_com_t *hal_com)
 	return RTW_HAL_STATUS_SUCCESS;
 }
 
-#if 0 //NEO
 
 enum rtw_hal_status
 rtw_hal_rf_get_default_xtal(struct rtw_hal_com_t *hal_com)
@@ -671,6 +670,7 @@ rtw_hal_rf_get_default_xtal(struct rtw_hal_com_t *hal_com)
 	return RTW_HAL_STATUS_SUCCESS;
 }
 
+#if 0 //NEO
 enum rtw_hal_status rtw_hal_rf_set_tssi_avg(struct hal_info_t *hal_info, u8 cur_phy_idx,
 						s32 xdbm)
 {
