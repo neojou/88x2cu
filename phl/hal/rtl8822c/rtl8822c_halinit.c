@@ -231,11 +231,15 @@ u32 _hal_cfg_extnal_fw_8852a(enum rtw_fw_type fw_type, struct rtw_fw_info_t *fw_
 	return RTW_HAL_STATUS_SUCCESS;
 }
 
-enum rtw_hal_status hal_cfg_fw_8852a(struct rtw_phl_com_t *phl_com,
+#endif //NEO
+
+enum rtw_hal_status hal_cfg_fw_8822c(struct rtw_phl_com_t *phl_com,
 				     struct hal_info_t *hal,
 				     char *ic_name,
 				     enum rtw_fw_type fw_type)
 {
+	return RTW_HAL_STATUS_SUCCESS;
+#if 0 //NEO
 	enum rtw_hal_status hstatus = RTW_HAL_STATUS_FAILURE;
 	struct rtw_fw_info_t *fw_info = &phl_com->fw_info;
 	struct rtw_fw_cap_t *fw_cap = &phl_com->dev_cap.fw_cap;
@@ -283,8 +287,8 @@ enum rtw_hal_status hal_cfg_fw_8852a(struct rtw_phl_com_t *phl_com,
 init_fw_fail:
 	PHL_TRACE(COMP_PHL_DBG, _PHL_ERR_, "%s : fw_en %d.\n", __func__, fw_info->fw_en);
 	return hstatus;
+#endif //NEO
 }
-#endif // if 0 NEO
 
 enum rtw_hal_status hal_get_efuse_8822c(struct rtw_phl_com_t *phl_com,
 					struct hal_info_t *hal,

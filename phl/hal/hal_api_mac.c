@@ -2460,6 +2460,8 @@ rtw_hal_mac_trx_init(void *mac, struct hal_init_info_t *init_info)
 	return RTW_HAL_STATUS_SUCCESS;
 }
 
+#endif // NEO
+
 enum rtw_hal_status
 rtw_hal_mac_hal_init(struct rtw_phl_com_t *phl_com,
 		     struct hal_info_t *hal_info,
@@ -2469,25 +2471,20 @@ rtw_hal_mac_hal_init(struct rtw_phl_com_t *phl_com,
 	struct mac_adapter *mac = hal_to_mac(hal_info);
 	struct rtw_fw_info_t *fw_info = &phl_com->fw_info;
 	struct hal_ops_t *hal_ops = hal_get_ops(hal_info);
-	struct mac_ax_fwdl_info fwdl_info;
+	struct mac_fwdl_info fwdl_info;
 	u32 mac_status = 0;
 	enum rtw_fw_type fw_type = RTW_FW_MAX;
 
-	FUNCIN_WSTS(hstatus);
 
-#ifdef PHL_FEATURE_NIC
 	fw_type = RTW_FW_NIC;
-#elif defined(PHL_FEATURE_AP)
-	fw_type = RTW_FW_AP;
-#else
-	fw_type  = RTW_FW_MAX;
-#endif
 
 	hstatus = hal_ops->hal_cfg_fw(phl_com, hal_info, init_info->ic_name, fw_type);
 	if(RTW_HAL_STATUS_SUCCESS != hstatus) {
 		PHL_ERR("%s : Cfg FW Failed: %d!\n", __func__, hstatus);
 		return hstatus;
 	}
+
+#if 0 //NEO
 	/* fwdl_info */
 	fwdl_info.fw_en = fw_info->fw_en;
 	fwdl_info.dlram_en = fw_info->dlram_en;
@@ -2512,13 +2509,10 @@ rtw_hal_mac_hal_init(struct rtw_phl_com_t *phl_com,
 		hstatus = RTW_HAL_STATUS_MAC_INIT_FAILURE;
 		PHL_ERR("%s : mac_status %d!\n", __func__, mac_status);
 	}
-
-	FUNCOUT_WSTS(hstatus);
+#endif //NEO
 
 	return hstatus;
 }
-
-#endif // NEO
 
 enum rtw_hal_status
 rtw_hal_mac_hal_fast_init(struct rtw_phl_com_t *phl_com,

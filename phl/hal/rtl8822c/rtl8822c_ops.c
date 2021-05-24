@@ -58,9 +58,7 @@ void hal_set_ops_8822c(struct rtw_phl_com_t *phl_com,
 
 	/*** initialize section ***/
 	ops->read_chip_version = read_chip_version_8822c;
-#if 0 // NEO TODO
 	ops->hal_cfg_fw = hal_cfg_fw_8822c;
-#endif // if 0 NEO
 
 	ops->read_macreg = hal_read_macreg;
 	ops->write_macreg = hal_write_macreg;

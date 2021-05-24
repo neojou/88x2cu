@@ -470,10 +470,12 @@ static enum rtw_hal_status hal_ops_check(struct hal_info_t *hal)
 		status = RTW_HAL_STATUS_FAILURE;
 	}
 #endif /* CONFIG_WOWLAN */
+#endif //NEO
 	if (!ops->hal_cfg_fw) {
 		hal_error_msg("hal_cfg_fw");
 		status = RTW_HAL_STATUS_FAILURE;
 	}
+#if 0 // NEO TODO
 	if (!ops->init_default_value) {
 		hal_error_msg("init_default_value");
 		status = RTW_HAL_STATUS_FAILURE;
