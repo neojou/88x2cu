@@ -116,6 +116,7 @@ path_fw_8822c := $(path_fw_ac)/rtl8822c
 
 halmac-y	+=	$(path_fw_8822c)/hal8822c_fw.o 
 		
+halmac-$(usb)	+= 	$(path_hm_8822c)/_usb_8822c.o
 
 endif
 

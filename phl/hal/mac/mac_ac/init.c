@@ -73,9 +73,11 @@ struct mac_adapter *get_mac_adapter(enum mac_intf intf,
 }
 #endif
 
-#if 0 // NEO
-u32 hci_func_en(struct mac_ax_adapter *adapter)
+static
+u32 hci_func_en(struct mac_adapter *adapter)
 {
+	return MACSUCCESS;
+#if 0 //NEO
 	struct mac_ax_intf_ops *ops = adapter_to_intf_ops(adapter);
 	u32 val32;
 	u32 ret = MACSUCCESS;
@@ -85,8 +87,10 @@ u32 hci_func_en(struct mac_ax_adapter *adapter)
 	MAC_REG_W32(R_AX_HCI_FUNC_EN, val32);
 
 	return ret;
+#endif //NEO
 }
 
+#if 0 // NEO
 u32 dmac_func_en(struct mac_ax_adapter *adapter)
 {
 	struct mac_ax_intf_ops *ops = adapter_to_intf_ops(adapter);
@@ -247,13 +251,6 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
-	ret = ops->enable_fw(adapter, RTW_FW_NIC);
-	if (ret != MACSUCCESS) {
-		PLTFM_MSG_ERR("[ERR]enable_fw %d\n", ret);
-		return ret;
-	}
-
-#if 0 //NEO
 	ret = hci_func_en(adapter);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]hci_func_en %d\n", ret);
@@ -266,6 +263,12 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
+	ret = ops->enable_fw(adapter, RTW_FW_NIC);
+	if (ret != MACSUCCESS) {
+		PLTFM_MSG_ERR("[ERR]enable_fw %d\n", ret);
+		return ret;
+	}
+#if 0 //NEO
 	if (fwdl_info->fw_en) {
 		if (fwdl_info->dlrom_en || fwdl_info->dlram_en) {
 			ret = fwdl_pre_init(adapter, trx_info->qta_mode);
@@ -429,13 +432,6 @@ u32 mac_hal_fast_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
-	ret = ops->enable_fw(adapter, RTW_FW_NIC);
-	if (ret != MACSUCCESS) {
-		PLTFM_MSG_ERR("[ERR]enable_fw %d\n", ret);
-		return ret;
-	}
-
-#if 0 //NEO
 	ret = hci_func_en(adapter);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]hci_func_en %d\n", ret);
@@ -448,6 +444,13 @@ u32 mac_hal_fast_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
+	ret = ops->enable_fw(adapter, RTW_FW_NIC);
+	if (ret != MACSUCCESS) {
+		PLTFM_MSG_ERR("[ERR]enable_fw %d\n", ret);
+		return ret;
+	}
+
+#if 0 //NEO
 	if (fwdl_info->fw_en) {
 		if (fwdl_info->dlrom_en || fwdl_info->dlram_en) {
 			ret = fwdl_pre_init(adapter, trx_info->qta_mode);
