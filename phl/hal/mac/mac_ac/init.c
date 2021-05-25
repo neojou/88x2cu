@@ -18,6 +18,44 @@
 //#include "security_cam.h"
 //#include "hw.h"
 
+enum rtw_dma_mapping {
+	RTW_DMA_MAPPING_EXTRA	= 0,
+	RTW_DMA_MAPPING_LOW	= 1,
+	RTW_DMA_MAPPING_NORMAL	= 2,
+	RTW_DMA_MAPPING_HIGH	= 3,
+
+	RTW_DMA_MAPPING_MAX,
+	RTW_DMA_MAPPING_UNDEF,
+};
+
+struct rtw_rqpn {
+	enum rtw_dma_mapping dma_map_vo;
+	enum rtw_dma_mapping dma_map_vi;
+	enum rtw_dma_mapping dma_map_be;
+	enum rtw_dma_mapping dma_map_bk;
+	enum rtw_dma_mapping dma_map_mg;
+	enum rtw_dma_mapping dma_map_hi;
+};
+
+static struct rtw_rqpn rqpn_table[] = {
+	{RTW_DMA_MAPPING_NORMAL, RTW_DMA_MAPPING_NORMAL,
+	 RTW_DMA_MAPPING_LOW, RTW_DMA_MAPPING_LOW,
+	 RTW_DMA_MAPPING_EXTRA, RTW_DMA_MAPPING_HIGH},
+	{RTW_DMA_MAPPING_NORMAL, RTW_DMA_MAPPING_NORMAL,
+	 RTW_DMA_MAPPING_LOW, RTW_DMA_MAPPING_LOW,
+	 RTW_DMA_MAPPING_EXTRA, RTW_DMA_MAPPING_HIGH},
+	{RTW_DMA_MAPPING_NORMAL, RTW_DMA_MAPPING_NORMAL,
+	 RTW_DMA_MAPPING_NORMAL, RTW_DMA_MAPPING_HIGH,
+	 RTW_DMA_MAPPING_HIGH, RTW_DMA_MAPPING_HIGH},
+	{RTW_DMA_MAPPING_NORMAL, RTW_DMA_MAPPING_NORMAL,
+	 RTW_DMA_MAPPING_LOW, RTW_DMA_MAPPING_LOW,
+	 RTW_DMA_MAPPING_HIGH, RTW_DMA_MAPPING_HIGH},
+	{RTW_DMA_MAPPING_NORMAL, RTW_DMA_MAPPING_NORMAL,
+	 RTW_DMA_MAPPING_LOW, RTW_DMA_MAPPING_LOW,
+	 RTW_DMA_MAPPING_EXTRA, RTW_DMA_MAPPING_HIGH},
+};
+
+
 #ifdef CONFIG_NEW_HALMAC_INTERFACE
 struct mac_ax_adapter *get_mac_ax_adapter(enum mac_ax_intf intf,
 					  u8 chip_id, u8 chip_cut,
@@ -73,21 +111,49 @@ struct mac_adapter *get_mac_adapter(enum mac_intf intf,
 }
 #endif
 
+static int txdma_queue_mapping(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	struct rtw_phl_com_t *phl_com = (struct rtw_phl_com_t *)(adapter->phl_adapter);
+	struct hal_spec_t *hal_spec = phl_get_ic_spec(phl_com);
+	struct rtw_rqpn *rqpn;
+	u8 max_bulkout_num = hal_spec->max_bulkout_num;
+	u16 txdma_pq_map = 0;
+
+	pr_info("%s NEO bulkout_num: %d\n", __func__, max_bulkout_num);
+	if (max_bulkout_num < 2 || max_bulkout_num > 4) {
+		PLTFM_MSG_ERR("max_bulkout_num %d invalid\n", max_bulkout_num);
+		return MACNOITEM;
+	}
+	rqpn = &rqpn_table[max_bulkout_num];
+
+	txdma_pq_map |= BIT_TXDMA_HIQ_MAP(rqpn->dma_map_hi);
+	txdma_pq_map |= BIT_TXDMA_MGQ_MAP(rqpn->dma_map_mg);
+	txdma_pq_map |= BIT_TXDMA_BKQ_MAP(rqpn->dma_map_bk);
+	txdma_pq_map |= BIT_TXDMA_BEQ_MAP(rqpn->dma_map_be);
+	txdma_pq_map |= BIT_TXDMA_VIQ_MAP(rqpn->dma_map_vi);
+	txdma_pq_map |= BIT_TXDMA_VOQ_MAP(rqpn->dma_map_vo);
+	MAC_REG_W16(REG_TXDMA_PQ_MAP, txdma_pq_map);
+
+#if 0 //NEO : rtw88 - need to check
+	MAC_REG_W8(REG_CR, 0);
+	MAC_REG_W8(REG_CR, MAC_TRX_ENABLE);
+	MAC_REG_W32(REG_H2CQ_CSR, BIT_H2CQ_FULL);
+
+	MAC_REG_W8_SET(REG_TXDMA_PQ_MAP, BIT_RXDMA_ARBBW_EN);
+#endif //NEO
+
+	return MACSUCCESS;
+
+}
+
 static
 u32 hci_func_en(struct mac_adapter *adapter)
 {
-	return MACSUCCESS;
-#if 0 //NEO
-	struct mac_ax_intf_ops *ops = adapter_to_intf_ops(adapter);
-	u32 val32;
-	u32 ret = MACSUCCESS;
+	u32 ret;
 
-	val32 = MAC_REG_R32(R_AX_HCI_FUNC_EN) |
-		B_AX_HCI_TXDMA_EN | B_AX_HCI_RXDMA_EN;
-	MAC_REG_W32(R_AX_HCI_FUNC_EN, val32);
-
+	ret = txdma_queue_mapping(adapter);
 	return ret;
-#endif //NEO
 }
 
 #if 0 // NEO

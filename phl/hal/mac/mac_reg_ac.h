@@ -111,7 +111,63 @@
 #define REG_MEM_PWR_CRTL 0x10D8
 #define REG_FW_DBG6 0x10F8
 #define REG_FW_DBG7 0x10FC
+
 #define REG_CR 0x0100
+#define BIT_32K_CAL_TMR_EN	BIT(10)
+#define BIT_MAC_SEC_EN		BIT(9)
+#define BIT_ENSWBCN		BIT(8)
+#define BIT_MACRXEN		BIT(7)
+#define BIT_MACTXEN		BIT(6)
+#define BIT_SCHEDULE_EN		BIT(5)
+#define BIT_PROTOCOL_EN		BIT(4)
+#define BIT_RXDMA_EN		BIT(3)
+#define BIT_TXDMA_EN		BIT(2)
+#define BIT_HCI_RXDMA_EN	BIT(1)
+#define BIT_HCI_TXDMA_EN	BIT(0)
+#define MAC_TRX_ENABLE	(BIT_HCI_TXDMA_EN | BIT_HCI_RXDMA_EN | BIT_TXDMA_EN | \
+			BIT_RXDMA_EN | BIT_PROTOCOL_EN | BIT_SCHEDULE_EN | \
+			BIT_MACTXEN | BIT_MACRXEN)
+#define BIT_SHIFT_TXDMA_VOQ_MAP	4
+#define BIT_MASK_TXDMA_VOQ_MAP	0x3
+#define BIT_TXDMA_VOQ_MAP(x)                                                   \
+	(((x) & BIT_MASK_TXDMA_VOQ_MAP) << BIT_SHIFT_TXDMA_VOQ_MAP)
+#define BIT_SHIFT_TXDMA_VIQ_MAP	6
+#define BIT_MASK_TXDMA_VIQ_MAP	0x3
+#define BIT_TXDMA_VIQ_MAP(x)                                                   \
+	(((x) & BIT_MASK_TXDMA_VIQ_MAP) << BIT_SHIFT_TXDMA_VIQ_MAP)
+
+#define REG_TXDMA_PQ_MAP	0x010C
+#define BIT_RXDMA_ARBBW_EN	BIT(0)
+#define BIT_SHIFT_TXDMA_BEQ_MAP	8
+#define BIT_MASK_TXDMA_BEQ_MAP	0x3
+#define BIT_TXDMA_BEQ_MAP(x)                                                   \
+	(((x) & BIT_MASK_TXDMA_BEQ_MAP) << BIT_SHIFT_TXDMA_BEQ_MAP)
+#define BIT_SHIFT_TXDMA_BKQ_MAP	10
+#define BIT_MASK_TXDMA_BKQ_MAP	0x3
+#define BIT_TXDMA_BKQ_MAP(x)                                                   \
+	(((x) & BIT_MASK_TXDMA_BKQ_MAP) << BIT_SHIFT_TXDMA_BKQ_MAP)
+#define BIT_SHIFT_TXDMA_MGQ_MAP	12
+#define BIT_MASK_TXDMA_MGQ_MAP	0x3
+#define BIT_TXDMA_MGQ_MAP(x)                                                   \
+	(((x) & BIT_MASK_TXDMA_MGQ_MAP) << BIT_SHIFT_TXDMA_MGQ_MAP)
+#define BIT_SHIFT_TXDMA_HIQ_MAP	14
+#define BIT_MASK_TXDMA_HIQ_MAP	0x3
+#define BIT_TXDMA_HIQ_MAP(x)                                                   \
+	(((x) & BIT_MASK_TXDMA_HIQ_MAP) << BIT_SHIFT_TXDMA_HIQ_MAP)
+#define BIT_SHIFT_TXSC_40M	4
+#define BIT_MASK_TXSC_40M	0xf
+#define BIT_TXSC_40M(x)							       \
+	(((x) & BIT_MASK_TXSC_40M) << BIT_SHIFT_TXSC_40M)
+#define BIT_SHIFT_TXSC_20M	0
+#define BIT_MASK_TXSC_20M	0xf
+#define BIT_TXSC_20M(x)							       \
+	(((x) & BIT_MASK_TXSC_20M) << BIT_SHIFT_TXSC_20M)
+#define BIT_SHIFT_MAC_CLK_SEL	20
+
+#define MAC_CLK_HW_DEF_80M	0
+#define MAC_CLK_HW_DEF_40M	1
+#define MAC_CLK_HW_DEF_20M	2
+#define MAC_CLK_SPEED		80
 #define REG_PG_SIZE 0x0104
 #define REG_PKT_BUFF_ACCESS_CTRL 0x0106
 #define REG_TSF_CLK_STATE 0x0108
@@ -340,7 +396,13 @@
 #define REG_H2CQ_TXBD_DESA 0x1320
 #define REG_H2CQ_TXBD_NUM 0x1328
 #define REG_H2CQ_TXBD_IDX 0x132C
+
 #define REG_H2CQ_CSR 0x1330
+#define BIT_H2CQ_FULL		BIT(31)
+
+#define REG_FAST_EDCA_VOVI_SETTING 0x1448
+#define REG_FAST_EDCA_BEBK_SETTING 0x144C
+
 #define REG_CHANGE_PCIE_SPEED 0x1350
 #define REG_DEBUG_STATE1 0x1354
 #define REG_DEBUG_STATE2 0x1358

@@ -208,6 +208,30 @@
 		MAC_REG_W8(__offset, MAC_REG_R8(__offset) & ~(mask));	\
 	} while (0)
 
+#define MAC_REG_W16_CLR(offset, mask)					\
+	do {								\
+		u32 __offset = (u32)offset;				\
+		MAC_REG_W16(__offset, MAC_REG_R16(__offset) & ~(mask));	\
+	} while (0)
+
+#define MAC_REG_W32_CLR(offset, mask)					\
+	do {								\
+		u32 __offset = (u32)offset;				\
+		MAC_REG_W32(__offset, MAC_REG_R32(__offset) & ~(mask));	\
+	} while (0)
+
+#define MAC_REG_W8_SET(offset, mask)					\
+	do {								\
+		u8 __offset = (u32)offset;				\
+		MAC_REG_W8(__offset, MAC_REG_R8(__offset) | mask);	\
+	} while (0)
+
+#define MAC_REG_W16_SET(offset, mask)					\
+	do {								\
+		u32 __offset = (u32)offset;				\
+		MAC_REG_W16(__offset, MAC_REG_R16(__offset) | mask);	\
+	} while (0)
+
 #define MAC_REG_W32_SET(offset, mask)					\
 	do {								\
 		u32 __offset = (u32)offset;				\
