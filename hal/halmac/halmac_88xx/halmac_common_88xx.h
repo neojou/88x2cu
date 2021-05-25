@@ -122,10 +122,6 @@ enum halmac_ret_status
 h2c_lb_88xx(struct halmac_adapter *adapter);
 
 enum halmac_ret_status
-pwr_seq_parser_88xx(struct halmac_adapter *adapter,
-		    struct halmac_wlan_pwr_cfg **cmd_seq);
-
-enum halmac_ret_status
 parse_intf_phy_88xx(struct halmac_adapter *adapter,
 		    struct halmac_intf_phy_para *param,
 		    enum halmac_intf_phy_platform pltfm,

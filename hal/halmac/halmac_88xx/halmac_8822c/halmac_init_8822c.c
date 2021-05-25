@@ -407,7 +407,6 @@ mount_api_8822c(struct halmac_adapter *adapter)
 		adapter->sdio_hw_info.tx_addr_format = HALMAC_SDIO_AGG_MODE;
 		api->halmac_init_interface_cfg = init_sdio_cfg_8822c;
 		api->halmac_init_sdio_cfg = init_sdio_cfg_8822c;
-		api->halmac_mac_power_switch = mac_pwr_switch_sdio_8822c;
 		api->halmac_phy_cfg = phy_cfg_sdio_8822c;
 		api->halmac_pcie_switch = pcie_switch_sdio_8822c;
 		api->halmac_interface_integration_tuning = intf_tun_sdio_8822c;
@@ -430,14 +429,12 @@ mount_api_8822c(struct halmac_adapter *adapter)
 #endif
 	} else if (adapter->intf == HALMAC_INTERFACE_USB) {
 #if HALMAC_USB_SUPPORT
-		api->halmac_mac_power_switch = mac_pwr_switch_usb_8822c;
 		api->halmac_phy_cfg = phy_cfg_usb_8822c;
 		api->halmac_pcie_switch = pcie_switch_usb_8822c;
 		api->halmac_interface_integration_tuning = intf_tun_usb_8822c;
 #endif
 	} else if (adapter->intf == HALMAC_INTERFACE_PCIE) {
 #if HALMAC_PCIE_SUPPORT
-		api->halmac_mac_power_switch = mac_pwr_switch_pcie_8822c;
 		api->halmac_phy_cfg = phy_cfg_pcie_8822c;
 		api->halmac_pcie_switch = pcie_switch_8822c;
 		api->halmac_interface_integration_tuning = intf_tun_pcie_8822c;

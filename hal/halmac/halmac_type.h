@@ -2184,9 +2184,6 @@ struct halmac_api {
 	(*halmac_register_api)(struct halmac_adapter *adapter,
 			       struct halmac_api_registry *registry);
 	enum halmac_ret_status
-	(*halmac_mac_power_switch)(struct halmac_adapter *adapter,
-				   enum halmac_mac_power pwr);
-	enum halmac_ret_status
 	(*halmac_download_firmware)(struct halmac_adapter *adapter, u8 *fw_bin,
 				    u32 size);
 	enum halmac_ret_status

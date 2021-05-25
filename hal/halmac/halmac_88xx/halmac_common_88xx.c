@@ -179,16 +179,8 @@ static enum halmac_ret_status
 get_drop_scan_packet_status_88xx(struct halmac_adapter *adapter,
 				 enum halmac_cmd_process_status *proc_status);
 
-static enum halmac_ret_status
-pwr_sub_seq_parser_88xx(struct halmac_adapter *adapter, u8 cut, u8 intf,
-			struct halmac_wlan_pwr_cfg *cmd);
-
 static void
 pwr_state_88xx(struct halmac_adapter *adapter, enum halmac_mac_power *state);
-
-static enum halmac_ret_status
-pwr_cmd_polling_88xx(struct halmac_adapter *adapter,
-		     struct halmac_wlan_pwr_cfg *cmd);
 
 static void
 get_pq_mapping_88xx(struct halmac_adapter *adapter,
@@ -214,17 +206,6 @@ wlhdr_data_valid_88xx(struct halmac_adapter *adapter,
 
 static void
 dump_reg_88xx(struct halmac_adapter *adapter);
-
-static u8
-packet_in_nlo_88xx(struct halmac_adapter *adapter,
-		   enum halmac_packet_id pkt_id);
-
-static enum halmac_packet_id
-get_real_pkt_id_88xx(struct halmac_adapter *adapter,
-		     enum halmac_packet_id pkt_id);
-
-static u32
-get_update_packet_page_size(struct halmac_adapter *adapter, u32 size);
 
 /**
  * ofld_func_cfg_88xx() - config offload function
@@ -2479,169 +2460,6 @@ h2c_lb_88xx(struct halmac_adapter *adapter)
 }
 
 enum halmac_ret_status
-pwr_seq_parser_88xx(struct halmac_adapter *adapter,
-		    struct halmac_wlan_pwr_cfg **cmd_seq)
-{
-	u8 cut;
-	u8 intf;
-	u32 idx = 0;
-	enum halmac_ret_status status = HALMAC_RET_SUCCESS;
-	struct halmac_wlan_pwr_cfg *cmd;
-
-	cut = HALMAC_PWR_CUT_C_MSK;
-
-	switch (adapter->intf) {
-	case HALMAC_INTERFACE_PCIE:
-	case HALMAC_INTERFACE_AXI:
-		intf = HALMAC_PWR_INTF_PCI_MSK;
-		break;
-	case HALMAC_INTERFACE_USB:
-		intf = HALMAC_PWR_INTF_USB_MSK;
-		break;
-	case HALMAC_INTERFACE_SDIO:
-		intf = HALMAC_PWR_INTF_SDIO_MSK;
-		break;
-	default:
-		PLTFM_MSG_ERR("[ERR]interface!!\n");
-		return HALMAC_RET_SWITCH_CASE_ERROR;
-	}
-
-	do {
-		cmd = cmd_seq[idx];
-
-		if (!cmd)
-			break;
-
-		status = pwr_sub_seq_parser_88xx(adapter, cut, intf, cmd);
-		if (status != HALMAC_RET_SUCCESS) {
-			PLTFM_MSG_ERR("[ERR]pwr sub seq!!\n");
-			return status;
-		}
-
-		idx++;
-	} while (1);
-
-	return status;
-}
-
-static enum halmac_ret_status
-pwr_sub_seq_parser_88xx(struct halmac_adapter *adapter, u8 cut, u8 intf,
-			struct halmac_wlan_pwr_cfg *cmd)
-{
-	u8 value;
-	u32 offset;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-
-	do {
-		if ((cmd->interface_msk & intf) && (cmd->cut_msk & cut)) {
-			switch (cmd->cmd) {
-			case HALMAC_PWR_CMD_WRITE:
-				offset = cmd->offset;
-
-				if (cmd->base == HALMAC_PWR_ADDR_SDIO)
-					offset |= SDIO_LOCAL_OFFSET;
-
-				value = HALMAC_REG_R8(offset);
-				value = (u8)(value & (u8)(~(cmd->msk)));
-				value = (u8)(value | (cmd->value & cmd->msk));
-
-				HALMAC_REG_W8(offset, value);
-				break;
-			case HALMAC_PWR_CMD_POLLING:
-				if (pwr_cmd_polling_88xx(adapter, cmd) !=
-				    HALMAC_RET_SUCCESS)
-					return HALMAC_RET_PWRSEQ_POLLING_FAIL;
-				break;
-			case HALMAC_PWR_CMD_DELAY:
-				if (cmd->value == HALMAC_PWR_DELAY_US)
-					PLTFM_DELAY_US(cmd->offset);
-				else
-					PLTFM_DELAY_US(1000 * cmd->offset);
-				break;
-			case HALMAC_PWR_CMD_READ:
-				break;
-			case HALMAC_PWR_CMD_END:
-				return HALMAC_RET_SUCCESS;
-			default:
-				return HALMAC_RET_PWRSEQ_CMD_INCORRECT;
-			}
-		}
-		cmd++;
-	} while (1);
-
-	return HALMAC_RET_SUCCESS;
-}
-
-static enum halmac_ret_status
-pwr_cmd_polling_88xx(struct halmac_adapter *adapter,
-		     struct halmac_wlan_pwr_cfg *cmd)
-{
-	u8 value;
-	u8 flg;
-	u8 poll_bit;
-	u32 offset;
-	u32 cnt;
-	static u32 stats;
-	enum halmac_interface intf;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-
-	poll_bit = 0;
-	cnt = HALMAC_PWR_POLLING_CNT;
-	flg = 0;
-	intf = adapter->intf;
-
-	if (cmd->base == HALMAC_PWR_ADDR_SDIO)
-		offset = cmd->offset | SDIO_LOCAL_OFFSET;
-	else
-		offset = cmd->offset;
-
-	do {
-		cnt--;
-		value = HALMAC_REG_R8(offset);
-		value = (u8)(value & cmd->msk);
-
-		if (value == (cmd->value & cmd->msk)) {
-			poll_bit = 1;
-		} else {
-			if (cnt == 0) {
-				if (intf == HALMAC_INTERFACE_PCIE && flg == 0) {
-					/* PCIE + USB package */
-					/* power bit polling timeout issue */
-					stats++;
-					PLTFM_MSG_WARN("[WARN]PCIE stats:%d\n",
-						       stats);
-					value = HALMAC_REG_R8(REG_SYS_PW_CTRL);
-					value |= BIT(3);
-					HALMAC_REG_W8(REG_SYS_PW_CTRL, value);
-					value &= ~BIT(3);
-					HALMAC_REG_W8(REG_SYS_PW_CTRL, value);
-					poll_bit = 0;
-					cnt = HALMAC_PWR_POLLING_CNT;
-					flg = 1;
-				} else {
-					PLTFM_MSG_ERR("[ERR]polling to!!\n");
-					PLTFM_MSG_ERR("[ERR]cmd offset:%X\n",
-						      cmd->offset);
-					PLTFM_MSG_ERR("[ERR]cmd value:%X\n",
-						      cmd->value);
-					PLTFM_MSG_ERR("[ERR]cmd msk:%X\n",
-						      cmd->msk);
-					PLTFM_MSG_ERR("[ERR]offset = %X\n",
-						      offset);
-					PLTFM_MSG_ERR("[ERR]value = %X\n",
-						      value);
-					return HALMAC_RET_PWRSEQ_POLLING_FAIL;
-				}
-			} else {
-				PLTFM_DELAY_US(50);
-			}
-		}
-	} while (!poll_bit);
-
-	return HALMAC_RET_SUCCESS;
-}
-
-enum halmac_ret_status
 parse_intf_phy_88xx(struct halmac_adapter *adapter,
 		    struct halmac_intf_phy_para *param,
 		    enum halmac_intf_phy_platform pltfm,
@@ -2849,58 +2667,6 @@ pwr_state_88xx(struct halmac_adapter *adapter, enum halmac_mac_power *state)
 		*state = HALMAC_MAC_POWER_OFF;
 	else
 		*state = HALMAC_MAC_POWER_ON;
-}
-
-static u8
-packet_in_nlo_88xx(struct halmac_adapter *adapter,
-		   enum halmac_packet_id pkt_id)
-{
-	enum halmac_packet_id nlo_pkt = HALMAC_PACKET_PROBE_REQ_NLO;
-
-	if (pkt_id >= nlo_pkt)
-		return 1;
-	else
-		return 0;
-}
-
-static enum halmac_packet_id
-get_real_pkt_id_88xx(struct halmac_adapter *adapter,
-		     enum halmac_packet_id pkt_id)
-{
-	enum halmac_packet_id real_pkt_id;
-
-	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
-
-	switch (pkt_id) {
-	case HALMAC_PACKET_PROBE_REQ_NLO:
-		real_pkt_id = HALMAC_PACKET_PROBE_REQ;
-		break;
-	case HALMAC_PACKET_SYNC_BCN_NLO:
-		real_pkt_id = HALMAC_PACKET_SYNC_BCN;
-		break;
-	case HALMAC_PACKET_DISCOVERY_BCN_NLO:
-		real_pkt_id = HALMAC_PACKET_DISCOVERY_BCN;
-		break;
-	default:
-		real_pkt_id = pkt_id;
-	}
-	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
-	return real_pkt_id;
-}
-
-static u32
-get_update_packet_page_size(struct halmac_adapter *adapter, u32 size)
-{
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-	u32 txdesc_size;
-	u32 total;
-
-	api->halmac_get_hw_value(adapter, HALMAC_HW_TX_DESC_SIZE, &txdesc_size);
-
-	total = size + txdesc_size;
-	return (total & 0x7f) > 0 ?
-		(total >> TX_PAGE_SIZE_SHIFT_88XX) + 1 :
-		total >> TX_PAGE_SIZE_SHIFT_88XX;
 }
 
 #endif /* HALMAC_88XX_SUPPORT */
