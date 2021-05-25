@@ -468,8 +468,6 @@ init_trx_cfg_8822c(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
 	u8 en_fwff;
 	u16 value16;
 
-	adapter->trx_mode = mode;
-
 	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
 
 	status = txdma_queue_mapping_8822c(adapter, mode);
@@ -675,7 +673,6 @@ priority_queue_cfg_8822c(struct halmac_adapter *adapter,
 		transfer_mode = HALMAC_TRNSFER_NORMAL;
 	}
 
-	adapter->hw_cfg_info.trx_mode = transfer_mode;
 	HALMAC_REG_W8(REG_CR + 3, (u8)transfer_mode);
 
 	return HALMAC_RET_SUCCESS;
@@ -1093,10 +1090,7 @@ init_wmac_cfg_8822c(struct halmac_adapter *adapter)
 
 	HALMAC_REG_W32(REG_WMAC_OPTION_FUNCTION_2, WLAN_MAC_OPT_FUNC2);
 
-	if (adapter->hw_cfg_info.trx_mode == HALMAC_TRNSFER_NORMAL)
-		value8 = WLAN_MAC_OPT_NORM_FUNC1;
-	else
-		value8 = WLAN_MAC_OPT_LB_FUNC1;
+	value8 = WLAN_MAC_OPT_NORM_FUNC1;
 
 	HALMAC_REG_W8(REG_WMAC_OPTION_FUNCTION_1, value8);
 

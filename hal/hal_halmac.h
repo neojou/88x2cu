@@ -147,8 +147,6 @@ int rtw_halmac_set_edca(struct dvobj_priv *d, u8 queue, u8 aifs, u8 cw, u16 txop
 int rtw_halmac_set_rts_full_bw(struct dvobj_priv *d, u8 enable);
 
 /* Functions */
-int rtw_halmac_poweron(struct dvobj_priv *);
-int rtw_halmac_poweroff(struct dvobj_priv *);
 int rtw_halmac_init_hal_fw(struct dvobj_priv *, u8 *fw, u32 fwsize);
 int rtw_halmac_init_hal_fw_file(struct dvobj_priv *, u8 *fwpath);
 int rtw_halmac_deinit_hal(struct dvobj_priv *);

@@ -14,6 +14,9 @@
  ******************************************************************************/
 #include "pwr.h"
 #include "../mac_reg_ac.h"
+
+//NEO : rtk_wifi_driver
+
 #if 0 //NEO
 #include "coex.h"
 
@@ -95,10 +98,10 @@ static u32 _patch_aon_int_leave_lps(struct mac_ax_adapter *adapter)
 
 static u32 pwr_cmd_poll(struct mac_adapter *adapter, struct mac_pwr_cfg *seq)
 {
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 	u8 val = 0;
 	u32 addr;
 	u32 cnt;
-	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 
 	cnt = PWR_POLL_CNT;
 	addr = seq->addr;
@@ -122,10 +125,10 @@ static u32 pwr_cmd_poll(struct mac_adapter *adapter, struct mac_pwr_cfg *seq)
 static u32 sub_pwr_seq_start(struct mac_adapter *adapter,
 			     u8 cv_msk, u8 intf_msk, struct mac_pwr_cfg *seq)
 {
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 	u8 val;
 	u32 addr;
 	u32 ret;
-	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 
 	while (seq->cmd != PWR_CMD_END) {
 		if (!(seq->intf_msk & intf_msk) || !(seq->cut_msk & cv_msk))
@@ -193,21 +196,113 @@ u32 pwr_seq_start(struct mac_adapter *adapter,
 	return MACSUCCESS;
 }
 
-u32 mac_pwr_switch(struct mac_adapter *adapter, u8 on)
+static void mac_bb_rf_switch(struct mac_adapter *adapter, bool on)
 {
-	u32 ret = MACSUCCESS;
-	u32 ret_end;
-	struct mac_pwr_cfg **pwr_seq;
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
-	u32 (*intf_pwr_switch)(void *vadapter, u8 pre_switch, u8 on);
-	u32 (*pwr_func)(void *vadapter);
+	u8 val8;
 	u32 val32;
-	u8 rpwm, val8;
-	enum mac_pwr_st mac_pwr;
-	struct rtw_hal_com_t *hal_com = (struct rtw_hal_com_t *)adapter->drv_adapter;
-	struct dvobj_priv *dvobj = hal_com->drv_priv;
-	_adapter *tadapter = dvobj_get_primary_adapter(dvobj);
 
+	if (on) {
+		/* enable BB/RF */
+		val8 = MAC_REG_R8(REG_SYS_FUNC_EN);
+		val8 &= BIT(0) | BIT(1);
+		MAC_REG_W8(REG_SYS_FUNC_EN, val8);
+
+		val8 = MAC_REG_R8(REG_RF_CTRL);
+		val8 &= BIT(0) | BIT(1) | BIT(2);
+		MAC_REG_W8(REG_RF_CTRL, val8);
+
+		val32 = MAC_REG_R32(REG_WLRF1);
+		val32 &= BIT(24) | BIT(25) | BIT(26);
+		MAC_REG_W32(REG_WLRF1, val32);
+	} else {
+		/* disable BB/RF */
+		val8 = MAC_REG_R8(REG_SYS_FUNC_EN);
+		val8 &= ~(BIT(0) | BIT(1));
+		MAC_REG_W8(REG_SYS_FUNC_EN, val8);
+
+		val8 = MAC_REG_R8(REG_RF_CTRL);
+		val8 &= ~(BIT(0) | BIT(1) | BIT(2));
+		MAC_REG_W8(REG_RF_CTRL, val8);
+
+		val32 = MAC_REG_R32(REG_WLRF1);
+		val32 &= ~(BIT(24) | BIT(25) | BIT(26));
+		MAC_REG_W32(REG_WLRF1, val32);
+	}
+}
+
+static u32 mac_pre_init_system_cfg(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 val32;
+	u32 ret;
+
+	/* pre_init_system_cfg_8822c */
+	MAC_REG_W8(REG_RSV_CTRL, 0);
+	if (MAC_REG_R8(REG_SYS_CFG2 + 3) == 0x20)
+		MAC_REG_W8(0xFE5B, MAC_REG_R8(0xFE5B) | BIT(4));
+
+	/* CONFIG PIN MUX */
+	val32 = MAC_REG_R32(REG_PAD_CTRL1);
+	val32 |= BIT(28) | BIT(29);
+	MAC_REG_W32(REG_PAD_CTRL1, val32);
+
+	val32 = MAC_REG_R32(REG_LED_CFG);
+	val32 &= ~(BIT(25) | BIT(26));
+	MAC_REG_W32(REG_LED_CFG, val32);
+
+	val32 = MAC_REG_R32(REG_GPIO_MUXCFG);
+	val32 |= BIT(2);
+	MAC_REG_W32(REG_GPIO_MUXCFG, val32);
+
+	/* disable BB/RF */
+	mac_bb_rf_switch(adapter, false);
+
+	if (MAC_REG_R8(REG_SYS_CFG1 + 2) & BIT(4)) {
+		PLTFM_MSG_ERR("[ERR]test mode!!\n");
+		return MACHWERR;
+	}
+
+	return MACSUCCESS;
+}
+
+//NEO : for rtk_wifi_driver's halmac temporarily, will take off in the future.
+
+enum halmac_dlfw_state {
+	HALMAC_DLFW_NONE = 0,
+	HALMAC_DLFW_DONE = 1,
+	HALMAC_GEN_INFO_SENT = 2,
+
+	/* Data CPU firmware download framework */
+	HALMAC_DLFW_INIT = 0x11,
+	HALMAC_DLFW_START = 0x12,
+	HALMAC_DLFW_CONF_READY = 0x13,
+	HALMAC_DLFW_CPU_READY = 0x14,
+	HALMAC_DLFW_MEM_READY = 0x15,
+	HALMAC_DLFW_SW_READY = 0x16,
+	HALMAC_DLFW_OFLD_READY = 0x17,
+
+	HALMAC_DLFW_UNDEFINED = 0x7F,
+};
+
+#define dvobj_to_halmac(d) ((struct halmac_adapter *)((d)->halmac))
+
+struct halmac_adapter;
+
+void set_adapter_dlfw_state(struct halmac_adapter *adapter, enum halmac_dlfw_state state);
+void init_adapter_dynamic_param_88xx(struct halmac_adapter *adapter);
+
+static u32
+_pwr_switch(struct mac_adapter *adapter, bool on)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	struct mac_pwr_cfg **pwr_seq;
+	enum mac_pwr_st mac_pwr;
+	u8 rpwm;
+	u8 val8;
+	u32 ret;
+
+	rpwm = MAC_REG_R8(0xFE58);
 
 	/* Check FW still exist or not */
 	if (MAC_REG_R16(REG_MCUFW_CTRL) == 0xC078) {
@@ -226,90 +321,103 @@ u32 mac_pwr_switch(struct mac_adapter *adapter, u8 on)
 			mac_pwr = MAC_PWR_MAC_ON;
 	}
 
-
-	if (on) {
-		/*Check if power switch is needed*/
-		if (mac_pwr == MAC_PWR_MAC_ON) {
-			PLTFM_MSG_WARN("[WARN]power state unchange!!\n");
-			ret = MACALRDYON;
-			goto END;
-		}
-
-		pwr_seq = adapter->hw_info->pwr_on_seq;
-
-
-		/* pre_init_system_cfg_8822c */
-		MAC_REG_W8(REG_RSV_CTRL, 0);
-		if (MAC_REG_R8(REG_SYS_CFG2 + 3) == 0x20)
-			MAC_REG_W8(0xFE5B, MAC_REG_R8(0xFE5B) | BIT(4));
-
-		/* CONFIG PIN MUX */
-		val32 = MAC_REG_R32(REG_PAD_CTRL1);
-		val32 |= BIT(28) | BIT(29);
-		MAC_REG_W32(REG_PAD_CTRL1, val32);
-
-		val32 = MAC_REG_R32(REG_LED_CFG);
-		val32 &= ~(BIT(25) | BIT(26));
-		MAC_REG_W32(REG_LED_CFG, val32);
-
-		val32 = MAC_REG_R32(REG_GPIO_MUXCFG);
-		val32 |= BIT(2);
-		MAC_REG_W32(REG_GPIO_MUXCFG, val32);
-
-		/* disable BB/RF */
-		val8 = MAC_REG_R8(REG_SYS_FUNC_EN);
-		val8 &= ~(BIT(0) | BIT(1));
-		MAC_REG_W8(REG_SYS_FUNC_EN, val8);
-
-		val8 = MAC_REG_R8(REG_RF_CTRL);
-		val8 &= ~(BIT(0) | BIT(1) | BIT(2));
-		MAC_REG_W8(REG_RF_CTRL, val8);
-
-
-		val32 = MAC_REG_R32(REG_WLRF1);
-		val32 &= ~(BIT(24) | BIT(25) | BIT(26));
-		MAC_REG_W32(REG_WLRF1, val32);
-		
-	} else {
-		pwr_seq = adapter->hw_info->pwr_off_seq;
+	/* Check if power switch is needed */
+	if (on && mac_pwr == MAC_PWR_MAC_ON) {
+		PLTFM_MSG_WARN("[WARN]power state unchange!!\n");
+		return MACALRDYON;
 	}
 
+	if (on) {
+		PLTFM_MSG_ERR("%s on\n", __func__);
+		pwr_seq = adapter->hw_info->pwr_on_seq;
+	} else {
+		PLTFM_MSG_ERR("%s off\n", __func__);
+		pwr_seq = adapter->hw_info->pwr_off_seq;
+	}
 
 	ret = pwr_seq_start(adapter, pwr_seq);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]pwr seq start %d\n", ret);
 		adapter->sm.pwr = MAC_PWR_ERR;
-		goto END;
+		return MACHWERR;
 	}
 
 	if (on) {
 		MAC_REG_W8_CLR(REG_SYS_STATUS1 + 1, BIT(0));
-
-		/* init system cfg 8822c */
-		val32 = MAC_REG_R32(REG_CPU_DMEM_CON);
-		val32 |= BIT(16) | BIT(8);
-		MAC_REG_W32(REG_CPU_DMEM_CON, val32);
-
-		val8 = MAC_REG_R8(REG_SYS_FUNC_EN + 1);
-		val8 |= 0xD8;
-		MAC_REG_W8(REG_SYS_FUNC_EN + 1, val8);
-
-		/* PHY_REQ_DELAY reg 0x1100[27:24] = 0x0C */
-		val8 = MAC_REG_R8(REG_CR_EXT + 3) & 0xF0;
-		val8 |= 0x0C;
-		MAC_REG_W8(REG_CR_EXT + 3, val8);
-
-		/* disable boot-from-flash for driver's DL FW */
-		val32 = MAC_REG_R32(REG_MCUFW_CTRL);
-		if (val32 & BIT(20)) {
-			MAC_REG_W32(REG_MCUFW_CTRL, val32 & (~(BIT(20))));
-			val32 = MAC_REG_R32(REG_GPIO_MUXCFG) & (~(BIT(19)));
-			MAC_REG_W32(REG_GPIO_MUXCFG, val32);
-		}
-		adapter->sm.pwr = MAC_PWR_ON;
 	} else {
-		adapter->sm.pwr = MAC_PWR_OFF;
+		struct rtw_hal_com_t *hal_com = (struct rtw_hal_com_t *)adapter->drv_adapter;
+		struct dvobj_priv *dvobj = (struct dvobj_priv *)hal_com->drv_priv;
+		struct halmac_adapter *halmac = dvobj_to_halmac(dvobj);
+
+		if (halmac) {
+			set_adapter_dlfw_state(halmac, HALMAC_DLFW_NONE);
+			//tadapter->halmac_state.dlfw_state = HALMAC_DLFW_NONE;
+			init_adapter_dynamic_param_88xx(halmac);
+		}
 	}
+
+	return MACSUCCESS;
+}
+
+u32 mac_pwr_switch(struct mac_adapter *adapter, u8 on)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	struct rtw_hal_com_t *hal_com = (struct rtw_hal_com_t *)adapter->drv_adapter;
+	struct dvobj_priv *dvobj = hal_com->drv_priv;
+	_adapter *tadapter = dvobj_get_primary_adapter(dvobj);
+	u8 val8;
+	u32 val32;
+	u32 ret;
+
+
+	if (!on) {
+		ret = _pwr_switch(adapter, false);
+		adapter->sm.pwr = MAC_PWR_OFF;
+		goto END;
+	}
+
+	mac_pre_init_system_cfg(adapter);
+
+	ret = _pwr_switch(adapter, true);
+	if (ret == MACALRDYON) {
+		/* work around for warm reboot but device not power off,
+		 * but it would also fail into this case when auto power on is enabled.
+		 */
+		ret = _pwr_switch(adapter, false);
+		if (ret != MACSUCCESS) {
+			PLTFM_MSG_ERR("[ERR]pwr switch off %d\n", ret);
+			return MACHWERR;
+		}
+		ret = _pwr_switch(adapter, true);
+	}
+	if (ret != MACSUCCESS) {
+		PLTFM_MSG_ERR("[ERR]pwr switch on again %d\n", ret);
+		return MACHWERR;
+	}
+
+	/* init system cfg 8822c */
+	val32 = MAC_REG_R32(REG_CPU_DMEM_CON);
+	val32 |= BIT(16) | BIT(8);
+	MAC_REG_W32(REG_CPU_DMEM_CON, val32);
+
+	val8 = MAC_REG_R8(REG_SYS_FUNC_EN + 1);
+	val8 |= 0xD8;
+	MAC_REG_W8(REG_SYS_FUNC_EN + 1, val8);
+
+	/* PHY_REQ_DELAY reg 0x1100[27:24] = 0x0C */
+	val8 = MAC_REG_R8(REG_CR_EXT + 3) & 0xF0;
+	val8 |= 0x0C;
+	MAC_REG_W8(REG_CR_EXT + 3, val8);
+
+	/* disable boot-from-flash for driver's DL FW */
+	val32 = MAC_REG_R32(REG_MCUFW_CTRL);
+	if (val32 & BIT(20)) {
+		MAC_REG_W32(REG_MCUFW_CTRL, val32 & (~(BIT(20))));
+		val32 = MAC_REG_R32(REG_GPIO_MUXCFG) & (~(BIT(19)));
+		MAC_REG_W32(REG_GPIO_MUXCFG, val32);
+	}
+	adapter->sm.pwr = MAC_PWR_ON;
 END:
 	return ret;
 }
+

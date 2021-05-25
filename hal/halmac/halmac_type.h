@@ -930,7 +930,6 @@ struct halmac_hw_cfg_info {
 	u8 ac_oqt_size;
 	u8 non_ac_oqt_size;
 	u8 acq_num;
-	u8 trx_mode;
 	u8 usb_txagg_num;
 	u32 prtct_efuse_size;
 };
@@ -2158,7 +2157,7 @@ struct halmac_adapter {
 	struct halmac_fw_version fw_ver;
 	struct halmac_state halmac_state;
 	enum halmac_interface intf;
-	enum halmac_trx_mode trx_mode;
+	//enum halmac_trx_mode trx_mode;
 	struct halmac_txff_allocation txff_alloc;
 	u8 efuse_map_valid;
 	u8 efuse_seg_size;

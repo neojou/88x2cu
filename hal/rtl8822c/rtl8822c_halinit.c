@@ -18,7 +18,8 @@
 #include <hal_data.h>		/* GET_HAL_SPEC(), HAL_DATA_TYPE */
 #include "../hal_halmac.h"	/* HALMAC API */
 #include "rtl8822c.h"
-
+#include "../phl/phl_headers.h"
+#include "../phl/hal/hal_headers.h"
 
 void rtl8822c_init_hal_spec(PADAPTER adapter)
 {
@@ -87,6 +88,10 @@ u32 rtl8822c_power_on(PADAPTER adapter)
 	u8 bMacPwrCtrlOn;
 	int err = 0;
 	u8 ret = _SUCCESS;
+	struct dvobj_priv *dvobj = adapter_to_dvobj(adapter);
+	struct phl_info_t *phl_info = dvobj->phl;
+	struct hal_info_t *hal_info = phl_info->hal;
+	enum rtw_hal_status hal_status;
 
 
 	d = adapter_to_dvobj(adapter);
@@ -96,9 +101,9 @@ u32 rtl8822c_power_on(PADAPTER adapter)
 	if (bMacPwrCtrlOn == _TRUE)
 		goto out;
 
-	err = rtw_halmac_poweron(d);
-	if (err) {
-		RTW_ERR("%s: Power ON Fail!!\n", __FUNCTION__);
+	hal_status = rtw_hal_mac_power_switch(phl_info->phl_com, hal_info, 1);
+	if (hal_status) {
+		RTW_ERR("%s: Power ON Fail!! %d\n", __FUNCTION__, (int)hal_status);
 		ret = _FAIL;
 		goto out;
 	}
@@ -115,6 +120,10 @@ void rtl8822c_power_off(PADAPTER adapter)
 	struct dvobj_priv *d;
 	u8 bMacPwrCtrlOn;
 	int err = 0;
+	struct dvobj_priv *dvobj = adapter_to_dvobj(adapter);
+	struct phl_info_t *phl_info = dvobj->phl;
+	struct hal_info_t *hal_info = phl_info->hal;
+	enum rtw_hal_status hal_status;
 
 
 	d = adapter_to_dvobj(adapter);
@@ -129,9 +138,9 @@ void rtl8822c_power_off(PADAPTER adapter)
 
 	GET_HAL_DATA(adapter)->bFWReady = _FALSE;
 
-	err = rtw_halmac_poweroff(d);
-	if (err) {
-		RTW_ERR("%s: Power OFF Fail!!\n", __FUNCTION__);
+	hal_status = rtw_hal_mac_power_switch(phl_info->phl_com, hal_info, 0);
+	if (hal_status) {
+		RTW_ERR("%s: Power OFF Fail!! %d\n", __FUNCTION__, (int)hal_status);
 		goto out;
 	}
 

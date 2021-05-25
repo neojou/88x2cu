@@ -148,10 +148,7 @@ cfg_rxgck_fifo_8822c(struct halmac_adapter *adapter, u8 enable)
 	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
 
 	if (enable == 1) {
-		if (adapter->hw_cfg_info.trx_mode != HALMAC_TRNSFER_NORMAL)
-			PLTFM_MSG_ERR("[ERR]trx_mode != normal\n");
-		else
-			HALMAC_REG_W8_SET(REG_RXPSF_CTRL + 3, BIT(4));
+		HALMAC_REG_W8_SET(REG_RXPSF_CTRL + 3, BIT(4));
 	} else {
 		HALMAC_REG_W8_CLR(REG_RXPSF_CTRL + 3, BIT(4));
 	}

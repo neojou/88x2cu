@@ -1565,11 +1565,10 @@ rtw_hal_mac_power_switch(struct rtw_phl_com_t *phl_com,
 {
 	struct mac_adapter *mac = hal_to_mac(hal_info);
 	//u8 pwr_state = 0;
+	u32 ret;
 
-	/*pwr_state = hal_mac_get_pwr_state(mac);
-	if(pwr_state != on_off)*/
-
-	if (mac->ops->pwr_switch(mac, on_off) != MACSUCCESS)
+	ret = mac->ops->pwr_switch(mac, on_off);
+	if (ret != MACSUCCESS)
 		return RTW_HAL_STATUS_FAILURE;
 
 	return RTW_HAL_STATUS_SUCCESS;

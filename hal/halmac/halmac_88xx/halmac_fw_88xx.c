@@ -102,6 +102,11 @@ static enum halmac_ret_status
 proc_send_phydm_info_88xx(struct halmac_adapter *adapter,
 			  struct halmac_general_info *info);
 
+void set_adapter_dlfw_state(struct halmac_adapter *adapter, enum halmac_dlfw_state state)
+{
+	adapter->halmac_state.dlfw_state = state;
+}
+
 /**
  * download_firmware_88xx() - download Firmware
  * @adapter : the adapter of halmac
@@ -203,7 +208,8 @@ download_firmware_88xx(struct halmac_adapter *adapter, u8 *fw_bin, u32 size)
 	if (status != HALMAC_RET_SUCCESS)
 		return status;
 
-	adapter->halmac_state.dlfw_state = HALMAC_DLFW_DONE;
+	set_adapter_dlfw_state(adapter, HALMAC_DLFW_DONE);
+	//adapter->halmac_state.dlfw_state = HALMAC_DLFW_DONE;
 
 	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
 

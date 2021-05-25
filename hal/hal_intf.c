@@ -438,9 +438,10 @@ u32 rtw_hal_power_on(_adapter *padapter)
 	if ((ret == _SUCCESS) && (pHalData->EEPROMBluetoothCoexist == _TRUE))
 		rtw_btcoex_PowerOnSetting(padapter);
 #endif
-
 	return ret;
 }
+
+
 void rtw_hal_power_off(_adapter *padapter)
 {
 	struct macid_ctl_t *macid_ctl = &padapter->dvobj->macid_ctl;
