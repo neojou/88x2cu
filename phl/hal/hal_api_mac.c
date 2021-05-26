@@ -47,7 +47,8 @@ void hal_mac_get_hwinfo(struct hal_info_t *hal, struct hal_spec_t *hal_spec)
 	PHL_INFO("[MAC-INFO]- wd_info_len: %d\n", mac_info->wd_info_len);
 
 	PHL_INFO("[MAC-INFO]- pwr_seq_ver: %d\n", mac_info->pwr_seq_ver);
-	PHL_INFO("[MAC-INFO]- fifo_size: %d\n", mac_info->fifo_size);
+	PHL_INFO("[MAC-INFO]- txff_size: %d\n", mac_info->txff_size);
+	PHL_INFO("[MAC-INFO]- rxff_size: %d\n", mac_info->rxff_size);
 	PHL_INFO("[MAC-INFO]- macid_num: %d\n", mac_info->macid_num);
 	PHL_INFO("[MAC-INFO]- wl_efuse_size: %d\n", mac_info->wl_efuse_size);
 

@@ -1550,7 +1550,9 @@ struct mac_hw_info {
 	struct mac_pwr_cfg **pwr_on_seq;
 	struct mac_pwr_cfg **pwr_off_seq;
 	u8 pwr_seq_ver;
-	u32 fifo_size;
+	u32 txff_size;
+	u32 rxff_size;
+	u8 csi_buf_pg_num;
 	u16 macid_num;
 	u8 bssid_num;
 	u32 wl_efuse_size;
@@ -4571,6 +4573,21 @@ struct mac_pltfm_cb {
 };
 #endif/*CONFIG_NEW_HALMAC_INTERFACE*/
 
+struct mac_fifo_info {
+	/* tx fifo information */
+	u16 rsvd_boundary;
+	u16 rsvd_pg_num;
+	u16 rsvd_drv_pg_num;
+	u16 txff_pg_num;
+	u16 acq_pg_num;
+	u16 rsvd_drv_addr;
+	u16 rsvd_h2c_info_addr;
+	u16 rsvd_h2c_sta_info_addr;
+	u16 rsvd_h2cq_addr;
+	u16 rsvd_cpu_instr_addr;
+	u16 rsvd_fw_txbuf_addr;
+	u16 rsvd_csibuf_addr;
+};
 
 struct mac_adapter {
 	struct mac_ops *ops;
@@ -4581,6 +4598,7 @@ struct mac_adapter {
 	struct mac_state_mach sm;
 	struct mac_hw_info *hw_info;
 	struct mac_fw_info fw_info;
+	struct mac_fifo_info fifo_info;
 	struct mac_efuse_param efuse_param;
 #if 0 // NEO
 	struct mac_ax_mac_pwr_info mac_pwr_info;

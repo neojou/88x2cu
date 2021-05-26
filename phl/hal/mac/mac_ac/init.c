@@ -120,7 +120,6 @@ static int txdma_queue_mapping(struct mac_adapter *adapter)
 	u8 max_bulkout_num = hal_spec->max_bulkout_num;
 	u16 txdma_pq_map = 0;
 
-	pr_info("%s NEO bulkout_num: %d\n", __func__, max_bulkout_num);
 	if (max_bulkout_num < 2 || max_bulkout_num > 4) {
 		PLTFM_MSG_ERR("max_bulkout_num %d invalid\n", max_bulkout_num);
 		return MACNOITEM;
@@ -147,12 +146,94 @@ static int txdma_queue_mapping(struct mac_adapter *adapter)
 
 }
 
-static
-u32 hci_func_en(struct mac_adapter *adapter)
+static u32
+set_trx_fifo_info(struct mac_adapter *adapter)
+{
+	struct mac_fifo_info *fifo = &adapter->fifo_info;
+	u8 csi_buf_pg_num = adapter->hw_info->csi_buf_pg_num;
+	u16 cur_pg_addr;
+	u32 txff_size = adapter->hw_info->txff_size;
+
+	pr_info("%s NEO txff_size=%u\n", __func__, txff_size);
+	pr_info("%s NEO csi_buf_pg_num=%u\n", __func__, csi_buf_pg_num);
+#if 0 //NEO
+	/* config rsvd page num */
+	fifo->rsvd_drv_pg_num = 8;
+	fifo->txff_pg_num = txff_size >> 7;
+	fifo->rsvd_pg_num = fifo->rsvd_drv_pg_num +
+			   RSVD_PG_H2C_EXTRAINFO_NUM +
+			   RSVD_PG_H2C_STATICINFO_NUM +
+			   RSVD_PG_H2CQ_NUM +
+			   RSVD_PG_CPU_INSTRUCTION_NUM +
+			   RSVD_PG_FW_TXBUF_NUM +
+			   csi_buf_pg_num;
+
+	if (fifo->rsvd_pg_num > fifo->txff_pg_num) {
+		PLTFM_MSG_ERR("[ERR] %s rsvd_pg_num(%d) > txff_pg_num(%d)\n",
+			      __func__, fifo->rsvd_pg_num, fifo->txff_pg_num);
+		return MACBUFSZ;
+	}
+
+	fifo->acq_pg_num = fifo->txff_pg_num - fifo->rsvd_pg_num;
+	fifo->rsvd_boundary = fifo->txff_pg_num - fifo->rsvd_pg_num;
+
+	cur_pg_addr = fifo->txff_pg_num;
+	cur_pg_addr -= csi_buf_pg_num;
+	fifo->rsvd_csibuf_addr = cur_pg_addr;
+	cur_pg_addr -= RSVD_PG_FW_TXBUF_NUM;
+	fifo->rsvd_fw_txbuf_addr = cur_pg_addr;
+	cur_pg_addr -= RSVD_PG_CPU_INSTRUCTION_NUM;
+	fifo->rsvd_cpu_instr_addr = cur_pg_addr;
+	cur_pg_addr -= RSVD_PG_H2CQ_NUM;
+	fifo->rsvd_h2cq_addr = cur_pg_addr;
+	cur_pg_addr -= RSVD_PG_H2C_STATICINFO_NUM;
+	fifo->rsvd_h2c_sta_info_addr = cur_pg_addr;
+	cur_pg_addr -= RSVD_PG_H2C_EXTRAINFO_NUM;
+	fifo->rsvd_h2c_info_addr = cur_pg_addr;
+	cur_pg_addr -= fifo->rsvd_drv_pg_num;
+	fifo->rsvd_drv_addr = cur_pg_addr;
+
+	if (fifo->rsvd_boundary != fifo->rsvd_drv_addr) {
+		PLTFM_MSG_ERR("[ERR] %s rsvd_boundary(%d) != rsvd_drv_addr(%d)\n",
+			      __func__, fifo->rsvd_boundary, fifo->rsvd_drv_addr);
+		return MACBUFSZ;
+	}
+#endif //NEO
+	return MACSUCCESS;
+}
+
+static u32
+priority_queue_cfg(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 ret;
+
+	ret = set_trx_fifo_info(adapter);	
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR] set_trx_fifo_info, ret=%d\n", ret);
+		return ret;
+	}
+
+	return MACSUCCESS;
+}
+
+static u32
+hci_func_en(struct mac_adapter *adapter)
 {
 	u32 ret;
 
 	ret = txdma_queue_mapping(adapter);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR] txdma_queue_mapping, ret=%d\n", ret);
+		return ret;
+	}
+
+	ret = priority_queue_cfg(adapter);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR] priority_queue_cfg, ret=%d\n", ret);
+		return ret;
+	}
+
 	return ret;
 }
 
