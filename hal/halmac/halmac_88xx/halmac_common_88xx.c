@@ -356,9 +356,6 @@ get_hw_value_88xx(struct halmac_adapter *adapter, enum halmac_hw_id hw_id,
 	case HALMAC_HW_BT_BANK2_EFUSE_SIZE:
 		*(u32 *)value = 0;
 		break;
-	case HALMAC_HW_TXFIFO_SIZE:
-		*(u32 *)value = adapter->hw_cfg_info.tx_fifo_size;
-		break;
 	case HALMAC_HW_RXFIFO_SIZE:
 		*(u32 *)value = adapter->hw_cfg_info.rx_fifo_size;
 		break;

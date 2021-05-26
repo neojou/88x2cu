@@ -113,7 +113,6 @@ int rtw_halmac_deinit_adapter(struct dvobj_priv *);
 
 /* Get operations */
 int rtw_halmac_get_hw_value(struct dvobj_priv *d, enum halmac_hw_id hw_id, void *pvalue);
-int rtw_halmac_get_tx_fifo_size(struct dvobj_priv *d, u32 *size);
 int rtw_halmac_get_rx_fifo_size(struct dvobj_priv *d, u32 *size);
 int rtw_halmac_get_rsvd_drv_pg_bndy(struct dvobj_priv *d, u16 *bndy);
 int rtw_halmac_get_page_size(struct dvobj_priv *d, u32 *size);

@@ -914,35 +914,6 @@ int rtw_halmac_get_hw_value(struct dvobj_priv *d, enum halmac_hw_id hw_id, void 
 }
 
 /**
- * rtw_halmac_get_tx_fifo_size() - TX FIFO size
- * @d:		struct dvobj_priv*
- * @size:	TX FIFO size, unit is byte.
- *
- * Get TX FIFO size(byte) from HALMAC.
- *
- * Return 0 for OK, otherwise fail.
- */
-int rtw_halmac_get_tx_fifo_size(struct dvobj_priv *d, u32 *size)
-{
-	struct halmac_adapter *halmac;
-	struct halmac_api *api;
-	enum halmac_ret_status status;
-	u32 val = 0;
-
-
-	halmac = dvobj_to_halmac(d);
-	api = HALMAC_GET_API(halmac);
-
-	status = api->halmac_get_hw_value(halmac, HALMAC_HW_TXFIFO_SIZE, &val);
-	if (status != HALMAC_RET_SUCCESS)
-		return -1;
-
-	*size = val;
-
-	return 0;
-}
-
-/**
  * rtw_halmac_get_rx_fifo_size() - RX FIFO size
  * @d:		struct dvobj_priv*
  * @size:	RX FIFO size, unit is byte
