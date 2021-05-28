@@ -1071,6 +1071,9 @@ struct rtw_hal_com_t {
 	unsigned long int_mask;
 	u32 int_mask_default;
 #endif /* CONFIG_SDIO_HCI */
+#ifdef CONFIG_USB_HCI
+	u8 bulkout_num;
+#endif
 
 	struct hal_int_array intr;
 

@@ -1161,6 +1161,9 @@ u32 rtw_hal_hci_cfg(struct rtw_phl_com_t *phl_com, void *hal,
 #ifdef CONFIG_SDIO_HCI
 	hal_info->hal_com->block_sz = ic_info->sdio_info.block_sz;
 #endif
+#ifdef CONFIG_USB_HCI
+	hal_info->hal_com->bulkout_num = ic_info->usb_info.outep_num;
+#endif
 	hal_ops->hal_hci_configure(phl_com, hal_info, ic_info);
 
 	return hal_status;

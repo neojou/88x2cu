@@ -3821,7 +3821,7 @@ struct mac_ax_sdio_txagg_cfg {
 	u16 align_size;
 };
 
-struct mac_ax_usb_info {
+struct mac_usb_info {
 	u8 ep5;
 	u8 ep6;
 	u8 ep10;
@@ -4621,10 +4621,9 @@ struct mac_adapter {
 #if MAC_AX_SDIO_SUPPORT
 	struct mac_ax_sdio_info sdio_info;
 #endif
-#if MAC_AX_USB_SUPPORT
-	struct mac_ax_usb_info usb_info;
+#if MAC_USB_SUPPORT
+	struct mac_usb_info usb_info;
 #endif
-
 #if MAC_AX_FEATURE_HV
 	struct hv_ax_ops *hv_ops;
 #endif

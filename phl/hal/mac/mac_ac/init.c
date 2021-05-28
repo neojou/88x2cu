@@ -18,6 +18,16 @@
 //#include "security_cam.h"
 //#include "hw.h"
 
+
+#define RSVD_PG_DRV_NUM			16
+#define RSVD_PG_H2C_EXTRAINFO_NUM	24
+#define RSVD_PG_H2C_STATICINFO_NUM	8
+#define RSVD_PG_H2CQ_NUM		8
+#define RSVD_PG_CPU_INSTRUCTION_NUM	0
+#define RSVD_PG_FW_TXBUF_NUM		4
+
+#define C2H_PKT_BUF	256
+
 enum rtw_dma_mapping {
 	RTW_DMA_MAPPING_EXTRA	= 0,
 	RTW_DMA_MAPPING_LOW	= 1,
@@ -55,6 +65,21 @@ static struct rtw_rqpn rqpn_table[] = {
 	 RTW_DMA_MAPPING_EXTRA, RTW_DMA_MAPPING_HIGH},
 };
 
+struct rtw_page_table {
+	u16 hq_num;
+	u16 nq_num;
+	u16 lq_num;
+	u16 exq_num;
+	u16 gapq_num;
+};
+
+static struct rtw_page_table page_table_8822c[] = {
+	{64, 64, 64, 64, 1},
+	{64, 64, 64, 64, 1},
+	{64, 64, 0, 0, 1},
+	{64, 64, 64, 0, 1},
+	{64, 64, 64, 64, 1},
+};
 
 #ifdef CONFIG_NEW_HALMAC_INTERFACE
 struct mac_ax_adapter *get_mac_ax_adapter(enum mac_ax_intf intf,
@@ -154,9 +179,6 @@ set_trx_fifo_info(struct mac_adapter *adapter)
 	u16 cur_pg_addr;
 	u32 txff_size = adapter->hw_info->txff_size;
 
-	pr_info("%s NEO txff_size=%u\n", __func__, txff_size);
-	pr_info("%s NEO csi_buf_pg_num=%u\n", __func__, csi_buf_pg_num);
-#if 0 //NEO
 	/* config rsvd page num */
 	fifo->rsvd_drv_pg_num = 8;
 	fifo->txff_pg_num = txff_size >> 7;
@@ -198,7 +220,6 @@ set_trx_fifo_info(struct mac_adapter *adapter)
 			      __func__, fifo->rsvd_boundary, fifo->rsvd_drv_addr);
 		return MACBUFSZ;
 	}
-#endif //NEO
 	return MACSUCCESS;
 }
 
@@ -206,6 +227,11 @@ static u32
 priority_queue_cfg(struct mac_adapter *adapter)
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	struct rtw_hal_com_t *hal_com = (struct rtw_hal_com_t *)adapter->drv_adapter;
+	struct mac_fifo_info *fifo = &adapter->fifo_info;
+	struct rtw_page_table *pg_tbl = NULL;
+	u16 pubq_num;
+	u32 rxff_size = adapter->hw_info->rxff_size;
 	u32 ret;
 
 	ret = set_trx_fifo_info(adapter);	
@@ -214,6 +240,34 @@ priority_queue_cfg(struct mac_adapter *adapter)
 		return ret;
 	}
 
+	if (hal_com->bulkout_num >= 2 && hal_com->bulkout_num <=4) {
+		pg_tbl = &page_table_8822c[hal_com->bulkout_num];
+	}
+	if (pg_tbl == NULL) {
+		PLTFM_MSG_ERR("[ERR] %s usb bulkout num(%d) is not expected \n",
+			      __func__, hal_com->bulkout_num);
+		return MACCMP;
+	}
+
+	pubq_num = fifo->acq_pg_num - pg_tbl->hq_num - pg_tbl->lq_num -
+		   pg_tbl->nq_num - pg_tbl->exq_num - pg_tbl->gapq_num;
+	MAC_REG_W16(REG_FIFOPAGE_INFO_1, pg_tbl->hq_num);
+	MAC_REG_W16(REG_FIFOPAGE_INFO_2, pg_tbl->lq_num);
+	MAC_REG_W16(REG_FIFOPAGE_INFO_3, pg_tbl->nq_num);
+	MAC_REG_W16(REG_FIFOPAGE_INFO_4, pg_tbl->exq_num);
+	MAC_REG_W16(REG_FIFOPAGE_INFO_5, pubq_num);
+	MAC_REG_W32_SET(REG_RQPN_CTRL_2, BIT_LD_RQPN);
+
+	MAC_REG_W16(REG_FIFOPAGE_CTRL_2, fifo->rsvd_boundary);
+	MAC_REG_W8_SET(REG_FWHW_TXQ_CTRL + 2, BIT_EN_WR_FREE_TAIL >> 16);
+
+	MAC_REG_W16(REG_BCNQ_BDNY_V1, fifo->rsvd_boundary);
+	MAC_REG_W16(REG_FIFOPAGE_CTRL_2 + 2, fifo->rsvd_boundary);
+	MAC_REG_W16(REG_BCNQ1_BDNY_V1, fifo->rsvd_boundary);
+	MAC_REG_W32(REG_RXFF_BNDY, rxff_size - C2H_PKT_BUF - 1);
+	MAC_REG_W8_SET(REG_AUTO_LLT_V1, BIT_AUTO_INIT_LLT_V1);
+
+	MAC_REG_W8(REG_CR + 3, 0);
 	return MACSUCCESS;
 }
 
