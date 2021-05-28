@@ -26,7 +26,8 @@
 #define RSVD_PG_CPU_INSTRUCTION_NUM	0
 #define RSVD_PG_FW_TXBUF_NUM		4
 
-#define C2H_PKT_BUF	256
+#define C2H_PKT_BUF		256
+#define TX_PAGE_SIZE_SHIFT	7
 
 enum rtw_dma_mapping {
 	RTW_DMA_MAPPING_EXTRA	= 0,
@@ -288,8 +289,61 @@ priority_queue_cfg(struct mac_adapter *adapter)
 	return MACSUCCESS;
 }
 
+static int
+init_h2c(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	struct rtw_hal_com_t *hal_com = (struct rtw_hal_com_t *)adapter->drv_adapter;
+	struct mac_fifo_info *fifo = &adapter->fifo_info;
+	u8 value8;
+	u32 value32;
+	u32 h2cq_addr;
+	u32 h2cq_size;
+	u32 h2cq_free;
+	u32 wp, rp;
+
+	h2cq_addr = fifo->rsvd_h2cq_addr << TX_PAGE_SIZE_SHIFT;
+	h2cq_size = RSVD_PG_H2CQ_NUM << TX_PAGE_SIZE_SHIFT;
+
+	value32 = MAC_REG_R32(REG_H2C_HEAD);
+	value32 = (value32 & 0xFFFC0000) | h2cq_addr;
+	MAC_REG_W32(REG_H2C_HEAD, value32);
+
+	value32 = MAC_REG_R32(REG_H2C_READ_ADDR);
+	value32 = (value32 & 0xFFFC0000) | h2cq_addr;
+	MAC_REG_W32(REG_H2C_READ_ADDR, value32);
+
+	value32 = MAC_REG_R32(REG_H2C_TAIL);
+	value32 &= 0xFFFC0000;
+	value32 |= (h2cq_addr + h2cq_size);
+	MAC_REG_W32(REG_H2C_TAIL, value32);
+
+	value8 = MAC_REG_R8(REG_H2C_INFO);
+	value8 = (u8)((value8 & 0xFC) | 0x01);
+	MAC_REG_W8(REG_H2C_INFO, value8);
+
+	value8 = MAC_REG_R8(REG_H2C_INFO);
+	value8 = (u8)((value8 & 0xFB) | 0x04);
+	MAC_REG_W8(REG_H2C_INFO, value8);
+
+	value8 = MAC_REG_R8(REG_TXDMA_OFFSET_CHK + 1);
+	value8 = (u8)((value8 & 0x7f) | 0x80);
+	MAC_REG_W8(REG_TXDMA_OFFSET_CHK + 1, value8);
+
+	wp = MAC_REG_R32(REG_H2C_PKT_WRITEADDR) & 0x3FFFF;
+	rp = MAC_REG_R32(REG_H2C_PKT_READADDR) & 0x3FFFF;
+	h2cq_free = wp >= rp ? h2cq_size - (wp - rp) : rp - wp;
+
+	if (h2cq_size != h2cq_free) {
+		PLTFM_MSG_ERR("[ERR] H2C queue mismatch\n");
+		return MACBUFSZ;
+	}
+
+	return MACSUCCESS;
+}
+
 static u32
-hci_func_en(struct mac_adapter *adapter)
+mac_init(struct mac_adapter *adapter)
 {
 	u32 ret;
 
@@ -302,6 +356,12 @@ hci_func_en(struct mac_adapter *adapter)
 	ret = priority_queue_cfg(adapter);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR] priority_queue_cfg, ret=%d\n", ret);
+		return ret;
+	}
+
+	ret = init_h2c(adapter);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR] int_h2c, ret=%d\n", ret);
 		return ret;
 	}
 
@@ -469,12 +529,6 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
-	ret = hci_func_en(adapter);
-	if (ret != MACSUCCESS) {
-		PLTFM_MSG_ERR("[ERR]hci_func_en %d\n", ret);
-		return ret;
-	}
-
 	ret = intf_ops->intf_pre_init(adapter, intf_info);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]intf_pre_init %d\n", ret);
@@ -486,6 +540,13 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		PLTFM_MSG_ERR("[ERR]enable_fw %d\n", ret);
 		return ret;
 	}
+
+	ret = mac_init(adapter);
+	if (ret != MACSUCCESS) {
+		PLTFM_MSG_ERR("[ERR]mac_init %d\n", ret);
+		return ret;
+	}
+
 #if 0 //NEO
 	if (fwdl_info->fw_en) {
 		if (fwdl_info->dlrom_en || fwdl_info->dlram_en) {
@@ -650,12 +711,6 @@ u32 mac_hal_fast_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
-	ret = hci_func_en(adapter);
-	if (ret != MACSUCCESS) {
-		PLTFM_MSG_ERR("[ERR]hci_func_en %d\n", ret);
-		return ret;
-	}
-
 	ret = intf_ops->intf_pre_init(adapter, intf_info);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]intf_pre_init %d\n", ret);
@@ -665,6 +720,12 @@ u32 mac_hal_fast_init(struct mac_adapter *adapter,
 	ret = ops->enable_fw(adapter, RTW_FW_NIC);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]enable_fw %d\n", ret);
+		return ret;
+	}
+
+	ret = mac_init(adapter);
+	if (ret != MACSUCCESS) {
+		PLTFM_MSG_ERR("[ERR]mac_init %d\n", ret);
 		return ret;
 	}
 

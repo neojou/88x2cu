@@ -713,7 +713,7 @@ u32 mac_enable_fw(struct mac_adapter *adapter, enum rtw_fw_type cat)
 	pltfm_reset_88xx(adapter);
 
 	/* for efuse hidden rpt */
-	MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
+	//MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
 
 	ret = mac_fwdl(adapter, fw, fw_len);
 	if (ret != MACSUCCESS) {
