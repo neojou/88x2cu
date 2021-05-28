@@ -230,6 +230,7 @@ priority_queue_cfg(struct mac_adapter *adapter)
 	struct rtw_hal_com_t *hal_com = (struct rtw_hal_com_t *)adapter->drv_adapter;
 	struct mac_fifo_info *fifo = &adapter->fifo_info;
 	struct rtw_page_table *pg_tbl = NULL;
+	int cnt;
 	u16 pubq_num;
 	u32 rxff_size = adapter->hw_info->rxff_size;
 	u32 ret;
@@ -266,6 +267,22 @@ priority_queue_cfg(struct mac_adapter *adapter)
 	MAC_REG_W16(REG_BCNQ1_BDNY_V1, fifo->rsvd_boundary);
 	MAC_REG_W32(REG_RXFF_BNDY, rxff_size - C2H_PKT_BUF - 1);
 	MAC_REG_W8_SET(REG_AUTO_LLT_V1, BIT_AUTO_INIT_LLT_V1);
+
+#if MAC_USB_SUPPORT
+	MAC_REG_W8_CLR(REG_AUTO_LLT_V1, BIT(4) | BIT(5) | BIT(6) | BIT(7));
+	MAC_REG_W8_SET(REG_AUTO_LLT_V1, BIT(4) | BIT(5));
+
+	MAC_REG_W8(REG_AUTO_LLT_V1 + 3, 0x3);
+	MAC_REG_W8_SET(REG_TXDMA_OFFSET_CHK + 1, BIT(1));
+#endif
+
+	MAC_REG_W8_SET(REG_AUTO_LLT_V1, BIT_AUTO_INIT_LLT_V1);
+	cnt = 1000;
+	while (MAC_REG_R8(REG_AUTO_LLT_V1) & BIT_AUTO_INIT_LLT_V1) {
+		cnt--;
+		if (cnt == 0)
+			return MACHWERR;
+	}
 
 	MAC_REG_W8(REG_CR + 3, 0);
 	return MACSUCCESS;
