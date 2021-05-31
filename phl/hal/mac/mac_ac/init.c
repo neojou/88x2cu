@@ -364,6 +364,8 @@ init_h2c(struct mac_adapter *adapter)
 
 	if (h2cq_size != h2cq_free) {
 		PLTFM_MSG_ERR("[ERR] H2C queue mismatch\n");
+		PLTFM_MSG_ERR("[ERR] wp:0x%x, rp:0x%x\n", wp, rp);
+		PLTFM_MSG_ERR("[ERR] h2cq_size:0x%x, h2cq_free:0x%x\n", h2cq_size, h2cq_free);
 		return MACBUFSZ;
 	}
 
