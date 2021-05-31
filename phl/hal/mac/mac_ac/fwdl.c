@@ -463,8 +463,10 @@ DLFW_EMEM:
 	return ret;
 }
 
-u32 mac_fwdl(struct mac_adapter *adapter, u8 *fw, u32 len)
+u32 mac_fwdl(struct mac_adapter *adapter)
 {
+	u8 *fw = array_8822c_nic;
+	u32 len = array_length_8822c_nic;
 	u32 ret;
 
 	if (len < WLAN_FW_HDR_SIZE) {
@@ -650,17 +652,12 @@ pltfm_reset_88xx(struct mac_adapter *adapter)
 
 u32 mac_enable_fw(struct mac_adapter *adapter, enum rtw_fw_type cat)
 {
-	u32 ret = MACSUCCESS;
-	u32 chip_id, cv;
-	u32 fw_len = 0;
-	u8 *fw = NULL;
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
-	u8 value8;
-	u32 bckp_idx = 0;
 	struct halmac_backup_info bckp[DLFW_RESTORE_REG_NUM];
-
-	fw_len = array_length_8822c_nic;
-	fw = array_8822c_nic;
+	u8 value8;
+	u32 chip_id, cv;
+	u32 bckp_idx = 0;
+	u32 ret = MACSUCCESS;
 
 	ret = mac_disable_cpu(adapter);
 	if (ret != MACSUCCESS) {
@@ -712,10 +709,7 @@ u32 mac_enable_fw(struct mac_adapter *adapter, enum rtw_fw_type cat)
 
 	pltfm_reset_88xx(adapter);
 
-	/* for efuse hidden rpt */
-	//MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
-
-	ret = mac_fwdl(adapter, fw, fw_len);
+	ret = mac_fwdl(adapter);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]%s: mac_enable_cpu fail\n", __func__);
 		return ret;

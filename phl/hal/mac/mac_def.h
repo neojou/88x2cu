@@ -4771,8 +4771,8 @@ struct mac_ops {
 			  u8 boot_reason, u8 dlfw);
 	u32 (*disable_cpu)(struct mac_adapter *adapter);
 	u32 (*fwredl)(struct mac_adapter *adapter, u8 *fw, u32 len);
-	u32 (*fwdl)(struct mac_adapter *adapter, u8 *fw, u32 len);
 #endif // if 0 NEO
+	u32 (*fwdl)(struct mac_adapter *adapter);
 	u32 (*enable_fw)(struct mac_adapter *adapter,
 			 enum rtw_fw_type cat);
 #if 0 // NEO

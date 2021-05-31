@@ -173,8 +173,8 @@ static struct mac_ops mac8822c_ops = {
 	NULL, /* mac_enable_cpu, */ /* enable_cpu */
 	NULL, /* mac_disable_cpu, */ /* disable_cpu */
 	NULL, /* mac_fwredl, */ /* fwredl */
-	NULL, /* mac_fwdl, */ /* fwdl */
 #endif // NEO if 0
+	mac_fwdl, /* fwdl */
 	mac_enable_fw, /* enable_fw */
 #if 0 // NEO
 	NULL, /* mac_lv1_rcvy, */ /* lv1_rcvy */

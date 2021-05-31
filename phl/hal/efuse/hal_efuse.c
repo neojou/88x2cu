@@ -739,7 +739,7 @@ void rtw_efuse_process(void *efuse, char *ic_name)
 
 	debug_dump_data(efuse_info->shadow_map, efuse_info->log_efuse_size,
 					"Logical EFUSE MAP:");
-	//efuse_hidden_handle(efuse_info);
+	efuse_hidden_handle(efuse_info);
 
 	SET_STATUS_FLAG(efuse_info->status, EFUSE_STATUS_PROCESS);
 

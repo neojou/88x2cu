@@ -1721,11 +1721,22 @@ u32 mac_read_hidden_rpt(struct mac_adapter *adapter,
 			struct mac_defeature_value *rpt)
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	struct mac_ops *mac_ops = adapter_to_mac_ops(adapter);
 	u8 id = C2H_DEFEATURE_RSVD;
 	u8 mac_hidden_rpt[MAC_HIDDEN_RPT_LEN + MAC_HIDDEN_RPT_2_LEN] = {0};
 	u32 cnt = 100;
 	u32 ret;
 	int i;
+
+	/* for efuse hidden rpt */
+	MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
+
+	/* fw_dl */
+	ret = mac_ops->fwdl(adapter);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR] fwdl, ret=%d\n", ret);
+		return MACFWNONRDY;
+	}
 
 	while (cnt--) {
 		id = MAC_REG_R8(REG_C2HEVT);

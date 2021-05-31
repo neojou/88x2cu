@@ -294,6 +294,8 @@ u32 mac_fwredl(struct mac_ax_adapter *adapter, u8 *fw, u32 len);
  * @}
  */
 
+#endif //NEO
+
 /**
  * @addtogroup Firmware
  * @{
@@ -310,13 +312,11 @@ u32 mac_fwredl(struct mac_ax_adapter *adapter, u8 *fw, u32 len);
  * @return Please Place Description here.
  * @retval u32
  */
-u32 mac_fwdl(struct mac_ax_adapter *adapter, u8 *fw, u32 len);
+u32 mac_fwdl(struct mac_adapter *adapter);
 /**
  * @}
  * @}
  */
-
-#endif //NEO
 
 /**
  * @addtogroup Firmware
