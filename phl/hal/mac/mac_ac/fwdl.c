@@ -760,7 +760,7 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 	u32 ret = MACSUCCESS;
 
 	/* for efuse hidden rpt */
-	//MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
+	MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
 
 	ret = wait_txfifo_empty(adapter);
 	if (ret) {
@@ -819,7 +819,7 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 	pltfm_reset_88xx(adapter);
 
 	ret = mac_fwdl(adapter);
-	//restore_mac_reg(adapter, bckp, DLFW_RESTORE_REG_NUM);
+	restore_mac_reg(adapter, bckp, DLFW_RESTORE_REG_NUM);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]%s: mac_enable_cpu fail\n", __func__);
 		return ret;
