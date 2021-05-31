@@ -650,7 +650,7 @@ pltfm_reset_88xx(struct mac_adapter *adapter)
 #define DLFW_RESTORE_REG_NUM		6
 #define HALMAC_DMA_MAPPING_HIGH		3
 
-u32 mac_enable_fw(struct mac_adapter *adapter, enum rtw_fw_type cat)
+u32 mac_enable_fw(struct mac_adapter *adapter)
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 	struct halmac_backup_info bckp[DLFW_RESTORE_REG_NUM];

@@ -4773,8 +4773,7 @@ struct mac_ops {
 	u32 (*fwredl)(struct mac_adapter *adapter, u8 *fw, u32 len);
 #endif // if 0 NEO
 	u32 (*fwdl)(struct mac_adapter *adapter);
-	u32 (*enable_fw)(struct mac_adapter *adapter,
-			 enum rtw_fw_type cat);
+	u32 (*enable_fw)(struct mac_adapter *adapter);
 #if 0 // NEO
 	u32 (*lv1_rcvy)(struct mac_adapter *adapter,
 			enum mac_ax_lv1_rcvy_step step);

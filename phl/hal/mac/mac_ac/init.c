@@ -600,7 +600,7 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
-	ret = ops->enable_fw(adapter, RTW_FW_NIC);
+	ret = ops->enable_fw(adapter); // RTW_FW_NIC
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]enable_fw %d\n", ret);
 		return ret;
@@ -790,7 +790,7 @@ u32 mac_hal_fast_init(struct mac_adapter *adapter,
 	}
 
 #if 0 //NEO
-	ret = mac_ops->enable_fw(adapter, RTW_FW_NIC);
+	ret = mac_ops->enable_fw(adapter); // RTW_FW_NIC
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]enable_fw %d\n", ret);
 		return ret;
