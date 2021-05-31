@@ -1128,6 +1128,8 @@ _phl_alloc_h2c_pool(struct phl_info_t *phl_info)
 	struct rtw_h2c_pkt *h2c_pkt_buf = NULL;
 	void *drv_priv = NULL;
 
+	pr_info("%s NEO TODO\n", __func__);
+
 	FUNCIN_WSTS(pstatus);
 	drv_priv = phl_to_drvpriv(phl_info);
 

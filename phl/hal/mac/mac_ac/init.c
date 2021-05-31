@@ -26,8 +26,36 @@
 #define RSVD_PG_CPU_INSTRUCTION_NUM	0
 #define RSVD_PG_FW_TXBUF_NUM		4
 
-#define C2H_PKT_BUF		256
 #define TX_PAGE_SIZE_SHIFT	7
+
+// H2C, C2H : need to move to G6's H2C, fwcmd.c/fwcmd.h, and rewrite to common style
+#define C2H_PKT_BUF		256
+#define H2C_PKT_SIZE		32
+#define H2C_PKT_HDR_SIZE	8
+
+#define H2C_PKT_GENERAL_INFO	0x0D
+
+#if 0 //NEO
+#define SET_PKT_H2C_CATEGORY(h2c_pkt, value)                                   \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x00, value, GENMASK(6, 0))
+#define SET_PKT_H2C_CMD_ID(h2c_pkt, value)                                     \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x00, value, GENMASK(15, 8))
+#define SET_PKT_H2C_SUB_CMD_ID(h2c_pkt, value)                                 \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x00, value, GENMASK(31, 16))
+#define SET_PKT_H2C_TOTAL_LEN(h2c_pkt, value)                                  \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x01, value, GENMASK(15, 0))
+
+#define GENERAL_INFO_SET_FW_TX_BOUNDARY(h2c_pkt, value)                        \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x02, value, GENMASK(23, 16))
+
+static inline void rtw_h2c_pkt_set_header(u8 *h2c_pkt, u8 sub_id)
+{
+	SET_PKT_H2C_CATEGORY(h2c_pkt, H2C_PKT_CATEGORY);
+	SET_PKT_H2C_CMD_ID(h2c_pkt, H2C_PKT_CMD_ID);
+	SET_PKT_H2C_SUB_CMD_ID(h2c_pkt, sub_id);
+}
+#endif //NEO
+
 
 enum rtw_dma_mapping {
 	RTW_DMA_MAPPING_EXTRA	= 0,
@@ -368,6 +396,43 @@ mac_init(struct mac_adapter *adapter)
 	return ret;
 }
 
+static u32
+send_general_info_fifo(struct mac_adapter *adapter)
+{
+	pr_info("%s NEO TODO\n", __func__);
+	return MACSUCCESS;
+#if 0 //NEO
+	struct mac_fifo_info *fifo = &adapter->fifo_info;
+	u8 h2c_pkt[H2C_PKT_SIZE] = {0};
+	u16 total_size = H2C_PKT_HDR_SIZE + 4;
+
+	rtw_h2c_pkt_set_header(h2c_pkt, H2C_PKT_GENERAL_INFO);
+
+	SET_PKT_H2C_TOTAL_LEN(h2c_pkt, total_size);
+
+	GENERAL_INFO_SET_FW_TX_BOUNDARY(h2c_pkt,
+					fifo->rsvd_fw_txbuf_addr -
+					fifo->rsvd_boundary);
+
+	rtw_fw_send_h2c_packet(rtwdev, h2c_pkt);
+#endif
+}
+
+static u32
+send_general_info(struct mac_adapter *adapter)
+{
+	u32 ret;
+
+
+	ret = send_general_info_fifo(adapter);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR] send_general_info_fifo, ret=%d\n", ret);
+		return ret;
+	}
+
+	return ret;
+}
+
 #if 0 // NEO
 u32 dmac_func_en(struct mac_ax_adapter *adapter)
 {
@@ -546,6 +611,13 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		PLTFM_MSG_ERR("[ERR]mac_init %d\n", ret);
 		return ret;
 	}
+
+	ret = send_general_info(adapter);
+	if (ret != MACSUCCESS) {
+		PLTFM_MSG_ERR("[ERR]mac_init %d\n", ret);
+		return ret;
+	}
+
 
 #if 0 //NEO
 	if (fwdl_info->fw_en) {
