@@ -649,6 +649,80 @@ pltfm_reset_88xx(struct mac_adapter *adapter)
 
 #define DLFW_RESTORE_REG_NUM		6
 #define HALMAC_DMA_MAPPING_HIGH		3
+#define BIT_FW_DW_RDY			BIT(14)
+#define ILLEGAL_KEY_GROUP		0xFAAAAA00
+
+static void
+restore_mac_reg(struct mac_adapter *adapter,
+		struct halmac_backup_info *info, u32 num)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	struct halmac_backup_info *curr_info = info;
+	u8 len;
+	u32 i;
+	u32 reg;
+	u32 value;
+
+	for (i = 0; i < num; i++) {
+		reg = curr_info->mac_register;
+		value = curr_info->value;
+		len = curr_info->length;
+
+		if (len == 1)
+			MAC_REG_W8(reg, (u8)value);
+		else if (len == 2)
+			MAC_REG_W16(reg, (u16)value);
+		else if (len == 4)
+			MAC_REG_W32(reg, value);
+
+		curr_info++;
+	}
+}
+
+
+static u32
+dlfw_end_flow(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u16 fw_ctrl;
+	u32 cnt;
+	u32 ret;
+
+	MAC_REG_W32(REG_TXDMA_STATUS, BIT(2));
+
+	/* Check IMEM & DMEM checksum is OK or not */
+	fw_ctrl = MAC_REG_R16(REG_MCUFW_CTRL);
+	if ((fw_ctrl & 0x50) != 0x50)
+		return MACFWCHKSUM;
+
+	MAC_REG_W16(REG_MCUFW_CTRL, (fw_ctrl | BIT_FW_DW_RDY) & ~BIT(0));
+
+	ret = mac_enable_cpu(adapter, BOOT_REASON_PWR_ON, 1);
+	if (ret != MACSUCCESS) {
+		PLTFM_MSG_ERR("[ERR]%s: mac_enable_cpu fail\n", __func__);
+		return ret;
+	}
+
+	cnt = 5000;
+	while (MAC_REG_R16(REG_MCUFW_CTRL) != 0xC078) {
+		if (cnt == 0) {
+			PLTFM_MSG_ERR("[ERR]Check 0x80 = 0xC078 fail\n");
+			if ((MAC_REG_R32(REG_FW_DBG7) & 0xFFFFFF00) ==
+			    ILLEGAL_KEY_GROUP) {
+				PLTFM_MSG_ERR("[ERR]Key!!\n");
+				return MACFWCHKSUM;
+			}
+			return MACFWCHKSUM;
+		}
+		cnt--;
+		PLTFM_DELAY_US(50);
+	}
+
+	PLTFM_MSG_TRACE("[TRACE]0x80=0xC078, cnt=%d\n", cnt);
+	pr_info(" %s NEO [TRACE]0x80=0xC078, cnt=%d\n", __func__, cnt);
+
+	return MACSUCCESS;
+}
 
 u32 mac_enable_fw(struct mac_adapter *adapter)
 {
@@ -658,6 +732,9 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 	u32 chip_id, cv;
 	u32 bckp_idx = 0;
 	u32 ret = MACSUCCESS;
+
+	/* for efuse hidden rpt */
+	MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
 
 	ret = mac_disable_cpu(adapter);
 	if (ret != MACSUCCESS) {
@@ -710,14 +787,15 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 	pltfm_reset_88xx(adapter);
 
 	ret = mac_fwdl(adapter);
+	restore_mac_reg(adapter, bckp, DLFW_RESTORE_REG_NUM);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]%s: mac_enable_cpu fail\n", __func__);
 		return ret;
 	}
 
-	ret = mac_enable_cpu(adapter, BOOT_REASON_PWR_ON, 1);
+	ret = dlfw_end_flow(adapter);
 	if (ret != MACSUCCESS) {
-		PLTFM_MSG_ERR("[ERR]%s: mac_enable_cpu fail\n", __func__);
+		PLTFM_MSG_ERR("[ERR]%s: dlfw_end_flow fail\n", __func__);
 		return ret;
 	}
 

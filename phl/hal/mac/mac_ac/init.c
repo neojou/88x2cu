@@ -567,8 +567,8 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		 struct mac_fwdl_info *fwdl_info,
 		 struct mac_intf_info *intf_info)
 {
-	struct mac_ops *ops = adapter_to_mac_ops(adapter);
-	struct mac_intf_ops *intf_ops = adapter_to_intf_ops(adapter);
+	struct mac_ops *mac_ops = adapter_to_mac_ops(adapter);
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 	struct mac_hw_info *hw_info = adapter->hw_info;
 	u32 ret;
 	u32 rom_addr;
@@ -576,14 +576,14 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 	PLTFM_MUTEX_INIT(&adapter->fw_info.seq_lock);
 	PLTFM_MUTEX_INIT(&adapter->hw_info->ind_access_lock);
 
-	ret = ops->pwr_switch(adapter, 1);
+	ret = mac_ops->pwr_switch(adapter, 1);
 	if (ret == MACALRDYON) {
-		ret = ops->pwr_switch(adapter, 0);
+		ret = mac_ops->pwr_switch(adapter, 0);
 		if (ret != MACSUCCESS) {
 			PLTFM_MSG_ERR("[ERR]pwr_switch 0 fail %d\n", ret);
 			return ret;
 		}
-		ret = ops->pwr_switch(adapter, 1);
+		ret = mac_ops->pwr_switch(adapter, 1);
 		if (ret != MACSUCCESS) {
 			PLTFM_MSG_ERR("[ERR]pwr_switch 0->1 fail %d\n", ret);
 			return ret;
@@ -594,13 +594,16 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
-	ret = intf_ops->intf_pre_init(adapter, intf_info);
+	ret = ops->intf_pre_init(adapter, intf_info);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]intf_pre_init %d\n", ret);
 		return ret;
 	}
 
-	ret = ops->enable_fw(adapter); // RTW_FW_NIC
+	/* for efuse hidden rpt */
+	MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
+
+	ret = mac_ops->enable_fw(adapter); // RTW_FW_NIC
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]enable_fw %d\n", ret);
 		return ret;
@@ -763,8 +766,6 @@ u32 mac_hal_fast_init(struct mac_adapter *adapter,
 	u32 rom_addr;
 	u32 ret;
 
-	pr_info("%s NEO TODO\n", __func__);
-
 	ret = mac_ops->pwr_switch(adapter, 1);
 	if (ret == MACALRDYON) {
 		ret = mac_ops->pwr_switch(adapter, 0);
@@ -789,7 +790,6 @@ u32 mac_hal_fast_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
-#if 0 //NEO
 	ret = mac_ops->enable_fw(adapter); // RTW_FW_NIC
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]enable_fw %d\n", ret);
@@ -808,11 +808,6 @@ u32 mac_hal_fast_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
-	/* for efuse hidden rpt */
-	pr_info("%s NEO DOING - send C2H for efuse hidden rpt\n", __func__);
-	MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
-
-#endif //NEO
 	return ret;
 }
 

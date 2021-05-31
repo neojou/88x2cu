@@ -1729,21 +1729,6 @@ u32 mac_read_hidden_rpt(struct mac_adapter *adapter,
 	u32 ret;
 	int i;
 
-	/* for efuse hidden rpt */
-	MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
-
-	/* daible beacon related functions */
-	val8 = MAC_REG_R8(REG_BCN_CTRL);
-	val8 = (val8 & ~BIT(3)) | BIT(4);
-	MAC_REG_W8(REG_BCN_CTRL, val8);
-
-	/* fw_dl */
-	ret = mac_ops->enable_fw(adapter);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR] fwdl, ret=%d\n", ret);
-		return MACFWNONRDY;
-	}
-
 	while (cnt--) {
 		id = MAC_REG_R8(REG_C2HEVT);
 		pr_info("%s NEO id=0x%x\n", __func__, id);
