@@ -750,6 +750,54 @@ chk_failed:
 	return ret;
 }
 
+#define LTECOEX_ACCESS_CTRL REG_WL2LTECOEX_INDIRECT_ACCESS_CTRL_V1
+
+static u32
+ltecoex_reg_read(struct mac_adapter *adapter, u16 offset, u32 *value)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 cnt;
+	u32 ret;
+
+	cnt = 10000;
+	while ((MAC_REG_R8(LTECOEX_ACCESS_CTRL + 3) & BIT(5)) == 0) {
+		if (cnt == 0) {
+			PLTFM_MSG_ERR("[ERR]lte ready(R)\n");
+			return MACHWERR;
+		}
+		cnt--;
+		PLTFM_DELAY_US(50);
+	}
+
+	MAC_REG_W32(LTECOEX_ACCESS_CTRL, 0x800F0000 | offset);
+	*value = MAC_REG_R32(REG_WL2LTECOEX_INDIRECT_ACCESS_READ_DATA_V1);
+
+	return MACSUCCESS;
+}
+
+static u32
+ltecoex_reg_write(struct mac_adapter *adapter, u16 offset, u32 value)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 cnt;
+	u32 ret;
+
+	cnt = 10000;
+	while ((MAC_REG_R8(LTECOEX_ACCESS_CTRL + 3) & BIT(5)) == 0) {
+		if (cnt == 0) {
+			PLTFM_MSG_ERR("[ERR]lte ready(W)\n");
+			return MACHWERR;
+		}
+		cnt--;
+		PLTFM_DELAY_US(50);
+	}
+
+	MAC_REG_W32(REG_WL2LTECOEX_INDIRECT_ACCESS_WRITE_DATA_V1, value);
+	MAC_REG_W32(LTECOEX_ACCESS_CTRL, 0xC00F0000 | offset);
+
+	return MACSUCCESS;
+}
+
 u32 mac_enable_fw(struct mac_adapter *adapter)
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
@@ -757,6 +805,7 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 	u8 value8;
 	u32 chip_id, cv;
 	u32 bckp_idx = 0;
+	u32 lte_coex_backup = 0;
 	u32 ret = MACSUCCESS;
 
 	/* for efuse hidden rpt */
@@ -765,6 +814,12 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 	ret = wait_txfifo_empty(adapter);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR]%s: wait_txfifo_empty fail\n", __func__);
+		return ret;
+	}
+
+	ret = ltecoex_reg_read(adapter, 0x38, &lte_coex_backup);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR]%s: ltecoex_reg_read fail\n", __func__);
 		return ret;
 	}
 
@@ -828,6 +883,12 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 	ret = dlfw_end_flow(adapter);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]%s: dlfw_end_flow fail\n", __func__);
+		return ret;
+	}
+
+	ret = ltecoex_reg_write(adapter, 0x38, lte_coex_backup);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR]%s: ltecoex_reg_write fail\n", __func__);
 		return ret;
 	}
 

@@ -785,87 +785,8 @@ u8 rtw_set_hal_ops(_adapter *padapter)
 	if (rtw_hal_data_init(padapter) == _FAIL)
 		return _FAIL;
 
-#ifdef CONFIG_RTL8188E
-	if (rtw_get_chip_type(padapter) == RTL8188E)
-		rtl8188eu_set_hal_ops(padapter);
-#endif
-
-#if defined(CONFIG_RTL8812A) || defined(CONFIG_RTL8821A)
-	if (rtw_get_chip_type(padapter) == RTL8812 || rtw_get_chip_type(padapter) == RTL8821)
-		rtl8812au_set_hal_ops(padapter);
-#endif
-
-#ifdef CONFIG_RTL8192E
-	if (rtw_get_chip_type(padapter) == RTL8192E)
-		rtl8192eu_set_hal_ops(padapter);
-#endif
-#ifdef CONFIG_RTL8723B
-	if (rtw_get_chip_type(padapter) == RTL8723B)
-		rtl8723bu_set_hal_ops(padapter);
-#endif
-#ifdef CONFIG_RTL8814A
-	if (rtw_get_chip_type(padapter) == RTL8814A)
-		rtl8814au_set_hal_ops(padapter);
-#endif /* CONFIG_RTL8814A */
-
-#ifdef CONFIG_RTL8188F
-	if (rtw_get_chip_type(padapter) == RTL8188F)
-		rtl8188fu_set_hal_ops(padapter);
-#endif
-
-#ifdef CONFIG_RTL8188GTV
-	if (rtw_get_chip_type(padapter) == RTL8188GTV)
-		rtl8188gtvu_set_hal_ops(padapter);
-#endif
-
-#ifdef CONFIG_RTL8703B
-	if (rtw_get_chip_type(padapter) == RTL8703B)
-		rtl8703bu_set_hal_ops(padapter);
-#endif /* CONFIG_RTL8703B */
-
-#ifdef CONFIG_RTL8822B
-	if (rtw_get_chip_type(padapter) == RTL8822B)
-		rtl8822bu_set_hal_ops(padapter);
-#endif /* CONFIG_RTL8822B */
-
-#ifdef CONFIG_RTL8723D
-	if (rtw_get_chip_type(padapter) == RTL8723D)
-		rtl8723du_set_hal_ops(padapter);
-#endif /* CONFIG_RTL8723D */
-
-
-#ifdef CONFIG_RTL8821C
-	if (rtw_get_chip_type(padapter) == RTL8821C) {
-		if (rtl8821cu_set_hal_ops(padapter) == _FAIL)
-			return _FAIL;
-	}
-#endif
-
-#ifdef CONFIG_RTL8710B
-	if (rtw_get_chip_type(padapter) == RTL8710B)
-		rtl8710bu_set_hal_ops(padapter);
-#endif /* CONFIG_RTL8710B */
-
-
-#ifdef CONFIG_RTL8192F
-	if (rtw_get_chip_type(padapter) == RTL8192F)
-		rtl8192fu_set_hal_ops(padapter);
-#endif
-
-#ifdef CONFIG_RTL8822C
 	if (rtw_get_chip_type(padapter) == RTL8822C)
 		rtl8822cu_set_hal_ops(padapter);
-#endif /* CONFIG_RTL8822C */
-
-#ifdef CONFIG_RTL8814B
-	if (rtw_get_chip_type(padapter) == RTL8814B)
-		rtl8814bu_set_hal_ops(padapter);
-#endif /* CONFIG_RTL8814B */
-
-#ifdef CONFIG_RTL8723F
-	if (rtw_get_chip_type(padapter) == RTL8723F)
-		rtl8723fu_set_hal_ops(padapter);
-#endif /* CONFIG_RTL8723F */
 
 	if (_FAIL == rtw_hal_ops_check(padapter))
 		return _FAIL;

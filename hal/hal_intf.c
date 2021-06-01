@@ -1120,15 +1120,6 @@ s32 c2h_handler(_adapter *adapter, u8 id, u8 seq, u8 plen, u8 *payload)
 		break;
 #endif
 
-#ifdef CONFIG_RTW_MAC_HIDDEN_RPT
-	case C2H_MAC_HIDDEN_RPT:
-		c2h_mac_hidden_rpt_hdl(adapter, payload, plen);
-		break;
-	case C2H_MAC_HIDDEN_RPT_2:
-		c2h_mac_hidden_rpt_2_hdl(adapter, payload, plen);
-		break;
-#endif
-
 	case C2H_DEFEATURE_DBG:
 		c2h_defeature_dbg_hdl(adapter, payload, plen);
 		break;
