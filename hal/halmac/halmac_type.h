@@ -68,6 +68,9 @@
 #define HALMAC_DBG_MONITOR_IO 0
 #endif
 
+//NEO
+#ifndef CALLED_FROM_PHL
+
 /* platform api */
 #define PLTFM_SDIO_CMD52_R(offset)                                             \
 	adapter->pltfm_api->SDIO_CMD52_READ(adapter->drv_adapter, offset)
@@ -136,9 +139,6 @@
 	adapter->pltfm_api->EVENT_INDICATION(adapter->drv_adapter, feature_id, \
 					     proc_status, buf, size)
 
-#if HALMAC_PLATFORM_WINDOWS
-#define PLTFM_MSG_PRINT	adapter->pltfm_api->MSG_PRINT
-#endif
 
 #define PLTFM_MSG_ALWAYS(...)                                                  \
 	adapter->pltfm_api->MSG_PRINT(adapter->drv_adapter, HALMAC_MSG_INIT,   \
@@ -171,6 +171,7 @@
 #define PLTFM_MSG_TRACE(...)	do {} while (0)
 #endif
 
+
 #else
 
 /* Disable debug msg  */
@@ -179,6 +180,8 @@
 #define PLTFM_MSG_TRACE(...)	do {} while (0)
 
 #endif
+
+#endif //NEO : CALLED_FROM_PHL
 
 #if HALMAC_DBG_MONITOR_IO
 #define PLTFM_MONITOR_READ(offset, byte, val, __func, __line)                  \

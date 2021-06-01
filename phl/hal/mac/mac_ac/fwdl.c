@@ -15,6 +15,11 @@
 
 #include "fwdl.h"
 
+//NEO
+#define CALLED_FROM_PHL
+#include "../../../../hal/halmac/halmac_type.h"
+#include "../../../../hal/hal_halmac.h"
+
 #define FWDL_WAIT_CNT 400000
 #define FWDL_SECTION_MAX_NUM 10
 #define FWDL_SECTION_CHKSUM_LEN	8
@@ -399,6 +404,63 @@ fail:
 	return ret;
 }
 
+static void
+update_fw_info(struct mac_adapter *adapter, u8 *fw_bin)
+{
+	struct rtw_hal_com_t *hal_com;
+	struct dvobj_priv *d;
+	struct halmac_adapter *halmac;
+	struct halmac_fw_version *info;
+
+	hal_com = (struct rtw_hal_com_t *)adapter->drv_adapter;
+	if (!hal_com) {
+		pr_info("%s NEO hal_com is NULL\n", __func__);
+		return;
+	}
+
+	d = hal_com->drv_priv;
+	if (!d) {
+		pr_info("%s NEO dvobj is NULL\n", __func__);
+		return;
+	}
+
+	halmac = dvobj_to_halmac(d);
+	if (!halmac) {
+		pr_info("%s NEO halmac_adapter is NULL\n", __func__);
+		return;
+	}
+
+	info = &halmac->fw_ver;
+	if (!info) {
+		pr_info("%s NEO halmac fw info is NULL\n", __func__);
+		return;
+	}
+
+	info->version =
+		rtk_le16_to_cpu(*((__le16 *)(fw_bin + WLAN_FW_HDR_VERSION)));
+	info->sub_version = *(fw_bin + WLAN_FW_HDR_SUBVERSION);
+	info->sub_index = *(fw_bin + WLAN_FW_HDR_SUBINDEX);
+	info->h2c_version = rtk_le16_to_cpu(*((__le16 *)(fw_bin +
+					    WLAN_FW_HDR_H2C_FMT_VER)));
+	info->build_time.month = *(fw_bin + WLAN_FW_HDR_MONTH);
+	info->build_time.date = *(fw_bin + WLAN_FW_HDR_DATE);
+	info->build_time.hour = *(fw_bin + WLAN_FW_HDR_HOUR);
+	info->build_time.min = *(fw_bin + WLAN_FW_HDR_MIN);
+	info->build_time.year =
+		rtk_le16_to_cpu(*((__le16 *)(fw_bin + WLAN_FW_HDR_YEAR)));
+
+	PLTFM_MSG_TRACE("[TRACE]=== FW info ===\n");
+	PLTFM_MSG_TRACE("[TRACE]ver : %X\n", info->version);
+	PLTFM_MSG_TRACE("[TRACE]sub-ver : %X\n",
+			info->sub_version);
+	PLTFM_MSG_TRACE("[TRACE]sub-idx : %X\n",
+			info->sub_index);
+	PLTFM_MSG_TRACE("[TRACE]build : %d/%d/%d %d:%d\n",
+			info->build_time.year, info->build_time.month,
+			info->build_time.date, info->build_time.hour,
+			info->build_time.min);
+}
+
 static u32 
 start_dlfw_88xx(struct mac_adapter *adapter, u8 *fw_bin, u32 size)
 {
@@ -456,9 +518,7 @@ DLFW_EMEM:
 			return ret;
 	}
 
-#if 0 //NEO
-	update_fw_info_88xx(adapter, fw_bin);
-#endif //NEO
+	update_fw_info(adapter, fw_bin);
 
 	return ret;
 }

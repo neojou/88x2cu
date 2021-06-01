@@ -149,6 +149,9 @@
 #define SS_STAT_ULRU		BIT(12)
 #define SS_STAT_DLTX		BIT(13)
 
+// NEO
+#ifndef CALLED_FROM_HAL
+
 #ifdef CONFIG_NEW_HALMAC_INTERFACE
 #define PLTFM_MSG_ALWAYS(...)                                                  \
 	_os_dbgdump("[MAC][ERR] " fmt, ##__VA_ARGS__)
@@ -156,6 +159,7 @@
 #define PLTFM_MSG_ALWAYS(...)                                                  \
 	adapter->pltfm_cb->msg_print(adapter->drv_adapter,  __VA_ARGS__)
 #endif
+
 
 #if MAC_AX_DBG_MSG_EN
 
@@ -215,6 +219,8 @@
 #define PLTFM_MSG_WARN(...)	do {} while (0)
 #define PLTFM_MSG_TRACE(...)	do {} while (0)
 
-#endif
+#endif /* MAC_AX_DBG_MSG_EN */
+
+#endif /* NEO: CALLED_FROM_HAL */
 
 #endif

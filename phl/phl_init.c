@@ -13,8 +13,10 @@
  *
  *****************************************************************************/
 #define _PHL_INIT_C_
+
 #include "phl_headers.h"
 //NEO
+#define CALLED_FROM_PHL
 #include "../hal/halmac/halmac_type.h"
 #include "../hal/hal_halmac.h"
 

@@ -18,6 +18,8 @@
 #include <hal_data.h>		/* GET_HAL_SPEC(), HAL_DATA_TYPE */
 #include "../hal_halmac.h"	/* HALMAC API */
 #include "rtl8822c.h"
+
+#define CALLED_FROM_HAL
 #include "../phl/phl_headers.h"
 #include "../phl/hal/hal_headers.h"
 

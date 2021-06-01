@@ -17,6 +17,7 @@
 #include <drv_types.h>		/* PADAPTER, struct dvobj_priv, SDIO_ERR_VAL8 and etc. */
 #include <hal_data.h>		/* efuse, PHAL_DATA_TYPE and etc. */
 #include "hal_halmac.h"		/* dvobj_to_halmac() and ect. */
+#define CALLED_FROM_HAL
 #include "../phl/phl_headers.h"
 #include "../phl/hal/hal_headers.h"
 
@@ -2553,20 +2554,20 @@ static int download_fw(struct dvobj_priv *d, u8 *fw, u32 fwsize, u8 re_dl)
 		}
 	}
 
-	//mac->halmac_state.dlfw_state = HALMAC_DLFW_NONE;
+	mac->halmac_state.dlfw_state = HALMAC_DLFW_NONE;
 	/* 5. Download Firmware */
-	//hal_status = rtw_hal_download_fw(phl_info->phl_com, hal_info);
-	//if (hal_status != RTW_HAL_STATUS_SUCCESS) {
-	status = api->halmac_download_firmware(mac, fw, fwsize);
-	if (status != HALMAC_RET_SUCCESS) {
+	hal_status = rtw_hal_download_fw(phl_info->phl_com, hal_info);
+	if (hal_status != RTW_HAL_STATUS_SUCCESS) {
+	//status = api->halmac_download_firmware(mac, fw, fwsize);
+	//if (status != HALMAC_RET_SUCCESS) {
 		RTW_ERR("%s: download firmware FAIL! status=0x%02x\n",
-			__FUNCTION__, status);
-			//__FUNCTION__, hal_status);
+			__FUNCTION__, hal_status);
+			//__FUNCTION__, status);
 		_debug_dlfw_fail(d);
 		err = -1;
 		goto resume_tx;
 	}
-	//mac->halmac_state.dlfw_state = HALMAC_DLFW_DONE;
+	mac->halmac_state.dlfw_state = HALMAC_DLFW_DONE;
 	
 
 	/* 5.1. (Driver) Reset driver variables if needed */
