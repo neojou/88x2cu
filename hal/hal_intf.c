@@ -45,36 +45,6 @@ void rtw_hal_chip_configure(_adapter *padapter)
 	padapter->hal_func.intf_chip_configure(padapter);
 }
 
-/*
- * Description:
- *	Read chip internal ROM data
- *
- * Return:
- *	_SUCCESS success
- *	_FAIL	 fail
- */
-u8 rtw_hal_read_chip_info(_adapter *padapter)
-{
-	u8 rtn = _SUCCESS;
-	u8 hci_type = rtw_get_intf_type(padapter);
-	systime start = rtw_get_current_time();
-
-	/*  before access eFuse, make sure card enable has been called */
-	if ((hci_type == RTW_SDIO || hci_type == RTW_GSPI)
-	    && !rtw_is_hw_init_completed(padapter))
-		rtw_hal_power_on(padapter);
-
-	rtn = padapter->hal_func.read_adapter_info(padapter);
-
-	if ((hci_type == RTW_SDIO || hci_type == RTW_GSPI)
-	    && !rtw_is_hw_init_completed(padapter))
-		rtw_hal_power_off(padapter);
-
-	RTW_INFO("%s in %d ms\n", __func__, rtw_get_passing_time_ms(start));
-
-	return rtn;
-}
-
 static void rtw_init_wireless_mode(_adapter *padapter)
 {
 	u8 proto_wireless_mode = 0;
@@ -1838,10 +1808,6 @@ u8 rtw_hal_ops_check(_adapter *padapter)
 	}
 	if (NULL == padapter->hal_func.intf_chip_configure) {
 		rtw_hal_error_msg("intf_chip_configure");
-		ret = _FAIL;
-	}
-	if (NULL == padapter->hal_func.read_adapter_info) {
-		rtw_hal_error_msg("read_adapter_info");
 		ret = _FAIL;
 	}
 

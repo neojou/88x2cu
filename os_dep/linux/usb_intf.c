@@ -1199,9 +1199,17 @@ _adapter *rtw_usb_primary_adapter_init(struct dvobj_priv *dvobj,
 #endif
 	rtw_btcoex_wifionly_initialize(padapter);
 
-	/* step read efuse/eeprom data and get mac_addr */
-	if (rtw_hal_read_chip_info(padapter) == _FAIL)
-		goto free_hal_data;
+	/* LED */
+	{
+	
+	struct led_priv *ledpriv = adapter_to_led(padapter);
+	PHAL_DATA_TYPE hal;
+
+	hal = GET_HAL_DATA(padapter);
+	ledpriv->bRegUseLed = _TRUE;
+	hal->CustomerID = RT_CID_DEFAULT;
+	ledpriv->LedStrategy = 12;
+	}
 
 	/* step 5. */
 	if (rtw_init_drv_sw(padapter) == _FAIL) {

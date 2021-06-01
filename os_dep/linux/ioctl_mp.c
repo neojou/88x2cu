@@ -3325,7 +3325,6 @@ int rtw_mp_SetBT(struct net_device *dev,
 		rtw_btcoex_SetManualControl(padapter, _FALSE);
 		rtw_btcoex_Initialize(padapter);
 #endif
-		pHalFunc->read_adapter_info(padapter);
 		pHalFunc->hal_deinit(padapter);
 		pHalFunc->hal_init(padapter);
 		rtw_pm_set_ips(padapter, IPS_NONE);

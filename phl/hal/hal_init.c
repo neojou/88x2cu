@@ -1169,7 +1169,7 @@ u32 rtw_hal_hci_cfg(struct rtw_phl_com_t *phl_com, void *hal,
 	return hal_status;
 }
 
-u32 rtw_hal_g6_read_chip_info(struct rtw_phl_com_t *phl_com, void *hal)
+u32 rtw_hal_read_chip_info(struct rtw_phl_com_t *phl_com, void *hal)
 {
 	enum rtw_hal_status hal_status = RTW_HAL_STATUS_SUCCESS;
 	struct hal_info_t *hal_info = (struct hal_info_t *)hal;

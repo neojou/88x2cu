@@ -68,7 +68,7 @@ bool rtw_hal_is_inited(struct rtw_phl_com_t *phl_com, void *hal);
 
 u32 rtw_hal_hci_cfg(struct rtw_phl_com_t *phl_com, void *hal,
 					struct rtw_ic_info *ic_info);
-u32 rtw_hal_g6_read_chip_info(struct rtw_phl_com_t *phl_com, void *hal);
+u32 rtw_hal_read_chip_info(struct rtw_phl_com_t *phl_com, void *hal);
 
 void rtw_hal_set_default_var(void *hal);
 

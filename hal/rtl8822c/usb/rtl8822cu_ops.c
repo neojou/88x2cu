@@ -204,44 +204,6 @@ static void read_ledsetting(PADAPTER adapter)
 #endif /* CONFIG_RTW_LED */
  
 
-/*
- * Description:
- *	Collect all hardware information, fill "HAL_DATA_TYPE".
- *	Sometimes this would be used to read MAC address.
- *	This function will do
- *	1. Read Efuse/EEPROM to initialize
- *	2. Read registers to initialize
- *	3. Other vaiables initialization
- */
-static u8 read_adapter_info(PADAPTER padapter)
-{
-	u8 ret = _FAIL;
-
-	/*
-	 * 1. Read Efuse/EEPROM to initialize
-	 */
-	if (rtl8822c_read_efuse(padapter) != _SUCCESS)
-		goto exit;
-
-	/*
-	 * 2. Read registers to initialize
-	 */
-
-	/*
-	 * 3. Other Initialization
-	 */
-
-#ifdef CONFIG_RTW_LED
-	read_ledsetting(padapter);
-#endif /* CONFIG_RTW_LED */
-
-	ret = _SUCCESS;
-
-exit:
-	return ret;
-}
-
-
 void rtl8822cu_set_hal_ops(PADAPTER padapter)
 {
 	struct hal_ops *ops;
@@ -274,7 +236,6 @@ void rtl8822cu_set_hal_ops(PADAPTER padapter)
 
 	ops->init_default_value = rtl8822cu_init_default_value;
 	ops->intf_chip_configure = rtl8822cu_interface_configure;
-	ops->read_adapter_info = read_adapter_info;
 
 	ops->set_hw_reg_handler = sethwreg;
 	ops->GetHwRegHandler = gethwreg;

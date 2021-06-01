@@ -4440,31 +4440,20 @@ static s32 rtw_mp_cmd_hdl(_adapter *padapter, u8 mp_cmd_id)
 
 	if (mp_cmd_id == MP_START) {
 		if (padapter->registrypriv.mp_mode == 0) {
+			padapter->registrypriv.mp_mode = 1;
 #if 0
 			rtw_hw_stop(dvobj);
-			rtk_hal_deinit(padapter);
 			padapter->registrypriv.mp_mode = 1;
-#ifdef CONFIG_BT_COEXIST
-		padapter->mppriv.CureFuseBTCoex = pHalData->EEPROMBluetoothCoexist;
-		pHalData->EEPROMBluetoothCoexist = _FALSE;
-#endif
-#ifdef CONFIG_RF_POWER_TRIM
-			if (!IS_HARDWARE_TYPE_8814A(padapter) && !IS_HARDWARE_TYPE_8822B(padapter) && !IS_HARDWARE_TYPE_8822C(padapter)) {
-				padapter->registrypriv.RegPwrTrimEnable = 1;
-				rtw_hal_read_chip_info(padapter);
-			}
-#endif /*CONFIG_RF_POWER_TRIM*/
 			rtw_reset_drv_sw(padapter);
-			if (!rtw_is_hw_init_completed(padapter)) {
-				status = rtk_hal_init(padapter);
+			if (!rtw_hw_is_init_completed(dvobj)) {
+				status = rtw_hw_start(dvobj);
 				if (status == _FAIL) {
 					ret = H2C_REJECTED;
 					goto exit;
 				}
-				rtw_hal_iface_init(padapter);
+				rtw_hw_iface_init(padapter);
 			}
 #endif
-			padapter->registrypriv.mp_mode = 1;
 			MPT_InitializeAdapter(padapter, 1);
 		}
 

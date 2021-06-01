@@ -283,7 +283,6 @@ struct hal_ops {
 	/*** initialize section ***/
 	void	(*init_default_value)(_adapter *padapter);
 	void	(*intf_chip_configure)(_adapter *padapter);
-	u8	(*read_adapter_info)(_adapter *padapter);
 	u32(*hal_power_on)(_adapter *padapter);
 	void	(*hal_power_off)(_adapter *padapter);
 	u32(*hal_init)(_adapter *padapter);
@@ -301,8 +300,6 @@ struct hal_ops {
 	#if defined (CONFIG_CONCURRENT_MODE)  && defined (CONFIG_TSF_SYNC)
 	void(*tsf_sync)(_adapter *Adapter);
 	#endif
-	void	(*run_thread)(_adapter *padapter);
-	void	(*cancel_thread)(_adapter *padapter);
 
 	/*** recv section ***/
 	s32(*init_recv_priv)(_adapter *padapter);
@@ -706,7 +703,6 @@ u8 rtw_hal_set_hwreg(PADAPTER padapter, u8 variable, u8 *val);
 void rtw_hal_get_hwreg(PADAPTER padapter, u8 variable, u8 *val);
 
 void rtw_hal_chip_configure(_adapter *padapter);
-u8 rtw_hal_read_chip_info(_adapter *padapter);
 
 u8 rtw_hal_set_def_var(_adapter *padapter, HAL_DEF_VARIABLE eVariable, void *pValue);
 u8 rtw_hal_get_def_var(_adapter *padapter, HAL_DEF_VARIABLE eVariable, void *pValue);

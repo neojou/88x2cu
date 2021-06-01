@@ -7817,16 +7817,6 @@ static int rtw_mp_efuse_set(struct net_device *dev,
 			strcpy(pmp_priv->efuse_file_path , tmp[1]);
 			RTW_INFO("Got file path %s\n", pmp_priv->efuse_file_path);
 		}
-		/*step read efuse/eeprom data and get mac_addr*/
-		if (padapter->hal_func.read_adapter_info(padapter)) {
-			_rtw_memset(extra, '\0', strlen(extra));
-			sprintf(extra, "eFuse Update OK\n");
-			RTW_INFO("eFuse Update OK\n");
-		} else {
-			_rtw_memset(extra, '\0', strlen(extra));
-			sprintf(extra, "eFuse Update FAIL\n");
-			RTW_INFO("eFuse Update FAIL\n");
-		}
 		pmp_priv->efuse_update_file = _FALSE;
 		RTW_INFO("To Use new eFuse map done ver3\n");
 	} else if (strcmp(tmp[0], "analyze") == 0) {
