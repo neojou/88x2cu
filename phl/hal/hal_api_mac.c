@@ -3197,6 +3197,7 @@ rtw_hal_mac_fwdl(struct hal_info_t *hal_info, u8 *fw_buf, u32 fw_size)
 
 	return RTW_HAL_STATUS_SUCCESS;
 }
+#endif // if 0 NEO
 
 enum rtw_hal_status
 rtw_hal_mac_enable_fw(struct hal_info_t *hal_info, u8 fw_type)
@@ -3204,15 +3205,13 @@ rtw_hal_mac_enable_fw(struct hal_info_t *hal_info, u8 fw_type)
 	struct mac_adapter *mac = hal_to_mac(hal_info);
 	u32 mac_err;
 
-	mac_err = mac->ops->enable_fw(mac, fw_type);
+	mac_err = mac->ops->enable_fw(mac);
 	if (mac_err != MACSUCCESS) {
 		PHL_ERR("%s : mac status %d.\n", __func__, mac_err);
 		return RTW_HAL_STATUS_FAILURE;
 	}
 	return RTW_HAL_STATUS_SUCCESS;
 }
-
-#endif // if 0 NEO
 
 void hal_mac_fill_txpkt_info(struct rtw_xmit_req *treq,
 				struct mac_txpkt_info *txpkt_info)
