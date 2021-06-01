@@ -650,9 +650,6 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
-	/* for efuse hidden rpt */
-	MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
-
 	ret = mac_ops->enable_fw(adapter); // RTW_FW_NIC
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]enable_fw %d\n", ret);
@@ -673,65 +670,6 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 
 
 #if 0 //NEO
-	if (fwdl_info->fw_en) {
-		if (fwdl_info->dlrom_en || fwdl_info->dlram_en) {
-			ret = fwdl_pre_init(adapter, trx_info->qta_mode);
-			if (ret != MACSUCCESS) {
-				PLTFM_MSG_ERR("[ERR]fwdl_pre_init %d\n", ret);
-				return ret;
-			}
-		}
-		if (fwdl_info->dlrom_en) {
-			switch (hw_info->chip_id) {
-			case MAC_AX_CHIP_ID_8852A:
-				rom_addr = RTL8852A_ROM_ADDR;
-				break;
-			case MAC_AX_CHIP_ID_8852B:
-				rom_addr = RTL8852B_ROM_ADDR;
-				break;
-			default:
-				PLTFM_MSG_ERR("[ERR]chip id\n");
-				return MACNOITEM;
-			}
-			ret = ops->romdl(adapter,
-					 fwdl_info->rom_buff,
-					 rom_addr,
-					 fwdl_info->rom_size);
-			if (ret != MACSUCCESS) {
-				PLTFM_MSG_ERR("[ERR]romdl %d\n", ret);
-				return ret;
-			}
-		}
-
-		if (fwdl_info->dlram_en) {
-			if (fwdl_info->fw_from_hdr) {
-				ret = ops->enable_fw(adapter,
-						     fwdl_info->fw_cat);
-				if (ret != MACSUCCESS) {
-					PLTFM_MSG_ERR("[ERR]enable_fw %d\n",
-						      ret);
-					return ret;
-				}
-			} else {
-				ret = ops->enable_cpu(adapter, 0,
-						      fwdl_info->dlram_en);
-				if (ret != MACSUCCESS) {
-					PLTFM_MSG_ERR("[ERR]enable_cpu %d\n",
-						      ret);
-					return ret;
-				}
-
-				ret = ops->fwdl(adapter,
-						fwdl_info->ram_buff,
-						fwdl_info->ram_size);
-				if (ret != MACSUCCESS) {
-					PLTFM_MSG_ERR("[ERR]fwdl %d\n", ret);
-					return ret;
-				}
-			}
-		}
-	}
-
 	ret = set_enable_bb_rf(adapter, MAC_AX_FUNC_EN);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]set_enable_bb_rf %d\n", ret);
@@ -839,6 +777,9 @@ u32 mac_hal_fast_init(struct mac_adapter *adapter,
 		PLTFM_MSG_ERR("[ERR]intf_pre_init %d\n", ret);
 		return ret;
 	}
+
+	/* for efuse hidden rpt */
+	MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
 
 	ret = mac_ops->enable_fw(adapter); // RTW_FW_NIC
 	if (ret != MACSUCCESS) {

@@ -766,9 +766,6 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 	u32 ret;
 
-	/* for efuse hidden rpt */
-	MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
-
 	ret = wait_txfifo_empty(adapter);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR]%s: wait_txfifo_empty fail\n", __func__);
