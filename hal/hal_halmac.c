@@ -17,6 +17,8 @@
 #include <drv_types.h>		/* PADAPTER, struct dvobj_priv, SDIO_ERR_VAL8 and etc. */
 #include <hal_data.h>		/* efuse, PHAL_DATA_TYPE and etc. */
 #include "hal_halmac.h"		/* dvobj_to_halmac() and ect. */
+#include "../phl/phl_headers.h"
+#include "../phl/hal/hal_headers.h"
 
 /*
  * HALMAC take return value 0 for fail and 1 for success to replace
@@ -2506,11 +2508,14 @@ static void _init_trx_cfg_drv(struct dvobj_priv *d)
  */
 static int download_fw(struct dvobj_priv *d, u8 *fw, u32 fwsize, u8 re_dl)
 {
-	PHAL_DATA_TYPE hal;
 	struct halmac_adapter *mac;
 	struct halmac_api *api;
 	struct halmac_fw_version fw_vesion;
+	struct phl_info_t *phl_info = d->phl;
+	struct hal_info_t *hal_info = phl_info->hal;
 	enum halmac_ret_status status;
+	enum rtw_hal_status hal_status;
+	PHAL_DATA_TYPE hal;
 	int err = 0;
 
 
@@ -2548,15 +2553,21 @@ static int download_fw(struct dvobj_priv *d, u8 *fw, u32 fwsize, u8 re_dl)
 		}
 	}
 
+	//mac->halmac_state.dlfw_state = HALMAC_DLFW_NONE;
 	/* 5. Download Firmware */
+	//hal_status = rtw_hal_download_fw(phl_info->phl_com, hal_info);
+	//if (hal_status != RTW_HAL_STATUS_SUCCESS) {
 	status = api->halmac_download_firmware(mac, fw, fwsize);
 	if (status != HALMAC_RET_SUCCESS) {
 		RTW_ERR("%s: download firmware FAIL! status=0x%02x\n",
 			__FUNCTION__, status);
+			//__FUNCTION__, hal_status);
 		_debug_dlfw_fail(d);
 		err = -1;
 		goto resume_tx;
 	}
+	//mac->halmac_state.dlfw_state = HALMAC_DLFW_DONE;
+	
 
 	/* 5.1. (Driver) Reset driver variables if needed */
 	hal->LastHMEBoxNum = 0;

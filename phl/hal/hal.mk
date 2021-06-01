@@ -29,7 +29,8 @@ _HAL_FILES :=	$(phl_path)$(HAL)/hal_api_mac.o \
 			$(phl_path)$(HAL)/hal_ser.o \
 			$(phl_path)$(HAL)/hal_api.o \
 			$(phl_path)$(HAL)/hal_notify.o \
-			$(phl_path)$(HAL)/hal_ld_file.o
+			$(phl_path)$(HAL)/hal_ld_file.o \
+			$(phl_path)$(HAL)/hal_fw.o
 
 ifeq ($(CONFIG_PCI_HCI), y)
 _HAL_FILES += $(phl_path)$(HAL)/hal_pci.o

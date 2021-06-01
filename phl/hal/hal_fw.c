@@ -144,7 +144,7 @@ rtw_hal_download_fw(struct rtw_phl_com_t *phl_com, void *hal)
 
 	hal_status = rtw_hal_mac_enable_fw(hal_info, fw_info->fw_type);
 
-	_hal_send_fwdl_hub_msg(phl_com, (!hal_status) ? true : false);
+	//_hal_send_fwdl_hub_msg(phl_com, (!hal_status) ? true : false);
 
 	FUNCOUT_WSTS(hal_status);
 

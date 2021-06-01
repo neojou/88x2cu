@@ -463,30 +463,6 @@ DLFW_EMEM:
 	return ret;
 }
 
-u32 mac_fwdl(struct mac_adapter *adapter)
-{
-	u8 *fw = array_8822c_nic;
-	u32 len = array_length_8822c_nic;
-	u32 ret;
-
-	if (len < WLAN_FW_HDR_SIZE) {
-		PLTFM_MSG_ERR("[ERR]FW size error!\n");
-		return MACBUFSZ;
-	}
-
-	ret = start_dlfw_88xx(adapter, fw, len);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR] start_dlfw_88xx failed\n");
-		goto fwdl_err;
-	}
-
-	pr_info("%s FW DL success\n", __func__);
-	return MACSUCCESS;
-
-fwdl_err:
-	return ret;
-}
-
 u32 mac_enable_cpu(struct mac_adapter *adapter, u8 boot_reason, u8 dlfw)
 {
 	u32 val32, ret;
@@ -530,107 +506,6 @@ u32 mac_disable_cpu(struct mac_adapter *adapter)
 
 	return MACSUCCESS;
 }
-
-#if 0 //NEO
-
-u32 mac_romdl(struct mac_ax_adapter *adapter, u8 *ROM, u32 ROM_addr, u32 len)
-{
-	u8 *content = NULL;
-	u32 val32, ret;
-	struct mac_ax_intf_ops *ops = adapter_to_intf_ops(adapter);
-
-	ret = mac_disable_cpu(adapter);
-	if (ret)
-		return ret;
-
-	if (!ROM)
-		return MACNOITEM;
-
-	val32 = MAC_REG_R32(R_AX_SEC_CTRL);
-
-	if (val32 & BIT(0)) {
-		ret = __write_memory(adapter, ROM, ROM_addr, len);
-		if (ret)
-			return ret;
-	} else {
-		PLTFM_MSG_ERR("[ERR]%s: __write_memory fail\n", __func__);
-		return MACSECUREON;
-	}
-
-	PLTFM_FREE(content, len);
-
-	return MACSUCCESS;
-}
-
-u32 mac_ram_boot(struct mac_ax_adapter *adapter, u8 *fw, u32 len)
-{
-	u32 addr;
-	u32 ret, section_num;
-	struct fw_bin_info info;
-	struct fwhdr_section_info *section_info;
-	struct mac_ax_intf_ops *ops = adapter_to_intf_ops(adapter);
-
-	ret = mac_disable_cpu(adapter);
-	if (ret)
-		goto fwdl_err;
-
-	ret = fwhdr_parser(adapter, fw, len, &info);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR]%s: fwhdr_parser fail\n", __func__);
-		goto fwdl_err;
-	}
-
-	ret = update_fw_ver(adapter, (struct fwhdr_hdr_t *)fw);
-	if (ret)
-		goto fwdl_err;
-
-	section_num = info.section_num;
-	section_info = info.section_info;
-
-	while (section_num > 0) {
-		ret = __write_memory(adapter, section_info->addr,
-				     section_info->dladdr, section_info->len);
-		if (ret)
-			goto fwdl_err;
-
-		section_info++;
-		section_num--;
-	}
-
-	addr = (0xb8003000 + R_AX_CPU_BOOT_ADDR) & 0x1FFFFFFF;
-	PLTFM_MSG_ERR("%s ind access 0x%X start\n", __func__, addr);
-	PLTFM_MUTEX_LOCK(&adapter->hw_info->ind_access_lock);
-	adapter->hw_info->ind_aces_cnt++;
-	MAC_REG_W32(R_AX_FILTER_MODEL_ADDR, addr);
-	MAC_REG_W32(R_AX_INDIR_ACCESS_ENTRY, (info.section_info[0].dladdr) |
-					      0xA0000000);
-	adapter->hw_info->ind_aces_cnt--;
-	PLTFM_MUTEX_UNLOCK(&adapter->hw_info->ind_access_lock);
-	PLTFM_MSG_ERR("%s ind access 0x%X end\n", __func__, addr);
-
-	ret = mac_enable_cpu(adapter, AX_BOOT_REASON_PWR_ON, 0);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR]%s: mac_enable_cpu fail\n", __func__);
-		goto fwdl_err;
-	}
-
-	PLTFM_DELAY_MS(10);
-
-	ret = check_fw_rdy(adapter);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR]%s: check_fw_rdy fail\n", __func__);
-		goto fwdl_err;
-	}
-	return MACSUCCESS;
-
-fwdl_err:
-	fwdl_fail_dump(adapter, &info, ret);
-
-	return ret;
-}
-
-#endif //NEO
-
 
 static void
 pltfm_reset_88xx(struct mac_adapter *adapter)
@@ -798,7 +673,7 @@ ltecoex_reg_write(struct mac_adapter *adapter, u16 offset, u32 value)
 	return MACSUCCESS;
 }
 
-u32 mac_enable_fw(struct mac_adapter *adapter)
+u32 mac_fwdl(struct mac_adapter *adapter)
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 	struct halmac_backup_info bckp[DLFW_RESTORE_REG_NUM];
@@ -807,15 +682,6 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 	u32 bckp_idx = 0;
 	u32 lte_coex_backup = 0;
 	u32 ret = MACSUCCESS;
-
-	/* for efuse hidden rpt */
-	MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
-
-	ret = wait_txfifo_empty(adapter);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR]%s: wait_txfifo_empty fail\n", __func__);
-		return ret;
-	}
 
 	ret = ltecoex_reg_read(adapter, 0x38, &lte_coex_backup);
 	if (ret) {
@@ -873,15 +739,15 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 
 	pltfm_reset_88xx(adapter);
 
-	ret = mac_fwdl(adapter);
+	ret = start_dlfw_88xx(adapter, array_8822c_nic, array_length_8822c_nic);
 	restore_mac_reg(adapter, bckp, DLFW_RESTORE_REG_NUM);
-	if (ret != MACSUCCESS) {
-		PLTFM_MSG_ERR("[ERR]%s: mac_enable_cpu fail\n", __func__);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR] start_dlfw_88xx failed\n");
 		return ret;
 	}
 
 	ret = dlfw_end_flow(adapter);
-	if (ret != MACSUCCESS) {
+	if (ret) {
 		PLTFM_MSG_ERR("[ERR]%s: dlfw_end_flow fail\n", __func__);
 		return ret;
 	}
@@ -889,6 +755,29 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 	ret = ltecoex_reg_write(adapter, 0x38, lte_coex_backup);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR]%s: ltecoex_reg_write fail\n", __func__);
+		return ret;
+	}
+
+	return ret;
+}
+
+u32 mac_enable_fw(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 ret;
+
+	/* for efuse hidden rpt */
+	MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
+
+	ret = wait_txfifo_empty(adapter);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR]%s: wait_txfifo_empty fail\n", __func__);
+		return ret;
+	}
+
+	ret = mac_fwdl(adapter);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR]%s: mac_fwdl fail\n", __func__);
 		return ret;
 	}
 
