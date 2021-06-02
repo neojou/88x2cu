@@ -3341,7 +3341,6 @@ void rtl8822c_set_hal_ops(PADAPTER adapter)
 	 * Initialize operation callback functions
 	 */
 	/*** initialize section ***/
-	ops->hal_power_on = rtl8822c_power_on;
 	ops->hal_power_off = rtl8822c_power_off;
 	ops->hal_init = rtl8822c_init;
 	ops->hal_deinit = rtl8822c_deinit;

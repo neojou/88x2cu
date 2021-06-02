@@ -18,6 +18,10 @@
 #include <drv_types.h>
 #include <hal_data.h>
 
+#define CALLED_FROM_HAL
+#include "../phl/phl_headers.h"
+#include "../phl/hal/hal_headers.h"
+
 const u32 _chip_type_to_odm_ic_type[] = {
 	0,
 	ODM_RTL8188E,
@@ -397,17 +401,39 @@ void rtw_hal_sw_led_deinit(_adapter *padapter)
 }
 #endif
 
-u32 rtw_hal_power_on(_adapter *padapter)
+u32 rtw_hal_power_on(_adapter *adapter)
 {
-	u32 ret = 0;
-	PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
+#ifdef CONFIG_BTC
+	PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapter);
+#endif
+	struct dvobj_priv *d = adapter_to_dvobj(adapter);
+	struct phl_info_t *phl_info = d->phl;
+	struct hal_info_t *hal_info = phl_info->hal;
+	enum rtw_hal_status hal_status;
+	u8 bMacPwrCtrlOn;
+	u32 ret = _SUCCESS;
 
-	ret = padapter->hal_func.hal_power_on(padapter);
+	bMacPwrCtrlOn = _FALSE;
+	rtw_hal_get_hwreg(adapter, HW_VAR_APFM_ON_MAC, &bMacPwrCtrlOn);
+	if (bMacPwrCtrlOn == _TRUE)
+		goto out;
+
+	hal_status = rtw_hal_mac_power_switch(phl_info->phl_com, hal_info, 1);
+	if (hal_status) {
+		RTW_ERR("%s: Power ON Fail!! %d\n", __FUNCTION__, (int)hal_status);
+		ret = _FAIL;
+		goto out;
+	}
+
+	bMacPwrCtrlOn = _TRUE;
+	rtw_hal_set_hwreg(adapter, HW_VAR_APFM_ON_MAC, &bMacPwrCtrlOn);
 
 #ifdef CONFIG_BTC
 	if ((ret == _SUCCESS) && (pHalData->EEPROMBluetoothCoexist == _TRUE))
 		rtw_btcoex_PowerOnSetting(padapter);
 #endif
+
+out:
 	return ret;
 }
 
@@ -1802,10 +1828,6 @@ u8 rtw_hal_ops_check(_adapter *padapter)
 		ret = _FAIL;
 	}
 
-	if (NULL == padapter->hal_func.hal_power_on) {
-		rtw_hal_error_msg("hal_power_on");
-		ret = _FAIL;
-	}
 	if (NULL == padapter->hal_func.hal_power_off) {
 		rtw_hal_error_msg("hal_power_off");
 		ret = _FAIL;

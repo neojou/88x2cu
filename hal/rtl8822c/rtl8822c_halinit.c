@@ -83,40 +83,6 @@ void rtl8822c_init_hal_spec(PADAPTER adapter)
 
 }
 
-u32 rtl8822c_power_on(PADAPTER adapter)
-{
-	struct dvobj_priv *d;
-	PHAL_DATA_TYPE hal;
-	u8 bMacPwrCtrlOn;
-	int err = 0;
-	u8 ret = _SUCCESS;
-	struct dvobj_priv *dvobj = adapter_to_dvobj(adapter);
-	struct phl_info_t *phl_info = dvobj->phl;
-	struct hal_info_t *hal_info = phl_info->hal;
-	enum rtw_hal_status hal_status;
-
-
-	d = adapter_to_dvobj(adapter);
-
-	bMacPwrCtrlOn = _FALSE;
-	rtw_hal_get_hwreg(adapter, HW_VAR_APFM_ON_MAC, &bMacPwrCtrlOn);
-	if (bMacPwrCtrlOn == _TRUE)
-		goto out;
-
-	hal_status = rtw_hal_mac_power_switch(phl_info->phl_com, hal_info, 1);
-	if (hal_status) {
-		RTW_ERR("%s: Power ON Fail!! %d\n", __FUNCTION__, (int)hal_status);
-		ret = _FAIL;
-		goto out;
-	}
-
-	bMacPwrCtrlOn = _TRUE;
-	rtw_hal_set_hwreg(adapter, HW_VAR_APFM_ON_MAC, &bMacPwrCtrlOn);
-
-out:
-	return ret;
-}
-
 void rtl8822c_power_off(PADAPTER adapter)
 {
 	struct dvobj_priv *d;
