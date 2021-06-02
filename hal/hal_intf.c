@@ -438,22 +438,38 @@ out:
 }
 
 
-void rtw_hal_power_off(_adapter *padapter)
+void rtw_hal_power_off(_adapter *adapter)
 {
-	struct macid_ctl_t *macid_ctl = &padapter->dvobj->macid_ctl;
+	struct macid_ctl_t *macid_ctl = &adapter->dvobj->macid_ctl;
+	struct dvobj_priv *d = adapter_to_dvobj(adapter);
+	struct phl_info_t *phl_info = d->phl;
+	struct hal_info_t *hal_info = phl_info->hal;
+	enum rtw_hal_status hal_status;
+	u8 bMacPwrCtrlOn;
 
 	_rtw_memset(macid_ctl->h2c_msr, 0, MACID_NUM_SW_LIMIT);
 	_rtw_memset(macid_ctl->op_num, 0, H2C_MSR_ROLE_MAX);
 
 #ifdef CONFIG_LPS_1T1R
-	GET_HAL_DATA(padapter)->lps_1t1r = 0;
+	GET_HAL_DATA(adapter)->lps_1t1r = 0;
 #endif
 
 #ifdef CONFIG_BTC
-	rtw_btcoex_PowerOffSetting(padapter);
+	rtw_btcoex_PowerOffSetting(adapter);
 #endif
 
-	padapter->hal_func.hal_power_off(padapter);
+	rtw_hal_get_hwreg(adapter, HW_VAR_APFM_ON_MAC, &bMacPwrCtrlOn);
+	if (bMacPwrCtrlOn == _TRUE)
+		return;
+
+	bMacPwrCtrlOn = _FALSE;
+	rtw_hal_set_hwreg(adapter, HW_VAR_APFM_ON_MAC, &bMacPwrCtrlOn);
+
+	hal_status = rtw_hal_mac_power_switch(phl_info->phl_com, hal_info, 0);
+	if (hal_status) {
+		RTW_ERR("%s: Power OFF Fail!! %d\n", __FUNCTION__, (int)hal_status);
+		return;
+	}
 }
 
 
@@ -1825,11 +1841,6 @@ u8 rtw_hal_ops_check(_adapter *padapter)
 	}
 	if (NULL == padapter->hal_func.intf_chip_configure) {
 		rtw_hal_error_msg("intf_chip_configure");
-		ret = _FAIL;
-	}
-
-	if (NULL == padapter->hal_func.hal_power_off) {
-		rtw_hal_error_msg("hal_power_off");
 		ret = _FAIL;
 	}
 
