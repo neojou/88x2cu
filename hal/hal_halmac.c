@@ -2558,11 +2558,8 @@ static int download_fw(struct dvobj_priv *d, u8 *fw, u32 fwsize, u8 re_dl)
 	/* 5. Download Firmware */
 	hal_status = rtw_hal_download_fw(phl_info->phl_com, hal_info);
 	if (hal_status != RTW_HAL_STATUS_SUCCESS) {
-	//status = api->halmac_download_firmware(mac, fw, fwsize);
-	//if (status != HALMAC_RET_SUCCESS) {
 		RTW_ERR("%s: download firmware FAIL! status=0x%02x\n",
 			__FUNCTION__, hal_status);
-			//__FUNCTION__, status);
 		_debug_dlfw_fail(d);
 		err = -1;
 		goto resume_tx;

@@ -15,6 +15,8 @@
 #ifndef _PHL_API_H_
 #define _PHL_API_H_
 
+struct mr_query_info;
+
 u8 rtw_phl_read8(void *phl, u32 addr);
 u16 rtw_phl_read16(void *phl, u32 addr);
 u32 rtw_phl_read32(void *phl, u32 addr);

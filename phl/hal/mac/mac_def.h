@@ -28,6 +28,8 @@
 #include "hv_type.h"
 #endif
 
+#ifndef CALLED_FROM_HAL
+
 /*--------------------Define -------------------------------------------*/
 #ifdef CONFIG_NEW_HALMAC_INTERFACE
 #define PLTFM_SDIO_CMD52_R8(addr)                                              \
@@ -222,7 +224,7 @@
 
 #define MAC_REG_W8_SET(offset, mask)					\
 	do {								\
-		u8 __offset = (u32)offset;				\
+		u32 __offset = (u32)offset;				\
 		MAC_REG_W8(__offset, MAC_REG_R8(__offset) | mask);	\
 	} while (0)
 
@@ -239,6 +241,8 @@
 	} while (0)
 
 #endif /*CONFIG_NEW_HALMAC_INTERFACE*/
+
+#endif /* CALLED_FROM_HAL */
 
 /*--------------------Define MACRO--------------------------------------*/
 #define MAC_AX_MAX_RU_NUM	4

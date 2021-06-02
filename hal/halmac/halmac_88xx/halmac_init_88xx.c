@@ -192,7 +192,6 @@ mount_api_88xx(struct halmac_adapter *adapter)
 
 	/* Mount function pointer */
 	api->halmac_register_api = register_api_88xx;
-	api->halmac_download_firmware = download_firmware_88xx;
 	api->halmac_free_download_firmware = free_download_firmware_88xx;
 	api->halmac_reset_wifi_fw = reset_wifi_fw_88xx;
 	api->halmac_get_fw_version = get_fw_version_88xx;

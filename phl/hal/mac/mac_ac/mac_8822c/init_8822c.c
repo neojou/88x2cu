@@ -435,7 +435,7 @@ static struct mac_hw_info mac8822c_hw_info = {
 	0, /* WD_INFO_LEN, */ /* wd_info_len */
 	pwr_on_seq_8822c, /* pwr_on_seq */
 	pwr_off_seq_8822c, /* pwr_off_seq */
-	NULL, /* PWR_SEQ_VER_8852A, */ /* pwr_seq_ver */
+	0, /* PWR_SEQ_VER_8852A, */ /* pwr_seq_ver */
 	262144, /* txff_size */
 	24576, /* rxff_size */
 	50, /* csi_buf_pg_num */
