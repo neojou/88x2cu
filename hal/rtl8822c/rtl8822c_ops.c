@@ -1353,10 +1353,11 @@ static u8 rx_agg_switch(PADAPTER adapter, u8 enable)
 {
 	int err;
 
+#if 0 //NEO
 	err = rtw_halmac_rx_agg_switch(adapter_to_dvobj(adapter), enable);
 	if (err)
 		return _FAIL;
-
+#endif //NEO
 	return _SUCCESS;
 }
 

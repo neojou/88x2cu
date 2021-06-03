@@ -2600,11 +2600,12 @@ resume_tx:
 			return -1;
 		_init_trx_cfg_drv(d);
 
+#if 0 //NEO
 		/* 9. Config RX Aggregation */
 		err = rtw_halmac_rx_agg_switch(d, _TRUE);
 		if (err)
 			return -1;
-
+#endif //NEO
 		/* 10. Send General Info */
 		err = _send_general_info(d);
 		if (err)
@@ -2679,9 +2680,11 @@ static int init_mac_flow(struct dvobj_priv *d)
 	_init_trx_cfg_drv(d);
 	/* Driver inser flow end */
 
+#if 0 //NEO
 	err = rtw_halmac_rx_agg_switch(d, _TRUE);
 	if (err)
 		goto out;
+#endif //NEO/
 
 	nettype = dvobj_to_regsty(d)->wireless_mode;
 	if (is_supported_vht(nettype) == _TRUE)
@@ -3747,6 +3750,7 @@ _exit:
 	return ret;
 }
 
+#if 0 //NEO
 /*
  * rtw_halmac_rx_agg_switch() - Switch RX aggregation function and setting
  * @d		struct dvobj_priv *
@@ -3828,6 +3832,7 @@ int rtw_halmac_rx_agg_switch(struct dvobj_priv *d, u8 enable)
 
 	return 0;
 }
+#endif //NEO
 
 int rtw_halmac_download_rsvd_page(struct dvobj_priv *dvobj, u8 pg_offset, u8 *pbuf, u32 size)
 {

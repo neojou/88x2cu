@@ -68,7 +68,9 @@ static u8 sethwreg(PADAPTER padapter, u8 variable, u8 *val)
 			pHalData->rxagg_usb_size = 0x05;
 #endif
 		}
-		rtw_halmac_rx_agg_switch(pdvobjpriv, _TRUE);
+//NEO
+//		rtw_halmac_rx_agg_switch(pdvobjpriv, _TRUE);
+
 #if 0
 		RTW_INFO("\n==========RAFFIC_STATISTIC==============\n");
 		RTW_INFO("cur_tx_bytes:%lld\n", pdvobjpriv->traffic_stat.cur_tx_bytes);
