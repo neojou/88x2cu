@@ -47,7 +47,6 @@ struct hw_port_reg {
 
 /* rtl8822c_halinit.c */
 void rtl8822c_init_hal_spec(PADAPTER);
-void rtl8822c_power_off(PADAPTER);
 u8 rtl8822c_hal_init(PADAPTER);
 void rtl8822c_init_misc(PADAPTER padapter);
 u32 rtl8822c_init(PADAPTER);
