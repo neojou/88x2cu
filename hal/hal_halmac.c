@@ -2734,15 +2734,20 @@ static int _drv_enable_trx(struct dvobj_priv *d)
 static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 {
 	PADAPTER adapter;
+	PHAL_DATA_TYPE hal;
 	struct halmac_adapter *halmac;
 	struct halmac_api *api;
+	struct halmac_fw_version fw_vesion;
+	struct phl_info_t *phl_info = d->phl;
+	struct hal_info_t *hal_info = phl_info->hal;
 	enum halmac_ret_status status;
+	enum rtw_hal_status hal_status;
 	u32 ok;
 	u8 fw_ok = _FALSE;
-	int err, err_ret = -1;
-
+	int err = 0, err_ret = -1;
 
 	adapter = dvobj_get_primary_adapter(d);
+	hal = GET_HAL_DATA(dvobj_get_primary_adapter(d));
 	halmac = dvobj_to_halmac(d);
 	if (!halmac)
 		goto out;
@@ -2760,9 +2765,29 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 
 	/* DownloadFW */
 	if (fw && fwsize) {
-		err = download_fw(d, fw, fwsize, 0);
-		if (err)
+		halmac->halmac_state.dlfw_state = HALMAC_DLFW_NONE;
+		/* 5. Download Firmware */
+		hal_status = rtw_hal_download_fw(phl_info->phl_com, hal_info);
+		if (hal_status != RTW_HAL_STATUS_SUCCESS) {
+			RTW_ERR("%s: download firmware FAIL! status=0x%02x\n",
+				__FUNCTION__, hal_status);
+			_debug_dlfw_fail(d);
+			err = -1;
 			goto out;
+		}
+		halmac->halmac_state.dlfw_state = HALMAC_DLFW_DONE;
+
+		/* 5.1. (Driver) Reset driver variables if needed */
+		hal->LastHMEBoxNum = 0;
+
+		/* 5.2. (Driver) Get FW version */
+		status = api->halmac_get_fw_version(halmac, &fw_vesion);
+		if (status == HALMAC_RET_SUCCESS) {
+			hal->firmware_version = fw_vesion.version;
+			hal->firmware_sub_version = fw_vesion.sub_version;
+			hal->firmware_size = fwsize;
+		}
+
 		fw_ok = _TRUE;
 	}
 
@@ -3130,35 +3155,6 @@ int rtw_halmac_dlfw(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 
 out:
 	return err_ret;
-}
-
-int rtw_halmac_dlfw_from_file(struct dvobj_priv *d, u8 *fwpath)
-{
-	u8 *fw = NULL;
-	u32 fwmaxsize = 0, size = 0;
-	int err = 0;
-
-
-	err = rtw_halmac_get_fw_max_size(d, &fwmaxsize);
-	if (err) {
-		RTW_ERR("%s: Fail to get Firmware MAX size(err=%d)\n", __FUNCTION__, err);
-		return -1;
-	}
-
-	fw = rtw_zmalloc(fwmaxsize);
-	if (!fw)
-		return -1;
-
-	size = rtw_retrieve_from_file(fwpath, fw, fwmaxsize);
-	if (size)
-		err = rtw_halmac_dlfw(d, fw, size);
-	else
-		err = -1;
-
-	rtw_mfree(fw, fwmaxsize);
-	/*fw = NULL;*/
-
-	return err;
 }
 
 /*
