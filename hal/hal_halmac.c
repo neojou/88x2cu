@@ -2601,17 +2601,6 @@ resume_tx:
 			return -1;
 		}
 
-		status = api->halmac_init_trx_cfg(mac, mode);
-		if (HALMAC_RET_SUCCESS != status)
-			return -1;
-		_init_trx_cfg_drv(d);
-
-#if 0 //NEO
-		/* 9. Config RX Aggregation */
-		err = rtw_halmac_rx_agg_switch(d, _TRUE);
-		if (err)
-			return -1;
-#endif //NEO
 		/* 10. Send General Info */
 		err = _send_general_info(d);
 		if (err)

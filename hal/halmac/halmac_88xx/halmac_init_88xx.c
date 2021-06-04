@@ -469,12 +469,6 @@ init_mac_cfg_88xx(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
 		return status;
 	}
 
-	status = api->halmac_init_trx_cfg(adapter, mode);
-	if (status != HALMAC_RET_SUCCESS) {
-		PLTFM_MSG_ERR("[ERR]init trx %x\n", status);
-		return status;
-	}
-
 	adapter->pq_map[HALMAC_PQ_MAP_VO] = HALMAC_MAP2_NQ;
 	adapter->pq_map[HALMAC_PQ_MAP_VI] = HALMAC_MAP2_NQ;
 	adapter->pq_map[HALMAC_PQ_MAP_BE] = HALMAC_MAP2_LQ;
@@ -488,11 +482,7 @@ init_mac_cfg_88xx(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
 	adapter->txff_alloc.extra_queue_pg_num = 0;
 	adapter->txff_alloc.pub_queue_pg_num = 1;
 
-#if 0 //NEO
-	adapter->hw_cfg_info.tx_fifo_size = 262144;
-	adapter->hw_cfg_info.rx_fifo_size = 24576;
 	adapter->h2c_info.buf_size = 1024;
-#endif //NEO
 
 	status = api->halmac_init_protocol_cfg(adapter);
 	if (status != HALMAC_RET_SUCCESS) {

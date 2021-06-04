@@ -378,10 +378,8 @@ mount_api_8822c(struct halmac_adapter *adapter)
 	adapter->hw_cfg_info.usb_txagg_num = BLK_DESC_NUM;
 	adapter->txff_alloc.rsvd_drv_pg_num = RSVD_PG_DRV_NUM;
 
-	api->halmac_init_trx_cfg = init_trx_cfg_8822c;
 	api->halmac_init_system_cfg = init_system_cfg_8822c;
 	api->halmac_init_protocol_cfg = init_protocol_cfg_8822c;
-	api->halmac_init_h2c = init_h2c_8822c;
 	api->halmac_pinmux_get_func = pinmux_get_func_8822c;
 	api->halmac_pinmux_set_func = pinmux_set_func_8822c;
 	api->halmac_pinmux_free_func = pinmux_free_func_8822c;
@@ -437,34 +435,6 @@ mount_api_8822c(struct halmac_adapter *adapter)
 		PLTFM_MSG_ERR("[ERR]Undefined IC\n");
 		return HALMAC_RET_CHIP_NOT_SUPPORT;
 	}
-
-	return HALMAC_RET_SUCCESS;
-}
-
-/**
- * init_trx_cfg_8822c() - config trx dma register
- * @adapter : the adapter of halmac
- * @mode : trx mode selection
- * Author : KaiYuan Chang/Ivan Lin
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-init_trx_cfg_8822c(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
-{
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-	enum halmac_ret_status status;
-	u8 en_fwff;
-	u8 value8;
-	u16 value16;
-
-	status = init_h2c_8822c(adapter);
-	if (status != HALMAC_RET_SUCCESS) {
-		PLTFM_MSG_ERR("[ERR]init h2cq!\n");
-		return status;
-	}
-
-	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
 
 	return HALMAC_RET_SUCCESS;
 }
@@ -665,63 +635,6 @@ init_protocol_cfg_8822c(struct halmac_adapter *adapter)
 	return HALMAC_RET_SUCCESS;
 }
 
-/**
- * init_h2c_8822c() - config h2c packet buffer
- * @adapter : the adapter of halmac
- * Author : KaiYuan Chang/Ivan Lin
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-init_h2c_8822c(struct halmac_adapter *adapter)
-{
-	u8 value8;
-	u32 value32;
-	u32 h2cq_addr;
-	u32 h2cq_size;
-	struct halmac_txff_allocation *txff_info = &adapter->txff_alloc;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-
-	h2cq_addr = txff_info->rsvd_h2cq_addr << TX_PAGE_SIZE_SHIFT_88XX;
-	h2cq_size = RSVD_PG_H2CQ_NUM << TX_PAGE_SIZE_SHIFT_88XX;
-
-	value32 = HALMAC_REG_R32(REG_H2C_HEAD);
-	value32 = (value32 & 0xFFFC0000) | h2cq_addr;
-	HALMAC_REG_W32(REG_H2C_HEAD, value32);
-
-	value32 = HALMAC_REG_R32(REG_H2C_READ_ADDR);
-	value32 = (value32 & 0xFFFC0000) | h2cq_addr;
-	HALMAC_REG_W32(REG_H2C_READ_ADDR, value32);
-
-	value32 = HALMAC_REG_R32(REG_H2C_TAIL);
-	value32 = (value32 & 0xFFFC0000);
-	value32 |= (h2cq_addr + h2cq_size);
-	HALMAC_REG_W32(REG_H2C_TAIL, value32);
-
-	value8 = HALMAC_REG_R8(REG_H2C_INFO);
-	value8 = (u8)((value8 & 0xFC) | 0x01);
-	HALMAC_REG_W8(REG_H2C_INFO, value8);
-
-	value8 = HALMAC_REG_R8(REG_H2C_INFO);
-	value8 = (u8)((value8 & 0xFB) | 0x04);
-	HALMAC_REG_W8(REG_H2C_INFO, value8);
-
-	value8 = HALMAC_REG_R8(REG_TXDMA_OFFSET_CHK + 1);
-	value8 = (u8)((value8 & 0x7f) | 0x80);
-	HALMAC_REG_W8(REG_TXDMA_OFFSET_CHK + 1, value8);
-
-	adapter->h2c_info.buf_size = h2cq_size;
-	get_h2c_buf_free_space_88xx(adapter);
-
-	if (adapter->h2c_info.buf_size != adapter->h2c_info.buf_fs) {
-		PLTFM_MSG_ERR("[ERR]get h2c free space error!\n");
-		return HALMAC_RET_GET_H2C_SPACE_ERR;
-	}
-
-	PLTFM_MSG_TRACE("[TRACE]h2c fs : %d\n", adapter->h2c_info.buf_fs);
-
-	return HALMAC_RET_SUCCESS;
-}
 
 /**
  * init_edca_cfg_8822c() - init EDCA config

@@ -428,13 +428,13 @@ init_trx_cfg(struct mac_adapter *adapter)
 		PLTFM_MSG_ERR("[ERR] priority_queue_cfg, ret=%d\n", ret);
 		return ret;
 	}
-#endif //NEO
 
 	ret = init_h2c(adapter);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR] int_h2c, ret=%d\n", ret);
 		return ret;
 	}
+#endif //NEO
 
 	return ret;
 }
@@ -484,6 +484,11 @@ u32 mac_trx_init(struct mac_adapter *adapter)
 		return ret;
 	}
 
+	ret = init_h2c(adapter);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR] int_h2c, ret=%d\n", ret);
+		return ret;
+	}
 out:
 	return ret;
 }
