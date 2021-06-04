@@ -383,62 +383,6 @@ fwff_is_empty(struct mac_adapter *adapter)
 	return MACSUCCESS;
 }
 
-
-static u32
-init_trx_cfg(struct mac_adapter *adapter)
-{
-	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
-	u8 en_fwff;
-	u8 value8;
-	u16 value16;
-	u32 ret;
-
-	ret = mac_trx_init(adapter);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR] mac_trx_init, ret=%d\n", ret);
-		return ret;
-	}
-
-#if 0 //NEO
-	ret = txdma_queue_mapping(adapter);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR] txdma_queue_mapping, ret=%d\n", ret);
-		return ret;
-	}
-
-	en_fwff = MAC_REG_R8(REG_WMAC_FWPKT_CR) & BIT_FWEN;
-	if (en_fwff) {
-		MAC_REG_W8_CLR(REG_WMAC_FWPKT_CR, BIT_FWEN);
-		if (fwff_is_empty(adapter) != MACSUCCESS)
-			PLTFM_MSG_ERR("[ERR]fwff is not empty\n");
-	}
-	value8 = 0;
-	MAC_REG_W8(REG_CR, value8);
-	value16 = MAC_REG_R16(REG_FWFF_PKT_INFO);
-	MAC_REG_W16(REG_FWFF_CTRL, value16);
-
-	value8 = MAC_TRX_ENABLE;
-	MAC_REG_W8(REG_CR, value8);
-	if (en_fwff)
-		MAC_REG_W8_SET(REG_WMAC_FWPKT_CR, BIT_FWEN);
-	MAC_REG_W32(REG_H2CQ_CSR, BIT(31));
-
-	ret = priority_queue_cfg(adapter);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR] priority_queue_cfg, ret=%d\n", ret);
-		return ret;
-	}
-
-	ret = init_h2c(adapter);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR] int_h2c, ret=%d\n", ret);
-		return ret;
-	}
-#endif //NEO
-
-	return ret;
-}
-
 u32 mac_sys_init(struct mac_adapter *adapter)
 {
 	u32 ret = MACSUCCESS;
@@ -499,9 +443,9 @@ mac_init(struct mac_adapter *adapter)
 {
 	u32 ret;
 
-	ret = init_trx_cfg(adapter);
+	ret = mac_trx_init(adapter);
 	if (ret) {
-		PLTFM_MSG_ERR("[ERR] init trx cfg, ret=%d\n", ret);
+		PLTFM_MSG_ERR("[ERR] mac trx init, ret=%d\n", ret);
 		return ret;
 	}
 
