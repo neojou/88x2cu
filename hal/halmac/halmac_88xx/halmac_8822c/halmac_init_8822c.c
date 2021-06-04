@@ -347,11 +347,7 @@ static struct halmac_pg_num HALMAC_PG_NUM_4BULKOUT_8822C[] = {
 	{HALMAC_TRX_MODE_DELAY_LOOPBACK, 64, 64, 64, 64, 1},
 };
 
-static enum halmac_ret_status
-priority_queue_cfg_8822c(struct halmac_adapter *adapter,
-			 enum halmac_trx_mode mode);
-
-static enum halmac_ret_status
+enum halmac_ret_status
 set_trx_fifo_info_8822c(struct halmac_adapter *adapter,
 			enum halmac_trx_mode mode);
 
@@ -462,12 +458,6 @@ init_trx_cfg_8822c(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
 	u8 value8;
 	u16 value16;
 
-	status = priority_queue_cfg_8822c(adapter, mode);
-	if (status != HALMAC_RET_SUCCESS) {
-		PLTFM_MSG_ERR("[ERR]priority queue cfg\n");
-		return status;
-	}
-
 	status = init_h2c_8822c(adapter);
 	if (status != HALMAC_RET_SUCCESS) {
 		PLTFM_MSG_ERR("[ERR]init h2cq!\n");
@@ -479,131 +469,7 @@ init_trx_cfg_8822c(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
 	return HALMAC_RET_SUCCESS;
 }
 
-static enum halmac_ret_status
-priority_queue_cfg_8822c(struct halmac_adapter *adapter,
-			 enum halmac_trx_mode mode)
-{
-	u8 transfer_mode = 0;
-	u8 value8;
-	u32 cnt;
-	struct halmac_txff_allocation *txff_info = &adapter->txff_alloc;
-	enum halmac_ret_status status;
-	struct halmac_pg_num *cur_pg_num = NULL;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-
-	status = set_trx_fifo_info_8822c(adapter, mode);
-	if (status != HALMAC_RET_SUCCESS) {
-		PLTFM_MSG_ERR("[ERR]set trx fifo!!\n");
-		return status;
-	}
-
-	if (adapter->intf == HALMAC_INTERFACE_SDIO) {
-		cur_pg_num = HALMAC_PG_NUM_SDIO_8822C;
-	} else if (adapter->intf == HALMAC_INTERFACE_PCIE) {
-		cur_pg_num = HALMAC_PG_NUM_PCIE_8822C;
-	} else if (adapter->intf == HALMAC_INTERFACE_USB) {
-		if (adapter->bulkout_num == 2) {
-			cur_pg_num = HALMAC_PG_NUM_2BULKOUT_8822C;
-		} else if (adapter->bulkout_num == 3) {
-			cur_pg_num = HALMAC_PG_NUM_3BULKOUT_8822C;
-		} else if (adapter->bulkout_num == 4) {
-			cur_pg_num = HALMAC_PG_NUM_4BULKOUT_8822C;
-		} else {
-			PLTFM_MSG_ERR("[ERR]interface not support\n");
-			return HALMAC_RET_NOT_SUPPORT;
-		}
-	} else {
-		return HALMAC_RET_NOT_SUPPORT;
-	}
-
-	status = pg_num_parser_88xx(adapter, mode, cur_pg_num);
-	if (status != HALMAC_RET_SUCCESS)
-		return status;
-
-	PLTFM_MSG_TRACE("[TRACE]Set FIFO page\n");
-
-	HALMAC_REG_W16(REG_FIFOPAGE_INFO_1, txff_info->high_queue_pg_num);
-	HALMAC_REG_W16(REG_FIFOPAGE_INFO_2, txff_info->low_queue_pg_num);
-	HALMAC_REG_W16(REG_FIFOPAGE_INFO_3, txff_info->normal_queue_pg_num);
-	HALMAC_REG_W16(REG_FIFOPAGE_INFO_4, txff_info->extra_queue_pg_num);
-	HALMAC_REG_W16(REG_FIFOPAGE_INFO_5, txff_info->pub_queue_pg_num);
-	HALMAC_REG_W32_SET(REG_RQPN_CTRL_2, BIT(31));
-
-	adapter->sdio_fs.hiq_pg_num = txff_info->high_queue_pg_num;
-	adapter->sdio_fs.miq_pg_num = txff_info->normal_queue_pg_num;
-	adapter->sdio_fs.lowq_pg_num = txff_info->low_queue_pg_num;
-	adapter->sdio_fs.pubq_pg_num = txff_info->pub_queue_pg_num;
-	adapter->sdio_fs.exq_pg_num = txff_info->extra_queue_pg_num;
-
-	HALMAC_REG_W16(REG_FIFOPAGE_CTRL_2, txff_info->rsvd_boundary);
-	HALMAC_REG_W16(REG_WMAC_CSIDMA_CFG, txff_info->rsvd_csibuf_addr);
-	HALMAC_REG_W8_SET(REG_FWHW_TXQ_CTRL + 2, BIT(4));
-
-	/*20170411 Soar*/
-	/* SDIO sometimes use two CMD52 to do HALMAC_REG_W16 */
-	/* and may cause a mismatch between HW status and Reg value. */
-	/* A patch is to write high byte first, suggested by Argis */
-	if (adapter->intf == HALMAC_INTERFACE_SDIO) {
-		value8 = (u8)(txff_info->rsvd_boundary >> 8 & 0xFF);
-		HALMAC_REG_W8(REG_BCNQ_BDNY_V1 + 1, value8);
-		value8 = (u8)(txff_info->rsvd_boundary & 0xFF);
-		HALMAC_REG_W8(REG_BCNQ_BDNY_V1, value8);
-	} else {
-		HALMAC_REG_W16(REG_BCNQ_BDNY_V1, txff_info->rsvd_boundary);
-	}
-
-	HALMAC_REG_W16(REG_FIFOPAGE_CTRL_2 + 2, txff_info->rsvd_boundary);
-
-	/*20170411 Soar*/
-	/* SDIO sometimes use two CMD52 to do HALMAC_REG_W16 */
-	/* and may cause a mismatch between HW status and Reg value. */
-	if (adapter->intf == HALMAC_INTERFACE_SDIO) {
-		value8 = (u8)(txff_info->rsvd_boundary >> 8 & 0xFF);
-		HALMAC_REG_W8(REG_BCNQ1_BDNY_V1 + 1, value8);
-		value8 = (u8)(txff_info->rsvd_boundary & 0xFF);
-		HALMAC_REG_W8(REG_BCNQ1_BDNY_V1, value8);
-	} else {
-		HALMAC_REG_W16(REG_BCNQ1_BDNY_V1, txff_info->rsvd_boundary);
-	}
-
-	HALMAC_REG_W32(REG_RXFF_BNDY,
-		       adapter->hw_cfg_info.rx_fifo_size -
-		       C2H_PKT_BUF_88XX - 1);
-
-	if (adapter->intf == HALMAC_INTERFACE_USB) {
-		value8 = HALMAC_REG_R8(REG_AUTO_LLT_V1);
-		value8 &= ~(BIT_MASK_BLK_DESC_NUM << BIT_SHIFT_BLK_DESC_NUM);
-		value8 |= (BLK_DESC_NUM << BIT_SHIFT_BLK_DESC_NUM);
-		HALMAC_REG_W8(REG_AUTO_LLT_V1, value8);
-
-		HALMAC_REG_W8(REG_AUTO_LLT_V1 + 3, BLK_DESC_NUM);
-		HALMAC_REG_W8_SET(REG_TXDMA_OFFSET_CHK + 1, BIT(1));
-	}
-
-	HALMAC_REG_W8_SET(REG_AUTO_LLT_V1, BIT_AUTO_INIT_LLT_V1);
-	cnt = 1000;
-	while (HALMAC_REG_R8(REG_AUTO_LLT_V1) & BIT_AUTO_INIT_LLT_V1) {
-		cnt--;
-		if (cnt == 0)
-			return HALMAC_RET_INIT_LLT_FAIL;
-	}
-
-	if (mode == HALMAC_TRX_MODE_DELAY_LOOPBACK) {
-		transfer_mode = HALMAC_TRNSFER_LOOPBACK_DELAY;
-		HALMAC_REG_W16(REG_WMAC_LBK_BUF_HD_V1,
-			       adapter->txff_alloc.rsvd_boundary);
-	} else if (mode == HALMAC_TRX_MODE_LOOPBACK) {
-		transfer_mode = HALMAC_TRNSFER_LOOPBACK_DIRECT;
-	} else {
-		transfer_mode = HALMAC_TRNSFER_NORMAL;
-	}
-
-	HALMAC_REG_W8(REG_CR + 3, (u8)transfer_mode);
-
-	return HALMAC_RET_SUCCESS;
-}
-
-static enum halmac_ret_status
+enum halmac_ret_status
 set_trx_fifo_info_8822c(struct halmac_adapter *adapter,
 			enum halmac_trx_mode mode)
 {

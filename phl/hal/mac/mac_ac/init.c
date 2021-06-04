@@ -422,13 +422,13 @@ init_trx_cfg(struct mac_adapter *adapter)
 	if (en_fwff)
 		MAC_REG_W8_SET(REG_WMAC_FWPKT_CR, BIT_FWEN);
 	MAC_REG_W32(REG_H2CQ_CSR, BIT(31));
-#endif //NEO
 
 	ret = priority_queue_cfg(adapter);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR] priority_queue_cfg, ret=%d\n", ret);
 		return ret;
 	}
+#endif //NEO
 
 	ret = init_h2c(adapter);
 	if (ret) {
@@ -477,6 +477,12 @@ u32 mac_trx_init(struct mac_adapter *adapter)
 	if (en_fwff)
 		MAC_REG_W8_SET(REG_WMAC_FWPKT_CR, BIT_FWEN);
 	MAC_REG_W32(REG_H2CQ_CSR, BIT(31));
+
+	ret = priority_queue_cfg(adapter);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR] priority_queue_cfg, ret=%d\n", ret);
+		return ret;
+	}
 
 out:
 	return ret;
