@@ -465,6 +465,14 @@ init_mac_cfg_88xx(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
 		PLTFM_MSG_ERR("[ERR]init trx %x\n", status);
 		return status;
 	}
+
+	adapter->pq_map[HALMAC_PQ_MAP_VO] = HALMAC_MAP2_NQ;
+	adapter->pq_map[HALMAC_PQ_MAP_VI] = HALMAC_MAP2_NQ;
+	adapter->pq_map[HALMAC_PQ_MAP_BE] = HALMAC_MAP2_LQ;
+	adapter->pq_map[HALMAC_PQ_MAP_BK] = HALMAC_MAP2_LQ;
+	adapter->pq_map[HALMAC_PQ_MAP_MG] = HALMAC_MAP2_HQ;
+	adapter->pq_map[HALMAC_PQ_MAP_HI] = HALMAC_MAP2_HQ;
+
 #if 0 //NEO
 	adapter->hw_cfg_info.tx_fifo_size = 262144;
 	adapter->hw_cfg_info.rx_fifo_size = 24576;

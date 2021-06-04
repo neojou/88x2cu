@@ -399,7 +399,7 @@ init_trx_cfg(struct mac_adapter *adapter)
 		return ret;
 	}
 
-#if 1 //NEO
+#if 0 //NEO
 	ret = txdma_queue_mapping(adapter);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR] txdma_queue_mapping, ret=%d\n", ret);
@@ -422,8 +422,8 @@ init_trx_cfg(struct mac_adapter *adapter)
 	if (en_fwff)
 		MAC_REG_W8_SET(REG_WMAC_FWPKT_CR, BIT_FWEN);
 	MAC_REG_W32(REG_H2CQ_CSR, BIT(31));
-
 #endif //NEO
+
 	ret = priority_queue_cfg(adapter);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR] priority_queue_cfg, ret=%d\n", ret);
@@ -454,7 +454,6 @@ u32 mac_trx_init(struct mac_adapter *adapter)
 	u16 value16;
 	u32 ret = MACSUCCESS;
 
-#if 0 //NEO
 	ret = txdma_queue_mapping(adapter);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR] txdma_queue_mapping, ret=%d\n", ret);
@@ -478,7 +477,6 @@ u32 mac_trx_init(struct mac_adapter *adapter)
 	if (en_fwff)
 		MAC_REG_W8_SET(REG_WMAC_FWPKT_CR, BIT_FWEN);
 	MAC_REG_W32(REG_H2CQ_CSR, BIT(31));
-#endif //NEO
 
 out:
 	return ret;
@@ -705,12 +703,6 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 	ret = mac_ops->fwdl(adapter);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR]%s: mac_fwdl fail\n", __func__);
-		return ret;
-	}
-
-	ret = mac_trx_init(adapter);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR]%s: mac_trx_init fail\n", __func__);
 		return ret;
 	}
 

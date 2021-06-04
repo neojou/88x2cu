@@ -348,10 +348,6 @@ static struct halmac_pg_num HALMAC_PG_NUM_4BULKOUT_8822C[] = {
 };
 
 static enum halmac_ret_status
-txdma_queue_mapping_8822c(struct halmac_adapter *adapter,
-			  enum halmac_trx_mode mode);
-
-static enum halmac_ret_status
 priority_queue_cfg_8822c(struct halmac_adapter *adapter,
 			 enum halmac_trx_mode mode);
 
@@ -466,31 +462,6 @@ init_trx_cfg_8822c(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
 	u8 value8;
 	u16 value16;
 
-#if 1 //NEO
-	status = txdma_queue_mapping_8822c(adapter, mode);
-	if (status != HALMAC_RET_SUCCESS) {
-		PLTFM_MSG_ERR("[ERR]queue mapping\n");
-		return status;
-	}
-
-	en_fwff = HALMAC_REG_R8(REG_WMAC_FWPKT_CR) & BIT_FWEN;
-	if (en_fwff) {
-		HALMAC_REG_W8_CLR(REG_WMAC_FWPKT_CR, BIT_FWEN);
-		if (fwff_is_empty_88xx(adapter) != HALMAC_RET_SUCCESS)
-			PLTFM_MSG_ERR("[ERR]fwff is not empty\n");
-	}
-	value8 = 0;
-	HALMAC_REG_W8(REG_CR, value8);
-	value16 = HALMAC_REG_R16(REG_FWFF_PKT_INFO);
-	HALMAC_REG_W16(REG_FWFF_CTRL, value16);
-
-	value8 = MAC_TRX_ENABLE;
-	HALMAC_REG_W8(REG_CR, value8);
-	if (en_fwff)
-		HALMAC_REG_W8_SET(REG_WMAC_FWPKT_CR, BIT_FWEN);
-	HALMAC_REG_W32(REG_H2CQ_CSR, BIT(31));
-#endif //NEO
-
 	status = priority_queue_cfg_8822c(adapter, mode);
 	if (status != HALMAC_RET_SUCCESS) {
 		PLTFM_MSG_ERR("[ERR]priority queue cfg\n");
@@ -504,50 +475,6 @@ init_trx_cfg_8822c(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
 	}
 
 	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
-
-	return HALMAC_RET_SUCCESS;
-}
-
-static enum halmac_ret_status
-txdma_queue_mapping_8822c(struct halmac_adapter *adapter,
-			  enum halmac_trx_mode mode)
-{
-	u16 value16;
-	struct halmac_rqpn *cur_rqpn_sel = NULL;
-	enum halmac_ret_status status;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-
-	if (adapter->intf == HALMAC_INTERFACE_SDIO) {
-		cur_rqpn_sel = HALMAC_RQPN_SDIO_8822C;
-	} else if (adapter->intf == HALMAC_INTERFACE_PCIE) {
-		cur_rqpn_sel = HALMAC_RQPN_PCIE_8822C;
-	} else if (adapter->intf == HALMAC_INTERFACE_USB) {
-		if (adapter->bulkout_num == 2) {
-			cur_rqpn_sel = HALMAC_RQPN_2BULKOUT_8822C;
-		} else if (adapter->bulkout_num == 3) {
-			cur_rqpn_sel = HALMAC_RQPN_3BULKOUT_8822C;
-		} else if (adapter->bulkout_num == 4) {
-			cur_rqpn_sel = HALMAC_RQPN_4BULKOUT_8822C;
-		} else {
-			PLTFM_MSG_ERR("[ERR]interface not support\n");
-			return HALMAC_RET_NOT_SUPPORT;
-		}
-	} else {
-		return HALMAC_RET_NOT_SUPPORT;
-	}
-
-	status = rqpn_parser_88xx(adapter, mode, cur_rqpn_sel);
-	if (status != HALMAC_RET_SUCCESS)
-		return status;
-
-	value16 = 0;
-	value16 |= BIT_TXDMA_HIQ_MAP(adapter->pq_map[HALMAC_PQ_MAP_HI]);
-	value16 |= BIT_TXDMA_MGQ_MAP(adapter->pq_map[HALMAC_PQ_MAP_MG]);
-	value16 |= BIT_TXDMA_BKQ_MAP(adapter->pq_map[HALMAC_PQ_MAP_BK]);
-	value16 |= BIT_TXDMA_BEQ_MAP(adapter->pq_map[HALMAC_PQ_MAP_BE]);
-	value16 |= BIT_TXDMA_VIQ_MAP(adapter->pq_map[HALMAC_PQ_MAP_VI]);
-	value16 |= BIT_TXDMA_VOQ_MAP(adapter->pq_map[HALMAC_PQ_MAP_VO]);
-	HALMAC_REG_W16(REG_TXDMA_PQ_MAP, value16);
 
 	return HALMAC_RET_SUCCESS;
 }
