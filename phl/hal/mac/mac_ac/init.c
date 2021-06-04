@@ -612,6 +612,52 @@ u32 mac_sys_init(struct mac_ax_adapter *adapter)
 
 #endif //NEO
 
+static u32
+wait_txfifo_empty(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 cnt = 1000;
+	u32 ret = MACSUCCESS;
+
+	do {
+		if (MAC_REG_R8(REG_TXPKT_EMPTY) != 0xFF)
+			goto chk_failed;
+
+		if ((MAC_REG_R8(REG_TXPKT_EMPTY + 1) & 0x06) != 0x06)
+			goto chk_failed;
+
+		ret = MACSUCCESS;
+		break;
+chk_failed:
+		ret = MACFFCFG;
+		PLTFM_DELAY_MS(2);
+		cnt--;
+	} while (cnt != 0);
+
+	return ret;
+}
+
+u32 mac_enable_fw(struct mac_adapter *adapter)
+{
+	struct mac_ops *mac_ops = adapter_to_mac_ops(adapter);
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 ret;
+
+	ret = wait_txfifo_empty(adapter);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR]%s: wait_txfifo_empty fail\n", __func__);
+		return ret;
+	}
+
+	ret = mac_ops->fwdl(adapter);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR]%s: mac_fwdl fail\n", __func__);
+		return ret;
+	}
+
+	return ret;
+}
+
 u32 mac_hal_init(struct mac_adapter *adapter,
 		 struct mac_trx_info *trx_info,
 		 struct mac_fwdl_info *fwdl_info,
@@ -650,7 +696,7 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
-	ret = mac_ops->enable_fw(adapter); // RTW_FW_NIC
+	ret = mac_enable_fw(adapter); // RTW_FW_NIC
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]enable_fw %d\n", ret);
 		return ret;
@@ -781,7 +827,7 @@ u32 mac_hal_fast_init(struct mac_adapter *adapter,
 	/* for efuse hidden rpt */
 	MAC_REG_W8(REG_C2HEVT, C2H_DEFEATURE_RSVD);
 
-	ret = mac_ops->enable_fw(adapter); // RTW_FW_NIC
+	ret = mac_enable_fw(adapter); // RTW_FW_NIC
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]enable_fw %d\n", ret);
 		return ret;

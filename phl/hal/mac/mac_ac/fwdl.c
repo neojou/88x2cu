@@ -659,32 +659,6 @@ dlfw_end_flow(struct mac_adapter *adapter)
 	return MACSUCCESS;
 }
 
-
-static u32
-wait_txfifo_empty(struct mac_adapter *adapter)
-{
-	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
-	u32 cnt = 1000;
-	u32 ret = MACSUCCESS;
-
-	do {
-		if (MAC_REG_R8(REG_TXPKT_EMPTY) != 0xFF)
-			goto chk_failed;
-
-		if ((MAC_REG_R8(REG_TXPKT_EMPTY + 1) & 0x06) != 0x06)
-			goto chk_failed;
-
-		ret = MACSUCCESS;
-		break;
-chk_failed:
-		ret = MACFFCFG;
-		PLTFM_DELAY_MS(2);
-		cnt--;
-	} while (cnt != 0);
-
-	return ret;
-}
-
 #define LTECOEX_ACCESS_CTRL REG_WL2LTECOEX_INDIRECT_ACCESS_CTRL_V1
 
 static u32
@@ -815,26 +789,6 @@ u32 mac_fwdl(struct mac_adapter *adapter)
 	ret = ltecoex_reg_write(adapter, 0x38, lte_coex_backup);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR]%s: ltecoex_reg_write fail\n", __func__);
-		return ret;
-	}
-
-	return ret;
-}
-
-u32 mac_enable_fw(struct mac_adapter *adapter)
-{
-	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
-	u32 ret;
-
-	ret = wait_txfifo_empty(adapter);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR]%s: wait_txfifo_empty fail\n", __func__);
-		return ret;
-	}
-
-	ret = mac_fwdl(adapter);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR]%s: mac_fwdl fail\n", __func__);
 		return ret;
 	}
 
