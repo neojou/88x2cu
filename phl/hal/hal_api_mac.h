@@ -110,10 +110,10 @@ struct hal_init_info_t {
 	char *ic_name;
 };
 enum rtw_hal_status
-rtw_hal_mac_init_mac(void *mac, struct hal_init_info_t *init_info);
+rtw_hal_mac_init_mac(struct hal_info_t *hal_info);
 
 enum rtw_hal_status
-rtw_hal_mac_trx_init(void *mac, struct hal_init_info_t *init_info);
+rtw_hal_mac_trx_init(struct hal_info_t *hal_info);
 
 enum rtw_hal_status
 rtw_hal_mac_hal_init(struct rtw_phl_com_t *phl_com,

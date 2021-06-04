@@ -2514,8 +2514,8 @@ static int download_fw(struct dvobj_priv *d, u8 *fw, u32 fwsize, u8 re_dl)
 	struct halmac_fw_version fw_vesion;
 	struct phl_info_t *phl_info = d->phl;
 	struct hal_info_t *hal_info = phl_info->hal;
-	enum halmac_ret_status status;
 	enum rtw_hal_status hal_status;
+	enum halmac_ret_status status;
 	PHAL_DATA_TYPE hal;
 	int err = 0;
 
@@ -2595,6 +2595,12 @@ resume_tx:
 
 		/* 8. Init TRX Configuration */
 		mode = _choose_trx_mode(d);
+		hal_status = rtw_hal_mac_trx_init(hal_info);
+		if (hal_status != RTW_HAL_STATUS_SUCCESS) {
+			RTW_ERR("%s: drtw_hal_mac_trx_init FAIL! status=0x%02x\n", __func__, hal_status);
+			return -1;
+		}
+
 		status = api->halmac_init_trx_cfg(mac, mode);
 		if (HALMAC_RET_SUCCESS != status)
 			return -1;
@@ -2622,6 +2628,9 @@ static int init_mac_flow(struct dvobj_priv *d)
 	struct hal_com_data *hal;
 	struct halmac_adapter *halmac;
 	struct halmac_api *api;
+	struct phl_info_t *phl_info = d->phl;
+	struct hal_info_t *hal_info = phl_info->hal;
+	enum rtw_hal_status hal_status;
 	enum halmac_drv_rsvd_pg_num rsvd_page_number;
 	union halmac_wlan_addr hwa;
 	enum halmac_trx_mode trx_mode;
@@ -2665,6 +2674,12 @@ static int init_mac_flow(struct dvobj_priv *d)
 #endif /* CONFIG_USB_HCI */
 
 	trx_mode = _choose_trx_mode(d);
+
+	hal_status = rtw_hal_mac_trx_init(hal_info);
+	if (hal_status != RTW_HAL_STATUS_SUCCESS) {
+		RTW_ERR("%s: drtw_hal_mac_trx_init FAIL! status=0x%02x\n", __func__, hal_status);
+		return -1;
+	}
 	status = api->halmac_init_mac_cfg(halmac, trx_mode);
 	if (status != HALMAC_RET_SUCCESS)
 		goto out;

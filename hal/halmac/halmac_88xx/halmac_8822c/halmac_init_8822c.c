@@ -15,6 +15,7 @@
 
 #include "halmac_init_8822c.h"
 #include "halmac_8822c_cfg.h"
+
 #if HALMAC_PCIE_SUPPORT
 #include "halmac_pcie_8822c.h"
 #endif
@@ -459,14 +460,13 @@ mount_api_8822c(struct halmac_adapter *adapter)
 enum halmac_ret_status
 init_trx_cfg_8822c(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
 {
-	u8 value8;
 	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-	enum halmac_ret_status status = HALMAC_RET_SUCCESS;
+	enum halmac_ret_status status;
 	u8 en_fwff;
+	u8 value8;
 	u16 value16;
 
-	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
-
+#if 1 //NEO
 	status = txdma_queue_mapping_8822c(adapter, mode);
 	if (status != HALMAC_RET_SUCCESS) {
 		PLTFM_MSG_ERR("[ERR]queue mapping\n");
@@ -489,6 +489,7 @@ init_trx_cfg_8822c(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
 	if (en_fwff)
 		HALMAC_REG_W8_SET(REG_WMAC_FWPKT_CR, BIT_FWEN);
 	HALMAC_REG_W32(REG_H2CQ_CSR, BIT(31));
+#endif //NEO
 
 	status = priority_queue_cfg_8822c(adapter, mode);
 	if (status != HALMAC_RET_SUCCESS) {

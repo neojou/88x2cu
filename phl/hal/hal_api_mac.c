@@ -2426,41 +2426,37 @@ rtw_hal_mac_dbg_dump_fw_rsvd_ple(struct hal_info_t *hal_info)
  * init HW scope or start HW scope?
  */
 enum rtw_hal_status
-rtw_hal_mac_init_mac(void *mac,struct hal_init_info_t *init_info)
+rtw_hal_mac_init_mac(struct hal_info_t *hal_info, struct hal_init_info_t *init_info)
 {
-	struct mac_adapter *mac_info = (struct mac_adapter *)mac;
-	struct mac_ax_ops *hal_mac_ops = mac_info->ops;
+	struct mac_adapter *mac = hal_to_mac(hal_info);
+	struct mac_ops *hal_mac_ops = mac->ops;
 	struct mac_trx_info trx_info;
 
 	trx_info.trx_mode = init_info->trx_info.trx_mode;
 	trx_info.qta_mode = init_info->trx_info.qta_mode;
 
-	if (hal_mac_ops->sys_init(mac_info))
+	if (hal_mac_ops->sys_init(mac))
 		return RTW_HAL_STATUS_MAC_INIT_FAILURE;
 
-	if (hal_mac_ops->trx_init(mac_info, &trx_info))
+	if (hal_mac_ops->trx_init(hal_info, &trx_info))
 		return RTW_HAL_STATUS_MAC_INIT_FAILURE;
 
 	return RTW_HAL_STATUS_SUCCESS;
 }
+
+#endif //NEO
 
 enum rtw_hal_status
-rtw_hal_mac_trx_init(void *mac, struct hal_init_info_t *init_info)
+rtw_hal_mac_trx_init(struct hal_info_t *hal_info)
 {
-	struct mac_adapter *mac_info = (struct mac_adapter *)mac;
-	struct mac_ax_ops *hal_mac_ops = mac_info->ops;
-	struct mac_trx_info trx_info;
+	struct mac_adapter *mac = hal_to_mac(hal_info);
+	struct mac_ops *hal_mac_ops = mac->ops;
 
-	trx_info.trx_mode = init_info->trx_info.trx_mode;
-	trx_info.qta_mode = init_info->trx_info.qta_mode;
-
-	if (hal_mac_ops->trx_init(mac_info, &trx_info))
+	if (hal_mac_ops->trx_init(mac))
 		return RTW_HAL_STATUS_MAC_INIT_FAILURE;
 
 	return RTW_HAL_STATUS_SUCCESS;
 }
-
-#endif // NEO
 
 enum rtw_hal_status
 rtw_hal_mac_hal_init(struct rtw_phl_com_t *phl_com,

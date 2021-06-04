@@ -50,6 +50,7 @@ struct mac_adapter *get_mac_adapter(enum mac_intf intf,
 
 u32 cmac_func_en(struct mac_adapter *adapter, u8 band, u8 en);
 u32 mac_sys_init(struct mac_adapter *adapter);
+u32 mac_trx_init(struct mac_adapter *adapter);
 u32 mac_hal_init(struct mac_adapter *adapter,
 		 struct mac_trx_info *trx_info,
 		 struct mac_fwdl_info *fwdl_info,

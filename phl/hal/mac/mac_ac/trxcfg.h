@@ -183,7 +183,7 @@ u32 mac_check_access(struct mac_adapter *adapter, u32 offset);
  * @return Please Place Description here.
  * @retval u32
  */
-u32 mac_trx_init(struct mac_adapter *adapter, struct mac_ax_trx_info *info);
+u32 mac_trx_init(struct mac_adapter *adapter);
 /**
  * @}
  * @}

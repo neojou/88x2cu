@@ -4765,10 +4765,9 @@ struct mac_ops {
 			   struct mac_ax_role_info *info);
 #endif // if 0 NEO
 	u32 (*pwr_switch)(struct mac_adapter *adapter, u8 on);
-#if 0 // NEO
 	u32 (*sys_init)(struct mac_adapter *adapter);
-	u32 (*trx_init)(struct mac_adapter *adapter,
-			struct mac_ax_trx_info *info);
+	u32 (*trx_init)(struct mac_adapter *adapter);
+#if 0 // NEO
 	u32 (*romdl)(struct mac_adapter *adapter, u8 *rom, u32 romaddr,
 		     u32 len);
 	u32 (*enable_cpu)(struct mac_adapter *adapter,

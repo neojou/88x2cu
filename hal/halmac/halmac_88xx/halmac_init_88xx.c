@@ -465,6 +465,11 @@ init_mac_cfg_88xx(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
 		PLTFM_MSG_ERR("[ERR]init trx %x\n", status);
 		return status;
 	}
+#if 0 //NEO
+	adapter->hw_cfg_info.tx_fifo_size = 262144;
+	adapter->hw_cfg_info.rx_fifo_size = 24576;
+	adapter->h2c_info.buf_size = 1024;
+#endif //NEO
 
 	status = api->halmac_init_protocol_cfg(adapter);
 	if (status != HALMAC_RET_SUCCESS) {
