@@ -922,7 +922,6 @@ struct halmac_hw_cfg_info {
 	u32 tx_fifo_size;
 	u32 rx_fifo_size;
 	u32 rx_desc_fifo_size;
-	u32 page_size;
 	u16 tx_align_size;
 	u8 txdesc_size;
 	u8 rxdesc_size;

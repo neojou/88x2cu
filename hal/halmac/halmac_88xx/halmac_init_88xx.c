@@ -117,7 +117,6 @@ init_adapter_param_88xx(struct halmac_adapter *adapter)
 
 	adapter->hw_cfg_info.chk_security_keyid = 0;
 	adapter->hw_cfg_info.acq_num = 8;
-	adapter->hw_cfg_info.page_size = TX_PAGE_SIZE_88XX;
 	adapter->hw_cfg_info.tx_align_size = TX_ALIGN_SIZE_88XX;
 	adapter->hw_cfg_info.txdesc_size = TX_DESC_SIZE_88XX;
 	adapter->hw_cfg_info.rxdesc_size = RX_DESC_SIZE_88XX;

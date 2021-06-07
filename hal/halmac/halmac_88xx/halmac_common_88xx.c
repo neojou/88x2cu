@@ -250,7 +250,7 @@ dl_drv_rsvd_page_88xx(struct halmac_adapter *adapter, u8 pg_offset, u8 *buf,
 
 	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
 
-	pg_size = adapter->hw_cfg_info.page_size;
+	pg_size = 128;
 	pg_num = size / pg_size + ((size & (pg_size - 1)) ? 1 : 0);
 	if (pg_offset + pg_num > adapter->txff_alloc.rsvd_drv_pg_num) {
 		PLTFM_MSG_ERR("[ERR] pkt overflow!!\n");
