@@ -12099,25 +12099,6 @@ void GetHwReg(_adapter *adapter, u8 variable, u8 *val)
 
 }
 
-static u32 _get_page_size(struct _ADAPTER *a)
-{
-	struct dvobj_priv *d;
-	u32 size = 0;
-	int err = 0;
-
-
-	d = adapter_to_dvobj(a);
-
-	err = rtw_halmac_get_page_size(d, &size);
-	if (!err)
-		return size;
-
-	RTW_WARN(FUNC_ADPT_FMT ": Fail to get Page size!!(err=%d)\n",
-		 FUNC_ADPT_ARG(a), err);
-
-	return PAGE_SIZE_128;
-}
-
 u8
 SetHalDefVar(_adapter *adapter, HAL_DEF_VARIABLE variable, void *value)
 {
