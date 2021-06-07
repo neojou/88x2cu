@@ -507,7 +507,6 @@ uint rtw_hal_iface_init(_adapter *adapter)
 	rtw_hal_hw_port_enable(adapter);
 	rtw_sec_restore_wep_key(adapter);
 	rtw_hal_init_opmode(adapter);
-	rtw_hal_start_thread(adapter);
 	return status;
 }
 uint rtk_hal_init(_adapter *padapter)
@@ -822,15 +821,6 @@ void rtw_hal_update_ra_mask(struct sta_info *psta)
 
 	padapter = psta->padapter;
 	rtw_sta_ra_registed(padapter, psta);
-}
-
-/*	Start specifical interface thread		*/
-void	rtw_hal_start_thread(_adapter *padapter)
-{
-}
-/*	Start specifical interface thread		*/
-void	rtw_hal_stop_thread(_adapter *padapter)
-{
 }
 
 u32	rtw_hal_read_bbreg(_adapter *padapter, u32 RegAddr, u32 BitMask)

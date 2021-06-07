@@ -803,8 +803,6 @@ u32 rtw_start_drv_threads(_adapter *padapter)
 		}
 	}
 
-
-	rtw_hal_start_thread(padapter);
 	return _status;
 
 }
@@ -815,7 +813,6 @@ void rtw_stop_drv_threads(_adapter *padapter)
 	if (is_primary_adapter(padapter))
 		rtw_stop_cmd_thread(padapter);
 
-	rtw_hal_stop_thread(padapter);
 }
 #endif
 

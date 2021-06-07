@@ -734,9 +734,6 @@ void	rtw_hal_free_xmit_priv(_adapter *padapter);
 
 void rtw_hal_update_ra_mask(struct sta_info *psta);
 
-void	rtw_hal_start_thread(_adapter *padapter);
-void	rtw_hal_stop_thread(_adapter *padapter);
-
 void rtw_hal_bcn_related_reg_setting(_adapter *padapter);
 
 u32	rtw_hal_read_bbreg(_adapter *padapter, u32 RegAddr, u32 BitMask);
