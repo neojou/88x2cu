@@ -2513,12 +2513,6 @@ static int init_mac_flow(struct dvobj_priv *d)
 	halmac->txff_alloc.rsvd_drv_pg_num = 8;
 	hal->drv_rsvd_page_number = 8;
 
-#ifdef CONFIG_USB_HCI
-	status = api->halmac_set_bulkout_num(halmac, dvobj_to_usb(d)->RtNumOutPipes);
-	if (status != HALMAC_RET_SUCCESS)
-		goto out;
-#endif /* CONFIG_USB_HCI */
-
 	trx_mode = _choose_trx_mode(d);
 
 	hal_status = rtw_hal_mac_trx_init(hal_info);

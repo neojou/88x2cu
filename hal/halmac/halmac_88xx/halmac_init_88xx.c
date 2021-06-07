@@ -299,7 +299,6 @@ mount_api_88xx(struct halmac_adapter *adapter)
 		api->halmac_cfg_rx_aggregation = cfg_sdio_rx_agg_88xx;
 		api->halmac_deinit_interface_cfg = deinit_sdio_cfg_88xx;
 		api->halmac_cfg_tx_agg_align = cfg_txagg_sdio_align_88xx;
-		api->halmac_set_bulkout_num = set_sdio_bulkout_num_88xx;
 		api->halmac_get_usb_bulkout_id = get_sdio_bulkout_id_88xx;
 		api->halmac_reg_read_indirect_32 = sdio_indirect_reg_r32_88xx;
 		api->halmac_reg_sdio_cmd53_read_n = sdio_reg_rn_88xx;
@@ -317,7 +316,6 @@ mount_api_88xx(struct halmac_adapter *adapter)
 		api->halmac_deinit_interface_cfg = deinit_usb_cfg_88xx;
 		api->halmac_cfg_tx_agg_align = cfg_txagg_usb_align_88xx;
 		api->halmac_tx_allowed_sdio = tx_allowed_usb_88xx;
-		api->halmac_set_bulkout_num = set_usb_bulkout_num_88xx;
 		api->halmac_get_sdio_tx_addr = get_usb_tx_addr_88xx;
 		api->halmac_get_usb_bulkout_id = get_usb_bulkout_id_88xx;
 		api->halmac_reg_read_8 = reg_r8_usb_88xx;
@@ -339,7 +337,6 @@ mount_api_88xx(struct halmac_adapter *adapter)
 		api->halmac_deinit_interface_cfg = deinit_pcie_cfg_88xx;
 		api->halmac_cfg_tx_agg_align = cfg_txagg_pcie_align_88xx;
 		api->halmac_tx_allowed_sdio = tx_allowed_pcie_88xx;
-		api->halmac_set_bulkout_num = set_pcie_bulkout_num_88xx;
 		api->halmac_get_sdio_tx_addr = get_pcie_tx_addr_88xx;
 		api->halmac_get_usb_bulkout_id = get_pcie_bulkout_id_88xx;
 		api->halmac_reg_read_8 = reg_r8_pcie_88xx;

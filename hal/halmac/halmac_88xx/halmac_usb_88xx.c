@@ -244,22 +244,6 @@ reg_w32_usb_88xx(struct halmac_adapter *adapter, u32 offset, u32 value)
 }
 
 /**
- * set_usb_bulkout_num_88xx() - inform bulk-out num
- * @adapter : the adapter of halmac
- * @bulkout_num : usb bulk-out number
- * Author : KaiYuan Chang
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-set_usb_bulkout_num_88xx(struct halmac_adapter *adapter, u8 num)
-{
-	adapter->bulkout_num = num;
-
-	return HALMAC_RET_SUCCESS;
-}
-
-/**
  * get_usb_bulkout_id_88xx() - get bulk out id for the TX packet
  * @adapter : the adapter of halmac
  * @buf : tx packet, include txdesc

@@ -2152,8 +2152,6 @@ struct halmac_adapter {
 	struct halmac_txff_allocation txff_alloc;
 	u8 efuse_map_valid;
 	u8 efuse_seg_size;
-	//u8 rpwm;
-	u8 bulkout_num;
 	u8 drv_info_size;
 	enum halmac_sdio_cmd53_4byte_mode sdio_cmd53_4byte;
 	struct halmac_sdio_hw_info sdio_hw_info;
@@ -2310,8 +2308,6 @@ struct halmac_api {
 	enum halmac_ret_status
 	(*halmac_tx_allowed_sdio)(struct halmac_adapter *adapter, u8 *buf,
 				  u32 size);
-	enum halmac_ret_status
-	(*halmac_set_bulkout_num)(struct halmac_adapter *adapter, u8 num);
 	enum halmac_ret_status
 	(*halmac_get_sdio_tx_addr)(struct halmac_adapter *adapter, u8 *buf,
 				   u32 size, u32 *cmd53_addr);

@@ -49,9 +49,6 @@ enum halmac_ret_status
 reg_w32_usb_88xx(struct halmac_adapter *adapter, u32 offset, u32 value);
 
 enum halmac_ret_status
-set_usb_bulkout_num_88xx(struct halmac_adapter *adapter, u8 num);
-
-enum halmac_ret_status
 get_usb_bulkout_id_88xx(struct halmac_adapter *adapter, u8 *buf, u32 size,
 			u8 *id);
 
