@@ -2200,30 +2200,6 @@ static int _send_general_info(struct dvobj_priv *d)
 }
 
 void _rtw_hal_set_fw_rsvd_page(_adapter *adapter, bool finished, u8 *page_num);
-static int _cfg_drv_rsvd_pg_num(struct dvobj_priv *d)
-{
-	struct _ADAPTER *a;
-	struct hal_com_data *hal;
-	struct halmac_adapter *halmac;
-	struct halmac_api *api;
-	enum halmac_ret_status status;
-	u8 drv_rsvd_num;
-	int ret = 0;
-
-
-	a = dvobj_get_primary_adapter(d);
-	hal = GET_HAL_DATA(a);
-	halmac = dvobj_to_halmac(d);
-	api = HALMAC_GET_API(halmac);
-
-	_rtw_hal_set_fw_rsvd_page(a, _FALSE, &drv_rsvd_num);
-	halmac->txff_alloc.rsvd_drv_pg_num = 8;
-	hal->drv_rsvd_page_number = 8;
-
-exit:
-
-	return ret;
-}
 
 static void _debug_dlfw_fail(struct dvobj_priv *d)
 {
@@ -2408,6 +2384,7 @@ static void _init_trx_cfg_drv(struct dvobj_priv *d)
  */
 static int download_fw(struct dvobj_priv *d, u8 *fw, u32 fwsize, u8 re_dl)
 {
+	PADAPTER p;
 	struct halmac_adapter *mac;
 	struct halmac_api *api;
 	struct halmac_fw_version fw_vesion;
@@ -2418,8 +2395,8 @@ static int download_fw(struct dvobj_priv *d, u8 *fw, u32 fwsize, u8 re_dl)
 	PHAL_DATA_TYPE hal;
 	int err = 0;
 
-
-	hal = GET_HAL_DATA(dvobj_get_primary_adapter(d));
+	p = dvobj_get_primary_adapter(d);
+	hal = GET_HAL_DATA(p);
 	mac = dvobj_to_halmac(d);
 	api = HALMAC_GET_API(mac);
 
@@ -2486,11 +2463,12 @@ resume_tx:
 
 	if (re_dl) {
 		enum halmac_trx_mode mode;
+		u8 drv_rsvd_num;
 
 		/* 7. Change reserved page size */
-		err = _cfg_drv_rsvd_pg_num(d);
-		if (err)
-			return -1;
+		_rtw_hal_set_fw_rsvd_page(p, _FALSE, &drv_rsvd_num);
+		mac->txff_alloc.rsvd_drv_pg_num = 8;
+		hal->drv_rsvd_page_number = 8;
 
 		/* 8. Init TRX Configuration */
 		mode = _choose_trx_mode(d);
@@ -2531,9 +2509,9 @@ static int init_mac_flow(struct dvobj_priv *d)
 	halmac = dvobj_to_halmac(d);
 	api = HALMAC_GET_API(halmac);
 
-	err = _cfg_drv_rsvd_pg_num(d);
-	if (err)
-		goto out;
+	_rtw_hal_set_fw_rsvd_page(p, _FALSE, &drv_rsvd_num);
+	halmac->txff_alloc.rsvd_drv_pg_num = 8;
+	hal->drv_rsvd_page_number = 8;
 
 #ifdef CONFIG_USB_HCI
 	status = api->halmac_set_bulkout_num(halmac, dvobj_to_usb(d)->RtNumOutPipes);
