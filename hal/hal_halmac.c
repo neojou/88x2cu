@@ -2260,6 +2260,7 @@ static int _send_general_info(struct dvobj_priv *d)
 	return 0;
 }
 
+void _rtw_hal_set_fw_rsvd_page(_adapter *adapter, bool finished, u8 *page_num);
 static int _cfg_drv_rsvd_pg_num(struct dvobj_priv *d)
 {
 	struct _ADAPTER *a;
@@ -2268,7 +2269,7 @@ static int _cfg_drv_rsvd_pg_num(struct dvobj_priv *d)
 	struct halmac_api *api;
 	enum halmac_drv_rsvd_pg_num rsvd_page_number;
 	enum halmac_ret_status status;
-	u16 drv_rsvd_num;
+	u8 drv_rsvd_num;
 	int ret = 0;
 
 
@@ -2277,22 +2278,15 @@ static int _cfg_drv_rsvd_pg_num(struct dvobj_priv *d)
 	halmac = dvobj_to_halmac(d);
 	api = HALMAC_GET_API(halmac);
 
-	drv_rsvd_num = rtw_hal_get_rsvd_page_num(a);
+	_rtw_hal_set_fw_rsvd_page(a, _FALSE, &drv_rsvd_num);
 	rsvd_page_number = _rsvd_page_num_drv2halmac(drv_rsvd_num);
-	status = api->halmac_cfg_drv_rsvd_pg_num(halmac, rsvd_page_number);
-	if (status != HALMAC_RET_SUCCESS) {
-		ret = -1;
-		goto exit;
-	}
+	halmac->txff_alloc.rsvd_drv_pg_num = 8;
 	hal->drv_rsvd_page_number = _rsvd_page_num_halmac2drv(rsvd_page_number);
 
 exit:
-#ifndef DBG_RSVD_PAGE_CFG
-	if (drv_rsvd_num != _rsvd_page_num_halmac2drv(rsvd_page_number))
-#endif
-		RTW_INFO("%s: request %d pages => halmac %d pages %s\n"
-			, __FUNCTION__, drv_rsvd_num, _rsvd_page_num_halmac2drv(rsvd_page_number)
-			, ret ? "fail" : "success");
+	RTW_INFO("%s: request %d pages => halmac %d pages %s\n"
+		, __FUNCTION__, drv_rsvd_num, _rsvd_page_num_halmac2drv(rsvd_page_number)
+		, ret ? "fail" : "success");
 
 	return ret;
 }

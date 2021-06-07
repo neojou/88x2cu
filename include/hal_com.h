@@ -506,7 +506,6 @@ u8 rtw_get_current_tx_sgi(_adapter *padapter, struct sta_info *psta);
 void rtw_hal_set_pathb_phase(_adapter *adapter, u8 phase_idx);
 #endif
 void rtw_hal_set_fw_rsvd_page(_adapter *adapter, bool finished);
-u8 rtw_hal_get_rsvd_page_num(struct _ADAPTER *adapter);
 
 #ifdef CONFIG_TSF_RESET_OFFLOAD
 int rtw_hal_reset_tsf(_adapter *adapter, u8 reset_port);

@@ -10396,7 +10396,7 @@ void rtw_hal_set_pathb_phase(_adapter *adapter, u8 phase_idx)
  */
 
 /*#define DBG_DUMP_SET_RSVD_PAGE*/
-static void _rtw_hal_set_fw_rsvd_page(_adapter *adapter, bool finished, u8 *page_num)
+void _rtw_hal_set_fw_rsvd_page(_adapter *adapter, bool finished, u8 *page_num)
 {
 	PHAL_DATA_TYPE pHalData;
 	struct xmit_frame	*pcmdframe = NULL;
@@ -10815,26 +10815,6 @@ static u8 rtw_hal_set_fw_bcn_early_c2h_rpt_cmd(struct _ADAPTER *adapter, u8 enab
 	RTW_PRINT("-%s()-\n", __func__);
 
 	return ret;
-}
-
-/**
- * rtw_hal_get_rsvd_page_num() - Get needed reserved page number
- * @adapter:	struct _ADAPTER*
- *
- * Caculate needed reserved page number.
- * In different state would get different number, for example normal mode and
- * WOW mode would need different reserved page size.
- *
- * Return the number of reserved page which driver need.
- */
-u8 rtw_hal_get_rsvd_page_num(struct _ADAPTER *adapter)
-{
-	u8 num = 0;
-
-
-	_rtw_hal_set_fw_rsvd_page(adapter, _FALSE, &num);
-
-	return num;
 }
 
 #ifndef CONFIG_HAS_HW_VAR_BCN_FUNC

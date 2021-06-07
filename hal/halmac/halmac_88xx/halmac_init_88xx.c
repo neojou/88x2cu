@@ -262,7 +262,6 @@ mount_api_88xx(struct halmac_adapter *adapter)
 	api->halmac_write_cam = write_cam_88xx;
 	api->halmac_clear_cam_entry = clear_cam_entry_88xx;
 
-	api->halmac_cfg_drv_rsvd_pg_num = cfg_drv_rsvd_pg_num_88xx;
 	api->halmac_get_chip_version = get_version_88xx;
 
 	api->halmac_query_status = query_status_88xx;

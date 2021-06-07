@@ -2394,53 +2394,6 @@ get_drop_scan_packet_status_88xx(struct halmac_adapter *adapter,
 }
 
 /**
- * cfg_drv_rsvd_pg_num_88xx() -config reserved page number for driver
- * @adapter : the adapter of halmac
- * @pg_num : page number
- * Author : KaiYuan Chang
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-cfg_drv_rsvd_pg_num_88xx(struct halmac_adapter *adapter,
-			 enum halmac_drv_rsvd_pg_num pg_num)
-{
-	if (adapter->api_registry.cfg_drv_rsvd_pg_en == 0)
-		return HALMAC_RET_NOT_SUPPORT;
-
-	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
-	PLTFM_MSG_TRACE("[TRACE]pg_num = %d\n", pg_num);
-
-	switch (pg_num) {
-	case HALMAC_RSVD_PG_NUM8:
-		adapter->txff_alloc.rsvd_drv_pg_num = 8;
-		break;
-	case HALMAC_RSVD_PG_NUM16:
-		adapter->txff_alloc.rsvd_drv_pg_num = 16;
-		break;
-	case HALMAC_RSVD_PG_NUM24:
-		adapter->txff_alloc.rsvd_drv_pg_num = 24;
-		break;
-	case HALMAC_RSVD_PG_NUM32:
-		adapter->txff_alloc.rsvd_drv_pg_num = 32;
-		break;
-	case HALMAC_RSVD_PG_NUM64:
-		adapter->txff_alloc.rsvd_drv_pg_num = 64;
-		break;
-	case HALMAC_RSVD_PG_NUM128:
-		adapter->txff_alloc.rsvd_drv_pg_num = 128;
-		break;
-	case HALMAC_RSVD_PG_NUM256:
-		adapter->txff_alloc.rsvd_drv_pg_num = 256;
-		break;
-	}
-
-	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
-
-	return HALMAC_RET_SUCCESS;
-}
-
-/**
  * (debug API)h2c_lb_88xx() - send h2c loopback packet
  * @adapter : the adapter of halmac
  * Author : KaiYuan Chang/Ivan Lin

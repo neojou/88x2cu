@@ -115,10 +115,6 @@ query_status_88xx(struct halmac_adapter *adapter,
 		  u32 *size);
 
 enum halmac_ret_status
-cfg_drv_rsvd_pg_num_88xx(struct halmac_adapter *adapter,
-			 enum halmac_drv_rsvd_pg_num pg_num);
-
-enum halmac_ret_status
 h2c_lb_88xx(struct halmac_adapter *adapter);
 
 enum halmac_ret_status

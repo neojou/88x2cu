@@ -2446,9 +2446,6 @@ struct halmac_api {
 	(*halmac_set_hw_value)(struct halmac_adapter *adapter,
 			       enum halmac_hw_id hw_id, void *value);
 	enum halmac_ret_status
-	(*halmac_cfg_drv_rsvd_pg_num)(struct halmac_adapter *adapter,
-				      enum halmac_drv_rsvd_pg_num pg_num);
-	enum halmac_ret_status
 	(*halmac_get_chip_version)(struct halmac_adapter *adapter,
 				   struct halmac_ver *ver);
 	enum halmac_ret_status
