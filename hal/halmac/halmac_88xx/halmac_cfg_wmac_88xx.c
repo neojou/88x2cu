@@ -486,21 +486,6 @@ cfg_multicast_addr_88xx(struct halmac_adapter *adapter,
 }
 
 /**
- * cfg_operation_mode_88xx() - config operation mode
- * @adapter : the adapter of halmac
- * @mode : 802.11 standard(b/g/n/ac)
- * Author : KaiYuan Chang/Ivan Lin
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-cfg_operation_mode_88xx(struct halmac_adapter *adapter,
-			enum halmac_wireless_mode mode)
-{
-	return HALMAC_RET_SUCCESS;
-}
-
-/**
  * cfg_ch_bw_88xx() - config channel & bandwidth
  * @adapter : the adapter of halmac
  * @ch : WLAN channel, support 2.4G & 5G

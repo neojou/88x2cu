@@ -2628,29 +2628,10 @@ static int init_mac_flow(struct dvobj_priv *d)
 	u8 nettype;
 	int err, err_ret = -1;
 
-
 	p = dvobj_get_primary_adapter(d);
 	hal = GET_HAL_DATA(p);
 	halmac = dvobj_to_halmac(d);
 	api = HALMAC_GET_API(halmac);
-
-#ifdef CONFIG_SUPPORT_TRX_SHARED
-	status = api->halmac_cfg_rxff_expand_mode(halmac,
-						  _rtw_get_trx_share_mode(p));
-	if (status != HALMAC_RET_SUCCESS)
-		goto out;
-#endif
-
-#ifdef DBG_LA_MODE
-	if (dvobj_to_regsty(d)->la_mode_en) {
-		status = api->halmac_cfg_la_mode(halmac, HALMAC_LA_MODE_PARTIAL);
-		if (status != HALMAC_RET_SUCCESS) {
-			RTW_ERR("%s: Fail to enable LA mode!\n", __FUNCTION__);
-			goto out;
-		}
-		RTW_PRINT("%s: Enable LA mode OK.\n", __FUNCTION__);
-	}
-#endif
 
 	err = _cfg_drv_rsvd_pg_num(d);
 	if (err)
@@ -2683,24 +2664,6 @@ static int init_mac_flow(struct dvobj_priv *d)
 
 	_init_trx_cfg_drv(d);
 	/* Driver inser flow end */
-
-#if 0 //NEO
-	err = rtw_halmac_rx_agg_switch(d, _TRUE);
-	if (err)
-		goto out;
-#endif //NEO/
-
-	nettype = dvobj_to_regsty(d)->wireless_mode;
-	if (is_supported_vht(nettype) == _TRUE)
-		status = api->halmac_cfg_operation_mode(halmac, HALMAC_WIRELESS_MODE_AC);
-	else if (is_supported_ht(nettype) == _TRUE)
-		status = api->halmac_cfg_operation_mode(halmac, HALMAC_WIRELESS_MODE_N);
-	else if (IsSupportedTxOFDM(nettype) == _TRUE)
-		status = api->halmac_cfg_operation_mode(halmac, HALMAC_WIRELESS_MODE_G);
-	else
-		status = api->halmac_cfg_operation_mode(halmac, HALMAC_WIRELESS_MODE_B);
-	if (status != HALMAC_RET_SUCCESS)
-		goto out;
 
 	err_ret = 0;
 out:

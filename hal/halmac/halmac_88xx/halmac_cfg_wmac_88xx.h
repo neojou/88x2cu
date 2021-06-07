@@ -51,10 +51,6 @@ cfg_multicast_addr_88xx(struct halmac_adapter *adapter,
 			union halmac_wlan_addr *addr);
 
 enum halmac_ret_status
-cfg_operation_mode_88xx(struct halmac_adapter *adapter,
-			enum halmac_wireless_mode mode);
-
-enum halmac_ret_status
 cfg_ch_bw_88xx(struct halmac_adapter *adapter, u8 ch,
 	       enum halmac_pri_ch_idx idx, enum halmac_bw bw);
 

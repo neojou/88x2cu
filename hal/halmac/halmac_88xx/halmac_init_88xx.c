@@ -203,7 +203,6 @@ mount_api_88xx(struct halmac_adapter *adapter)
 	api->halmac_cfg_bcn_space = cfg_bcn_space_88xx;
 	api->halmac_rw_bcn_ctrl = rw_bcn_ctrl_88xx;
 	api->halmac_cfg_multicast_addr = cfg_multicast_addr_88xx;
-	api->halmac_cfg_operation_mode = cfg_operation_mode_88xx;
 	api->halmac_cfg_ch_bw = cfg_ch_bw_88xx;
 	api->halmac_cfg_bw = cfg_bw_88xx;
 	api->halmac_init_mac_cfg = init_mac_cfg_88xx;
