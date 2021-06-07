@@ -404,10 +404,44 @@ static void init_txq_ctrl(struct mac_adapter *adapter)
 }
 
 
+#define WLAN_SLOT_TIME		0x09
+#define WLAN_PIFS_TIME		0x1C
+#define WLAN_SIFS_CCK_CONT_TX	0x0A
+#define WLAN_SIFS_OFDM_CONT_TX	0x0E
+#define WLAN_SIFS_CCK_TRX	0x0A
+#define WLAN_SIFS_OFDM_TRX	0x10
+
+#define WLAN_SIFS_CCK_DUR_TUNE	0x0A
+#define WLAN_SIFS_OFDM_DUR_TUNE	0x10
+#define WLAN_SIFS_CCK_CTX	0x0A
+#define WLAN_SIFS_CCK_IRX	0x0A
+#define WLAN_SIFS_OFDM_CTX	0x0E
+#define WLAN_SIFS_OFDM_IRX	0x0E
+
+#define WLAN_SIFS_CFG	(WLAN_SIFS_CCK_CONT_TX | \
+			(WLAN_SIFS_OFDM_CONT_TX << BIT_SHIFT_SIFS_OFDM_CTX) | \
+			(WLAN_SIFS_CCK_TRX << BIT_SHIFT_SIFS_CCK_TRX) | \
+			(WLAN_SIFS_OFDM_TRX << BIT_SHIFT_SIFS_OFDM_TRX))
+
+#define WLAN_SIFS_DUR_TUNE	(WLAN_SIFS_CCK_DUR_TUNE | \
+				(WLAN_SIFS_OFDM_DUR_TUNE << 8))
+
+static void init_sifs_ctrl(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+
+	MAC_REG_W16(REG_SPEC_SIFS, WLAN_SIFS_DUR_TUNE);
+	MAC_REG_W32(REG_SIFS, WLAN_SIFS_CFG);
+	MAC_REG_W16(REG_RESP_SIFS_CCK,
+		       WLAN_SIFS_CCK_CTX | WLAN_SIFS_CCK_IRX << 8);
+	MAC_REG_W16(REG_RESP_SIFS_OFDM,
+		       WLAN_SIFS_OFDM_CTX | WLAN_SIFS_OFDM_IRX << 8);
+}
+
 static u32 init_protocol_cfg(struct mac_adapter *adapter)
 {
 	init_txq_ctrl(adapter);
-
+	init_sifs_ctrl(adapter);
 
 	return MACSUCCESS;
 }

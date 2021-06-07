@@ -556,7 +556,52 @@
 #define REG_BCNTCFG 0x0510
 #define REG_PIFS 0x0512
 #define REG_RDG_PIFS 0x0513
+
 #define REG_SIFS 0x0514
+#define BIT_SHIFT_SIFS_OFDM_TRX 24
+#define BIT_MASK_SIFS_OFDM_TRX 0xff
+#define BIT_SIFS_OFDM_TRX(x)                                                   \
+	(((x) & BIT_MASK_SIFS_OFDM_TRX) << BIT_SHIFT_SIFS_OFDM_TRX)
+#define BITS_SIFS_OFDM_TRX (BIT_MASK_SIFS_OFDM_TRX << BIT_SHIFT_SIFS_OFDM_TRX)
+#define BIT_CLEAR_SIFS_OFDM_TRX(x) ((x) & (~BITS_SIFS_OFDM_TRX))
+#define BIT_GET_SIFS_OFDM_TRX(x)                                               \
+	(((x) >> BIT_SHIFT_SIFS_OFDM_TRX) & BIT_MASK_SIFS_OFDM_TRX)
+#define BIT_SET_SIFS_OFDM_TRX(x, v)                                            \
+	(BIT_CLEAR_SIFS_OFDM_TRX(x) | BIT_SIFS_OFDM_TRX(v))
+
+#define BIT_SHIFT_SIFS_CCK_TRX 16
+#define BIT_MASK_SIFS_CCK_TRX 0xff
+#define BIT_SIFS_CCK_TRX(x)                                                    \
+	(((x) & BIT_MASK_SIFS_CCK_TRX) << BIT_SHIFT_SIFS_CCK_TRX)
+#define BITS_SIFS_CCK_TRX (BIT_MASK_SIFS_CCK_TRX << BIT_SHIFT_SIFS_CCK_TRX)
+#define BIT_CLEAR_SIFS_CCK_TRX(x) ((x) & (~BITS_SIFS_CCK_TRX))
+#define BIT_GET_SIFS_CCK_TRX(x)                                                \
+	(((x) >> BIT_SHIFT_SIFS_CCK_TRX) & BIT_MASK_SIFS_CCK_TRX)
+#define BIT_SET_SIFS_CCK_TRX(x, v)                                             \
+	(BIT_CLEAR_SIFS_CCK_TRX(x) | BIT_SIFS_CCK_TRX(v))
+
+#define BIT_SHIFT_SIFS_OFDM_CTX 8
+#define BIT_MASK_SIFS_OFDM_CTX 0xff
+#define BIT_SIFS_OFDM_CTX(x)                                                   \
+	(((x) & BIT_MASK_SIFS_OFDM_CTX) << BIT_SHIFT_SIFS_OFDM_CTX)
+#define BITS_SIFS_OFDM_CTX (BIT_MASK_SIFS_OFDM_CTX << BIT_SHIFT_SIFS_OFDM_CTX)
+#define BIT_CLEAR_SIFS_OFDM_CTX(x) ((x) & (~BITS_SIFS_OFDM_CTX))
+#define BIT_GET_SIFS_OFDM_CTX(x)                                               \
+	(((x) >> BIT_SHIFT_SIFS_OFDM_CTX) & BIT_MASK_SIFS_OFDM_CTX)
+#define BIT_SET_SIFS_OFDM_CTX(x, v)                                            \
+	(BIT_CLEAR_SIFS_OFDM_CTX(x) | BIT_SIFS_OFDM_CTX(v))
+
+#define BIT_SHIFT_SIFS_CCK_CTX 0
+#define BIT_MASK_SIFS_CCK_CTX 0xff
+#define BIT_SIFS_CCK_CTX(x)                                                    \
+	(((x) & BIT_MASK_SIFS_CCK_CTX) << BIT_SHIFT_SIFS_CCK_CTX)
+#define BITS_SIFS_CCK_CTX (BIT_MASK_SIFS_CCK_CTX << BIT_SHIFT_SIFS_CCK_CTX)
+#define BIT_CLEAR_SIFS_CCK_CTX(x) ((x) & (~BITS_SIFS_CCK_CTX))
+#define BIT_GET_SIFS_CCK_CTX(x)                                                \
+	(((x) >> BIT_SHIFT_SIFS_CCK_CTX) & BIT_MASK_SIFS_CCK_CTX)
+#define BIT_SET_SIFS_CCK_CTX(x, v)                                             \
+	(BIT_CLEAR_SIFS_CCK_CTX(x) | BIT_SIFS_CCK_CTX(v))
+
 #define REG_TSFTR_SYN_OFFSET 0x0518
 #define REG_AGGR_BREAK_TIME 0x051A
 #define REG_SLOT 0x051B

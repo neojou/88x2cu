@@ -352,9 +352,6 @@ set_trx_fifo_info_8822c(struct halmac_adapter *adapter,
 			enum halmac_trx_mode mode);
 
 static void
-init_sifs_ctrl_8822c(struct halmac_adapter *adapter);
-
-static void
 init_rate_fallback_ctrl_8822c(struct halmac_adapter *adapter);
 
 enum halmac_ret_status
@@ -583,7 +580,6 @@ init_protocol_cfg_8822c(struct halmac_adapter *adapter)
 
 	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
 
-	init_sifs_ctrl_8822c(adapter);
 	init_rate_fallback_ctrl_8822c(adapter);
 
 	HALMAC_REG_W8(REG_AMPDU_MAX_TIME_V1, WLAN_AMPDU_MAX_TIME);
@@ -694,19 +690,6 @@ init_edca_cfg_8822c(struct halmac_adapter *adapter)
 	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
 
 	return HALMAC_RET_SUCCESS;
-}
-
-static void
-init_sifs_ctrl_8822c(struct halmac_adapter *adapter)
-{
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-
-	HALMAC_REG_W16(REG_SPEC_SIFS, WLAN_SIFS_DUR_TUNE);
-	HALMAC_REG_W32(REG_SIFS, WLAN_SIFS_CFG);
-	HALMAC_REG_W16(REG_RESP_SIFS_CCK,
-		       WLAN_SIFS_CCK_CTX | WLAN_SIFS_CCK_IRX << 8);
-	HALMAC_REG_W16(REG_RESP_SIFS_OFDM,
-		       WLAN_SIFS_OFDM_CTX | WLAN_SIFS_OFDM_IRX << 8);
 }
 
 static void
