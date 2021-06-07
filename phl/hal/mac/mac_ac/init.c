@@ -438,10 +438,42 @@ static void init_sifs_ctrl(struct mac_adapter *adapter)
 		       WLAN_SIFS_OFDM_CTX | WLAN_SIFS_OFDM_IRX << 8);
 }
 
+
+#define WLAN_DATA_RATE_FB_CNT_1_4	0x01000000
+#define WLAN_DATA_RATE_FB_CNT_5_8	0x08070504
+#define WLAN_RTS_RATE_FB_CNT_5_8	0x08070504
+#define WLAN_DATA_RATE_FB_RATE0		0xFE01F010
+#define WLAN_DATA_RATE_FB_RATE0_H	0x40000000
+#define WLAN_RTS_RATE_FB_RATE1		0x003FF010
+#define WLAN_RTS_RATE_FB_RATE1_H	0x40000000
+#define WLAN_RTS_RATE_FB_RATE4		0x0600F010
+#define WLAN_RTS_RATE_FB_RATE4_H	0x400003E0
+#define WLAN_RTS_RATE_FB_RATE5		0x0600F015
+#define WLAN_RTS_RATE_FB_RATE5_H	0x000000E0
+
+static void init_rate_fallback_ctrl(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+
+	MAC_REG_W32(REG_DARFRC, WLAN_DATA_RATE_FB_CNT_1_4);
+	MAC_REG_W32(REG_DARFRCH, WLAN_DATA_RATE_FB_CNT_5_8);
+	MAC_REG_W32(REG_RARFRCH, WLAN_RTS_RATE_FB_CNT_5_8);
+
+	MAC_REG_W32(REG_ARFR0, WLAN_DATA_RATE_FB_RATE0);
+	MAC_REG_W32(REG_ARFRH0, WLAN_DATA_RATE_FB_RATE0_H);
+	MAC_REG_W32(REG_ARFR1_V1, WLAN_RTS_RATE_FB_RATE1);
+	MAC_REG_W32(REG_ARFRH1_V1, WLAN_RTS_RATE_FB_RATE1_H);
+	MAC_REG_W32(REG_ARFR4, WLAN_RTS_RATE_FB_RATE4);
+	MAC_REG_W32(REG_ARFRH4, WLAN_RTS_RATE_FB_RATE4_H);
+	MAC_REG_W32(REG_ARFR5, WLAN_RTS_RATE_FB_RATE5);
+	MAC_REG_W32(REG_ARFRH5, WLAN_RTS_RATE_FB_RATE5_H);
+}
+
 static u32 init_protocol_cfg(struct mac_adapter *adapter)
 {
 	init_txq_ctrl(adapter);
 	init_sifs_ctrl(adapter);
+	init_rate_fallback_ctrl(adapter);
 
 	return MACSUCCESS;
 }
