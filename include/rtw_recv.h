@@ -30,13 +30,6 @@
 #endif
 
 
-#if defined(CONFIG_RTL8821C) && defined(CONFIG_SDIO_HCI) && defined(CONFIG_RECV_THREAD_MODE)
-	#ifdef NR_RECVBUFF
-	#undef NR_RECVBUFF
-	#define NR_RECVBUFF (32)
-	#endif
-#endif
-
 #define NR_RECVFRAME 256
 
 #define RXFRAME_ALIGN	8
@@ -578,11 +571,6 @@ enum rtw_rx_llc_hdl {
 struct recv_priv {
 	struct dvobj_priv *dvobj;
 
-#ifdef CONFIG_RECV_THREAD_MODE
-	_sema	recv_sema;
-
-#endif
-
 	/* _queue	blk_strms[MAX_RX_NUMBLKS];    */ /* keeping the block ack frame until return ack */
 	_queue	free_recv_queue;
 	#if 0
@@ -707,10 +695,6 @@ void rtw_reordering_ctrl_timeout_handler(void *pcontext);
 void rx_query_phy_status(union recv_frame *rframe, u8 *phy_stat);
 int rtw_inc_and_chk_continual_no_rx_packet(struct sta_info *sta, int tid_index);
 void rtw_reset_continual_no_rx_packet(struct sta_info *sta, int tid_index);
-
-#ifdef CONFIG_RECV_THREAD_MODE
-thread_return rtw_recv_thread(thread_context context);
-#endif
 
 __inline static u8 *get_rxmem(union recv_frame *precvframe)
 {

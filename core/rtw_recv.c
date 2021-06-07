@@ -96,14 +96,7 @@ sint rtw_init_recv_priv(struct dvobj_priv *dvobj)
 	sint	res = _SUCCESS;
 	struct recv_priv *precvpriv = &dvobj->recvpriv;
 
-#ifdef CONFIG_RECV_THREAD_MODE
-	_rtw_init_sema(&precvpriv->recv_sema, 0);
-#endif
-
 	_rtw_init_queue(&precvpriv->free_recv_queue);
-	#if 0
-	_rtw_init_queue(&precvpriv->uc_swdec_pending_queue);
-	#endif
 
 	precvpriv->dvobj = dvobj;
 
@@ -157,14 +150,6 @@ exit:
 void rtw_free_recv_priv(struct dvobj_priv *dvobj)
 {
 	struct recv_priv *precvpriv = &dvobj->recvpriv;
-
-	#if 0
-	rtw_free_uc_swdec_pending_queue(dvobj);
-	#endif
-
-#ifdef CONFIG_RECV_THREAD_MODE
-	_rtw_free_sema(&precvpriv->recv_sema);
-#endif
 
 	rtw_os_recv_resource_free(precvpriv);
 
@@ -4638,62 +4623,6 @@ exit:
 	return ret;
 }
 #endif
-
-#ifdef CONFIG_RECV_THREAD_MODE
-thread_return rtw_recv_thread(thread_context context)
-{
-	_adapter *adapter = (_adapter *)context;
-	struct dvobj_priv *dvobj = adapter_to_dvobj(adapter);
-	struct recv_priv *recvpriv = &dvobj->recvpriv;
-	s32 err = _SUCCESS;
-#ifdef RTW_RECV_THREAD_HIGH_PRIORITY
-#ifdef PLATFORM_LINUX
-	struct sched_param param = { .sched_priority = 1 };
-
-	sched_setscheduler(current, SCHED_FIFO, &param);
-#endif /* PLATFORM_LINUX */
-#endif /*RTW_RECV_THREAD_HIGH_PRIORITY*/
-	rtw_thread_enter("RTW_RECV_THREAD");
-
-	RTW_INFO(FUNC_ADPT_FMT" enter\n", FUNC_ADPT_ARG(adapter));
-
-	do {
-		err = _rtw_down_sema(&recvpriv->recv_sema);
-		if (_FAIL == err) {
-			RTW_ERR(FUNC_ADPT_FMT" down recv_sema fail!\n", FUNC_ADPT_ARG(adapter));
-			goto exit;
-		}
-
-		if (RTW_CANNOT_RUN(dvobj)) {
-			RTW_DBG(FUNC_ADPT_FMT "- bDriverStopped(%s) bSurpriseRemoved(%s)\n",
-				FUNC_ADPT_ARG(adapter),
-				dev_is_drv_stopped(dvobj) ? "True" : "False",
-				dev_is_surprise_removed(dvobj) ? "True" : "False");
-			goto exit;
-		}
-
-		err = rtw_hal_recv_hdl(adapter);
-
-		if (err == RTW_RFRAME_UNAVAIL
-			|| err == RTW_RFRAME_PKT_UNAVAIL
-		) {
-			rtw_msleep_os(1);
-			_rtw_up_sema(&recvpriv->recv_sema);
-		}
-
-		flush_signals_thread();
-
-	} while (err != _FAIL);
-
-exit:
-
-	RTW_INFO(FUNC_ADPT_FMT " Exit\n", FUNC_ADPT_ARG(adapter));
-
-	rtw_thread_wait_stop();
-
-	return 0;
-}
-#endif /* CONFIG_RECV_THREAD_MODE */
 
 u8 rtw_init_lite_recv_resource(struct dvobj_priv *dvobj)
 {

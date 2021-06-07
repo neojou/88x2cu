@@ -56,12 +56,6 @@
 #include <linux/list.h>
 #include <linux/vmalloc.h>
 
-#ifdef CONFIG_RECV_THREAD_MODE
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))
-#include <uapi/linux/sched/types.h>	/* struct sched_param */
-#endif
-#endif
-
 #if (LINUX_VERSION_CODE <= KERNEL_VERSION(2, 5, 41))
 #include <linux/tqueue.h>
 #endif

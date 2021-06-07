@@ -790,20 +790,6 @@ u32 rtw_start_drv_threads(_adapter *padapter)
 
 	RTW_INFO(FUNC_ADPT_FMT" enter\n", FUNC_ADPT_ARG(padapter));
 
-#ifdef CONFIG_RECV_THREAD_MODE
-aa
-	if (is_primary_adapter(padapter)) {
-		if (padapter->recvThread == NULL) {
-			RTW_INFO(FUNC_ADPT_FMT " start RTW_RECV_THREAD\n", FUNC_ADPT_ARG(padapter));
-			padapter->recvThread = kthread_run(rtw_recv_thread, padapter, "RTW_RECV_THREAD");
-			if (IS_ERR(padapter->recvThread)) {
-				padapter->recvThread = NULL;
-				_status = _FAIL;
-			}
-		}
-	}
-#endif
-
 	if (is_primary_adapter(padapter)) {
 		if (padapter->cmdThread == NULL) {
 			RTW_INFO(FUNC_ADPT_FMT " start RTW_CMD_THREAD\n", FUNC_ADPT_ARG(padapter));
@@ -819,6 +805,7 @@ aa
 
 
 #ifdef CONFIG_EVENT_THREAD_MODE
+aa
 	if (padapter->evtThread == NULL) {
 		RTW_INFO(FUNC_ADPT_FMT " start RTW_EVENT_THREAD\n", FUNC_ADPT_ARG(padapter));
 		padapter->evtThread = kthread_run(event_thread, padapter, "RTW_EVENT_THREAD");
@@ -845,15 +832,6 @@ void rtw_stop_drv_threads(_adapter *padapter)
 		_rtw_up_sema(&padapter->evtpriv.evt_notify);
 		rtw_thread_stop(padapter->evtThread);
 		padapter->evtThread = NULL;
-	}
-#endif
-
-#ifdef CONFIG_RECV_THREAD_MODE
-	if (is_primary_adapter(padapter) && padapter->recvThread) {
-		/* Below is to termindate rx_thread... */
-		_rtw_up_sema(&adapter_to_dvobj(padapter)->recvpriv.recv_sema);
-		rtw_thread_stop(padapter->recvThread);
-		padapter->recvThread = NULL;
 	}
 #endif
 

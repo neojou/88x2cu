@@ -40,9 +40,6 @@ struct rtw_intf_ops {
 	/*** recv section ***/
 	s32(*init_recv_priv)(struct dvobj_priv *dvobj);
 	void(*free_recv_priv)(struct dvobj_priv *dvobj);
-	#ifdef CONFIG_RECV_THREAD_MODE
-	s32 (*recv_hdl)(_adapter *adapter);
-	#endif
 
 	#if defined(CONFIG_PCI_HCI)
 	u32(*trxbd_init)(_adapter *adapter);

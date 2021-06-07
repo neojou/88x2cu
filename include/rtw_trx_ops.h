@@ -78,13 +78,6 @@ static inline void rtw_intf_free_recv_priv(struct dvobj_priv *dvobj)
 	return dvobj->intf_ops->free_recv_priv(dvobj);
 }
 
-#ifdef CONFIG_RECV_THREAD_MODE
-static inline s32 rtw_intf_recv_hdl(_adapter *adapter)
-{
-	return adapter_to_dvobj(adapter)->intf_ops->recv_hdl(adapter);
-}
-#endif
-
 struct lite_data_buf *rtw_alloc_litedatabuf(struct trx_data_buf_q *data_buf_q);
 s32 rtw_free_litedatabuf(struct trx_data_buf_q *data_buf_q,
 		struct lite_data_buf *lite_data_buf);

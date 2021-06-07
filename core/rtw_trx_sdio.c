@@ -521,8 +521,5 @@ struct rtw_intf_ops sdio_ops = {
 	/******************  recv *********************/
 	.init_recv_priv = sdio_init_recv_priv,
 	.free_recv_priv = sdio_free_recv_priv,
-	#ifdef CONFIG_RECV_THREAD_MODE
-	.recv_hdl = sdio_recv_hdl,
-	#endif
 };
 
