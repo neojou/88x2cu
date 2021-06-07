@@ -2389,7 +2389,7 @@ void rtw_hal_set_bcn_rsvdpage_loc_cmd(_adapter *adapter)
 	u32 page_size = 0;
 	u8 bcn_rsvdpage[H2C_BCN_RSVDPAGE_LEN] = {0};
 
-	rtw_hal_get_def_var(adapter, HAL_DEF_TX_PAGE_SIZE, (u8 *)&page_size);
+	page_size = 128;
 	#if 1
 	for (vap_id = 0; vap_id < CONFIG_LIMITED_AP_NUM; vap_id++) {
 		if (dvobj->vap_map & BIT(vap_id))
@@ -4266,7 +4266,7 @@ int rtw_hal_get_rsvd_page(_adapter *adapter, u32 page_offset,
 		return rst;
 	}
 #endif
-	rtw_hal_get_def_var(adapter, HAL_DEF_TX_PAGE_SIZE, &page_size);
+	page_size = 128;
 
 	addr = page_offset * page_size;
 	size = page_num * page_size;
@@ -4303,7 +4303,7 @@ void rtw_dump_rsvd_page(void *sel, _adapter *adapter, u8 page_offset, u8 page_nu
 	RTW_PRINT_SEL(sel, "======= RSVD PAGE DUMP =======\n");
 	RTW_PRINT_SEL(sel, "page_offset:%d, page_num:%d\n", page_offset, page_num);
 
-	rtw_hal_get_def_var(adapter, HAL_DEF_TX_PAGE_SIZE, &page_size);
+	page_size = 128;
 	if (page_size) {
 		buf_size = page_size * page_num;
 		buffer = rtw_zvmalloc(buf_size);
@@ -4718,7 +4718,7 @@ static void rtw_hal_get_aoac_rpt(_adapter *adapter)
 	page_offset = pwrctl->wowlan_aoac_rpt_loc;
 	page_number = 1;
 
-	rtw_hal_get_def_var(adapter, HAL_DEF_TX_PAGE_SIZE, &page_size);
+	page_size = 128;
 	buf_size = page_size * page_number;
 
 	buffer = rtw_zvmalloc(buf_size);
@@ -5308,13 +5308,6 @@ void rtw_hal_set_fw_wow_related_cmd(_adapter *padapter, u8 enable)
 #endif /* CONFIG_WAR_OFFLOAD */
 
 	} else {
-#if 0
-		{
-			u32 PageSize = 0;
-			rtw_hal_get_def_var(padapter, HAL_DEF_TX_PAGE_SIZE, (u8 *)&PageSize);
-			dump_TX_FIFO(padapter, 4, PageSize);
-		}
-#endif
 	}
 #ifdef CONFIG_CUSTOM_PULSE
 	rtw_hal_set_gpio_custom_cmd(padapter, enable);
@@ -8663,7 +8656,7 @@ bool rtw_read_from_frame_mask(_adapter *adapter, u8 idx)
 		return _FALSE;
 	}
 
-	rtw_hal_get_def_var(adapter, HAL_DEF_TX_PAGE_SIZE, (u8 *)&page_sz);
+	page_size = 128;
 	if (page_sz == 0) {
 		RTW_INFO("[Error]: %s, page_sz is 0!!\n", __func__);
 		return _FALSE;
@@ -8756,7 +8749,7 @@ bool rtw_write_to_frame_mask(_adapter *adapter, u8 idx,
 		return _FALSE;
 	}
 
-	rtw_hal_get_def_var(adapter, HAL_DEF_TX_PAGE_SIZE, (u8 *)&page_sz);
+	page_size = 128;
 	if (page_sz == 0) {
 		RTW_INFO("[Error]: %s, page_sz is 0!!\n", __func__);
 		return _FALSE;
@@ -8851,11 +8844,7 @@ bool rtw_write_to_frame_mask_buf(_adapter *adapter, u8 idx,
 		return _FALSE;
 	}
 
-	rtw_hal_get_def_var(adapter, HAL_DEF_TX_PAGE_SIZE, (u8 *)&page_sz);
-	if (page_sz == 0) {
-		RTW_ERR("[Error]: %s, page_sz is 0!!\n", __func__);
-		return _FALSE;
-	}
+	page_sz = 128;
 
 	/* Fill WKFM */
 	for (i = 0; i < WKFMCAM_ADDR_NUM / 2; i++) {
@@ -10451,12 +10440,7 @@ static void _rtw_hal_set_fw_rsvd_page(_adapter *adapter, bool finished, u8 *page
 	pxmitpriv = &adapter->xmitpriv;
 	pwrctl = adapter_to_pwrctl(adapter);
 
-	rtw_hal_get_def_var(adapter, HAL_DEF_TX_PAGE_SIZE, (u8 *)&PageSize);
-
-	if (PageSize == 0) {
-		RTW_ERR("[Error]: %s, PageSize is zero!!\n", __func__);
-		return;
-	}
+	PageSize = 128;
 	nr_assoc_if = _rtw_mi_assoc_if_num(adapter);
 
 	if ((pwrctl->wowlan_mode == _TRUE && pwrctl->wowlan_in_resume == _FALSE) ||
@@ -11975,7 +11959,7 @@ u8 SetHwReg(_adapter *adapter, u8 variable, u8 *val)
 
 				/*rtw_hal_get_def_var(adapter, HAL_DEF_TX_PAGE_BOUNDARY, &drv_pg_bndy);*/
 				rtw_halmac_get_rsvd_drv_pg_bndy(adapter_to_dvobj(adapter), &drv_pg_bndy);
-				rtw_hal_get_def_var(adapter, HAL_DEF_TX_PAGE_SIZE, (u8 *)&page_size);
+				page_size = 128;
 
 				if (vap_id != 0xFF)
 					bcn_addr = drv_pg_bndy + (vap_id * (MAX_BEACON_LEN / page_size));
@@ -12272,9 +12256,6 @@ GetHalDefVar(_adapter *adapter, HAL_DEF_VARIABLE variable, void *value)
 		break;
 	case HAL_DEF_ANT_DETECT:
 		*((u8 *)value) = hal_data->AntDetection;
-		break;
-	case HAL_DEF_TX_PAGE_SIZE:
-		*((u32 *)value) = _get_page_size(adapter);
 		break;
 	case HAL_DEF_TX_STBC:
 		#ifdef CONFIG_ALPHA_SMART_ANTENNA 
