@@ -1997,24 +1997,6 @@ void dump_trx_share_mode(void *sel, struct _ADAPTER *adapter)
 }
 #endif
 
-static enum halmac_trx_mode _choose_trx_mode(struct dvobj_priv *d)
-{
-	PADAPTER p;
-
-
-	p = dvobj_get_primary_adapter(d);
-
-	if (p->registrypriv.wifi_spec)
-		return HALMAC_TRX_MODE_WMM;
-
-#ifdef CONFIG_SUPPORT_TRX_SHARED
-	if (_rtw_get_trx_share_mode(p))
-		return HALMAC_TRX_MODE_TRXSHARE;
-#endif
-
-	return HALMAC_TRX_MODE_NORMAL;
-}
-
 static inline enum halmac_rf_type _rf_type_drv2halmac(enum rf_type rf_drv)
 {
 	enum halmac_rf_type rf_mac;
@@ -2471,7 +2453,7 @@ resume_tx:
 		hal->drv_rsvd_page_number = 8;
 
 		/* 8. Init TRX Configuration */
-		mode = _choose_trx_mode(d);
+		mode = HALMAC_TRX_MODE_NORMAL;
 		hal_status = rtw_hal_mac_trx_init(hal_info);
 		if (hal_status != RTW_HAL_STATUS_SUCCESS) {
 			RTW_ERR("%s: drtw_hal_mac_trx_init FAIL! status=0x%02x\n", __func__, hal_status);
@@ -2513,7 +2495,7 @@ static int init_mac_flow(struct dvobj_priv *d)
 	halmac->txff_alloc.rsvd_drv_pg_num = 8;
 	hal->drv_rsvd_page_number = 8;
 
-	trx_mode = _choose_trx_mode(d);
+	trx_mode = HALMAC_TRX_MODE_NORMAL;
 
 	hal_status = rtw_hal_mac_trx_init(hal_info);
 	if (hal_status != RTW_HAL_STATUS_SUCCESS) {
