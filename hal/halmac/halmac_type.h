@@ -1291,16 +1291,6 @@ enum halmac_feature_id {
 	HALMAC_FEATURE_ALL,             /* Support, only for reset */
 };
 
-enum halmac_drv_rsvd_pg_num {
-	HALMAC_RSVD_PG_NUM8,	/* 1K */
-	HALMAC_RSVD_PG_NUM16,   /* 2K */
-	HALMAC_RSVD_PG_NUM24,   /* 3K */
-	HALMAC_RSVD_PG_NUM32,   /* 4K */
-	HALMAC_RSVD_PG_NUM64,   /* 8K */
-	HALMAC_RSVD_PG_NUM128,  /* 16K */
-	HALMAC_RSVD_PG_NUM256,  /* 32K */
-};
-
 enum halmac_pcie_cfg {
 	HALMAC_PCIE_GEN1,
 	HALMAC_PCIE_GEN2,

@@ -1997,67 +1997,6 @@ void dump_trx_share_mode(void *sel, struct _ADAPTER *adapter)
 }
 #endif
 
-static enum halmac_drv_rsvd_pg_num _rsvd_page_num_drv2halmac(u16 num)
-{
-	if (num <= 8)
-		return HALMAC_RSVD_PG_NUM8;
-	if (num <= 16)
-		return HALMAC_RSVD_PG_NUM16;
-	if (num <= 24)
-		return HALMAC_RSVD_PG_NUM24;
-	if (num <= 32)
-		return HALMAC_RSVD_PG_NUM32;
-	if (num <= 64)
-		return HALMAC_RSVD_PG_NUM64;
-	if (num <= 128)
-		return HALMAC_RSVD_PG_NUM128;
-
-	if (num > 256)
-		RTW_WARN("%s: Fail to allocate RSVD page(%d)!!"
-			 " The MAX RSVD page number is 256...\n",
-			 __FUNCTION__, num);
-
-	return HALMAC_RSVD_PG_NUM256;
-}
-
-static u16 _rsvd_page_num_halmac2drv(enum halmac_drv_rsvd_pg_num rsvd_page_number)
-{
-	u16 num = 0;
-
-
-	switch (rsvd_page_number) {
-	case HALMAC_RSVD_PG_NUM8:
-		num = 8;
-		break;
-
-	case HALMAC_RSVD_PG_NUM16:
-		num = 16;
-		break;
-
-	case HALMAC_RSVD_PG_NUM24:
-		num = 24;
-		break;
-
-	case HALMAC_RSVD_PG_NUM32:
-		num = 32;
-		break;
-
-	case HALMAC_RSVD_PG_NUM64:
-		num = 64;
-		break;
-
-	case HALMAC_RSVD_PG_NUM128:
-		num = 128;
-		break;
-
-	case HALMAC_RSVD_PG_NUM256:
-		num = 256;
-		break;
-	}
-
-	return num;
-}
-
 static enum halmac_trx_mode _choose_trx_mode(struct dvobj_priv *d)
 {
 	PADAPTER p;
@@ -2267,7 +2206,6 @@ static int _cfg_drv_rsvd_pg_num(struct dvobj_priv *d)
 	struct hal_com_data *hal;
 	struct halmac_adapter *halmac;
 	struct halmac_api *api;
-	enum halmac_drv_rsvd_pg_num rsvd_page_number;
 	enum halmac_ret_status status;
 	u8 drv_rsvd_num;
 	int ret = 0;
@@ -2279,14 +2217,10 @@ static int _cfg_drv_rsvd_pg_num(struct dvobj_priv *d)
 	api = HALMAC_GET_API(halmac);
 
 	_rtw_hal_set_fw_rsvd_page(a, _FALSE, &drv_rsvd_num);
-	rsvd_page_number = _rsvd_page_num_drv2halmac(drv_rsvd_num);
 	halmac->txff_alloc.rsvd_drv_pg_num = 8;
-	hal->drv_rsvd_page_number = _rsvd_page_num_halmac2drv(rsvd_page_number);
+	hal->drv_rsvd_page_number = 8;
 
 exit:
-	RTW_INFO("%s: request %d pages => halmac %d pages %s\n"
-		, __FUNCTION__, drv_rsvd_num, _rsvd_page_num_halmac2drv(rsvd_page_number)
-		, ret ? "fail" : "success");
 
 	return ret;
 }
@@ -2585,7 +2519,6 @@ static int init_mac_flow(struct dvobj_priv *d)
 	struct phl_info_t *phl_info = d->phl;
 	struct hal_info_t *hal_info = phl_info->hal;
 	enum rtw_hal_status hal_status;
-	enum halmac_drv_rsvd_pg_num rsvd_page_number;
 	union halmac_wlan_addr hwa;
 	enum halmac_trx_mode trx_mode;
 	enum halmac_ret_status status;
