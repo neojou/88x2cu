@@ -370,7 +370,6 @@ mount_api_8822c(struct halmac_adapter *adapter)
 	adapter->txff_alloc.rsvd_drv_pg_num = RSVD_PG_DRV_NUM;
 
 	api->halmac_init_system_cfg = init_system_cfg_8822c;
-	api->halmac_init_protocol_cfg = init_protocol_cfg_8822c;
 	api->halmac_pinmux_get_func = pinmux_get_func_8822c;
 	api->halmac_pinmux_set_func = pinmux_set_func_8822c;
 	api->halmac_pinmux_free_func = pinmux_free_func_8822c;
@@ -557,71 +556,6 @@ init_system_cfg_8822c(struct halmac_adapter *adapter)
 
 	return HALMAC_RET_SUCCESS;
 }
-
-/**
- * init_protocol_cfg_8822c() - config protocol register
- * @adapter : the adapter of halmac
- * Author : KaiYuan Chang/Ivan Lin
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-init_protocol_cfg_8822c(struct halmac_adapter *adapter)
-{
-	u32 max_agg_num;
-	u32 max_rts_agg_num;
-	u32 value32;
-	u16 pre_txcnt;
-	u8 value8;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-
-	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
-
-	HALMAC_REG_W8(REG_AMPDU_MAX_TIME_V1, WLAN_AMPDU_MAX_TIME);
-	HALMAC_REG_W8_SET(REG_TX_HANG_CTRL, BIT_EN_EOF_V1);
-
-	pre_txcnt = WLAN_PRE_TXCNT_TIME_TH | BIT_EN_PRECNT;
-	HALMAC_REG_W8(REG_PRECNT_CTRL, (u8)(pre_txcnt & 0xFF));
-	HALMAC_REG_W8(REG_PRECNT_CTRL + 1, (u8)(pre_txcnt >> 8));
-
-	max_agg_num = WLAN_MAX_AGG_PKT_LIMIT;
-	max_rts_agg_num = WLAN_RTS_MAX_AGG_PKT_LIMIT;
-	value32 = WLAN_RTS_LEN_TH | (WLAN_RTS_TX_TIME_TH << 8) |
-				(max_agg_num << 16) | (max_rts_agg_num << 24);
-	HALMAC_REG_W32(REG_PROT_MODE_CTRL, value32);
-
-	HALMAC_REG_W16(REG_BAR_MODE_CTRL + 2,
-		       WLAN_BAR_RETRY_LIMIT | WLAN_RA_TRY_RATE_AGG_LIMIT << 8);
-
-	HALMAC_REG_W8(REG_FAST_EDCA_VOVI_SETTING, WALN_FAST_EDCA_VO_TH);
-	HALMAC_REG_W8(REG_FAST_EDCA_VOVI_SETTING + 2, WLAN_FAST_EDCA_VI_TH);
-	HALMAC_REG_W8(REG_FAST_EDCA_BEBK_SETTING, WLAN_FAST_EDCA_BE_TH);
-	HALMAC_REG_W8(REG_FAST_EDCA_BEBK_SETTING + 2, WLAN_FAST_EDCA_BK_TH);
-
-	/*close A/B/C/D-cut BA parser*/
-	HALMAC_REG_W8_CLR(REG_LIFETIME_EN, BIT(5));
-
-	/*Bypass TXBF error protection due to sounding failure*/
-	value32 = HALMAC_REG_R32(REG_BF0_TIME_SETTING) & (~BIT_BF0_UPDATE_EN);
-	HALMAC_REG_W32(REG_BF0_TIME_SETTING, value32 | BIT_BF0_TIMER_EN);
-	value32 = HALMAC_REG_R32(REG_BF1_TIME_SETTING) & (~BIT_BF1_UPDATE_EN);
-	HALMAC_REG_W32(REG_BF1_TIME_SETTING, value32 | BIT_BF1_TIMER_EN);
-	value32 = HALMAC_REG_R32(REG_BF_TIMEOUT_EN) & (~BIT_BF0_TIMEOUT_EN) &
-		 (~BIT_BF1_TIMEOUT_EN);
-	HALMAC_REG_W32(REG_BF_TIMEOUT_EN, value32);
-
-	/*Fix incorrect HW default value of RSC*/
-	value32 = BIT_CLEAR_RRSR_RSC_8822C(HALMAC_REG_R32(REG_RRSR));
-	HALMAC_REG_W32(REG_RRSR, value32);
-
-	value8 = HALMAC_REG_R8(REG_INIRTS_RATE_SEL);
-	HALMAC_REG_W8(REG_INIRTS_RATE_SEL, value8 | BIT(5));
-
-	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
-
-	return HALMAC_RET_SUCCESS;
-}
-
 
 /**
  * init_edca_cfg_8822c() - init EDCA config

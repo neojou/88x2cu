@@ -447,7 +447,10 @@
 #define REG_AMPDU_MAX_LENGTH_HT 0x0458
 #define REG_ACQ_STOP 0x045C
 #define REG_NDPA_RATE 0x045D
+
 #define REG_TX_HANG_CTRL 0x045E
+#define BIT_EN_EOF_V1	BIT(2)
+
 #define REG_NDPA_OPT_CTRL 0x045F
 #define REG_AMPDU_MAX_LENGTH_VHT 0x0460
 #define REG_RD_RESP_PKT_TH 0x0463
@@ -495,7 +498,10 @@
 #define REG_PTCL_ERR_STATUS 0x04E2
 #define REG_NULL_PKT_STATUS_EXTEND 0x04E3
 #define REG_HQMGQ_DROP 0x04E4
+
 #define REG_PRECNT_CTRL 0x04E5
+#define BIT_EN_PRECNT BIT(11)
+
 #define REG_BT_POLLUTE_PKT_CNT 0x04E8
 #define REG_PTCL_DBG 0x04EC
 #define REG_CPUMGQ_TIMER_CTRL2 0x04F4
@@ -509,9 +515,67 @@
 #define REG_CMDQ_BCNQ_INFO 0x1414
 #define REG_LOOPBACK_OPTION 0x1420
 #define REG_AESIV_SETTING 0x1424
+
 #define REG_BF0_TIME_SETTING 0x1428
+#define BIT_BF0_TIMER_SET BIT(31)
+#define BIT_BF0_TIMER_CLR BIT(30)
+#define BIT_BF0_UPDATE_EN BIT(29)
+#define BIT_BF0_TIMER_EN BIT(28)
+
+#define BIT_SHIFT_BF0_PRETIME_OVER 16
+#define BIT_MASK_BF0_PRETIME_OVER 0xfff
+#define BIT_BF0_PRETIME_OVER(x)                                                \
+	(((x) & BIT_MASK_BF0_PRETIME_OVER) << BIT_SHIFT_BF0_PRETIME_OVER)
+#define BITS_BF0_PRETIME_OVER                                                  \
+	(BIT_MASK_BF0_PRETIME_OVER << BIT_SHIFT_BF0_PRETIME_OVER)
+#define BIT_CLEAR_BF0_PRETIME_OVER(x) ((x) & (~BITS_BF0_PRETIME_OVER))
+#define BIT_GET_BF0_PRETIME_OVER(x)                                            \
+	(((x) >> BIT_SHIFT_BF0_PRETIME_OVER) & BIT_MASK_BF0_PRETIME_OVER)
+#define BIT_SET_BF0_PRETIME_OVER(x, v)                                         \
+	(BIT_CLEAR_BF0_PRETIME_OVER(x) | BIT_BF0_PRETIME_OVER(v))
+
+#define BIT_SHIFT_BF0_LIFETIME 0
+#define BIT_MASK_BF0_LIFETIME 0xffff
+#define BIT_BF0_LIFETIME(x)                                                    \
+	(((x) & BIT_MASK_BF0_LIFETIME) << BIT_SHIFT_BF0_LIFETIME)
+#define BITS_BF0_LIFETIME (BIT_MASK_BF0_LIFETIME << BIT_SHIFT_BF0_LIFETIME)
+#define BIT_CLEAR_BF0_LIFETIME(x) ((x) & (~BITS_BF0_LIFETIME))
+#define BIT_GET_BF0_LIFETIME(x)                                                \
+	(((x) >> BIT_SHIFT_BF0_LIFETIME) & BIT_MASK_BF0_LIFETIME)
+#define BIT_SET_BF0_LIFETIME(x, v)                                             \
+	(BIT_CLEAR_BF0_LIFETIME(x) | BIT_BF0_LIFETIME(v))
+
 #define REG_BF1_TIME_SETTING 0x142C
+#define BIT_BF1_TIMER_SET BIT(31)
+#define BIT_BF1_TIMER_CLR BIT(30)
+#define BIT_BF1_UPDATE_EN BIT(29)
+#define BIT_BF1_TIMER_EN BIT(28)
+#define BIT_SHIFT_BF1_PRETIME_OVER 16
+#define BIT_MASK_BF1_PRETIME_OVER 0xfff
+#define BIT_BF1_PRETIME_OVER(x)                                                \
+	(((x) & BIT_MASK_BF1_PRETIME_OVER) << BIT_SHIFT_BF1_PRETIME_OVER)
+#define BITS_BF1_PRETIME_OVER                                                  \
+	(BIT_MASK_BF1_PRETIME_OVER << BIT_SHIFT_BF1_PRETIME_OVER)
+#define BIT_CLEAR_BF1_PRETIME_OVER(x) ((x) & (~BITS_BF1_PRETIME_OVER))
+#define BIT_GET_BF1_PRETIME_OVER(x)                                            \
+	(((x) >> BIT_SHIFT_BF1_PRETIME_OVER) & BIT_MASK_BF1_PRETIME_OVER)
+#define BIT_SET_BF1_PRETIME_OVER(x, v)                                         \
+	(BIT_CLEAR_BF1_PRETIME_OVER(x) | BIT_BF1_PRETIME_OVER(v))
+#define BIT_SHIFT_BF1_LIFETIME 0
+#define BIT_MASK_BF1_LIFETIME 0xffff
+#define BIT_BF1_LIFETIME(x)                                                    \
+	(((x) & BIT_MASK_BF1_LIFETIME) << BIT_SHIFT_BF1_LIFETIME)
+#define BITS_BF1_LIFETIME (BIT_MASK_BF1_LIFETIME << BIT_SHIFT_BF1_LIFETIME)
+#define BIT_CLEAR_BF1_LIFETIME(x) ((x) & (~BITS_BF1_LIFETIME))
+#define BIT_GET_BF1_LIFETIME(x)                                                \
+	(((x) >> BIT_SHIFT_BF1_LIFETIME) & BIT_MASK_BF1_LIFETIME)
+#define BIT_SET_BF1_LIFETIME(x, v)                                             \
+	(BIT_CLEAR_BF1_LIFETIME(x) | BIT_BF1_LIFETIME(v))
+
 #define REG_BF_TIMEOUT_EN 0x1430
+#define BIT_BF1_TIMEOUT_EN BIT(1)
+#define BIT_BF0_TIMEOUT_EN BIT(0)
+
 #define REG_MACID_RELEASE0 0x1434
 #define REG_MACID_RELEASE1 0x1438
 #define REG_MACID_RELEASE2 0x143C

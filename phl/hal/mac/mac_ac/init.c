@@ -469,11 +469,101 @@ static void init_rate_fallback_ctrl(struct mac_adapter *adapter)
 	MAC_REG_W32(REG_ARFRH5, WLAN_RTS_RATE_FB_RATE5_H);
 }
 
+
+#define WLAN_AMPDU_MAX_TIME		0x70
+#define WLAN_RTS_LEN_TH			0xFF
+#define WLAN_RTS_TX_TIME_TH		0x08
+#define WLAN_MAX_AGG_PKT_LIMIT		0x3F
+#define WLAN_RTS_MAX_AGG_PKT_LIMIT	0x20
+#define WLAN_PRE_TXCNT_TIME_TH		0x1E4
+#define WALN_FAST_EDCA_VO_TH		0x06
+#define WLAN_FAST_EDCA_VI_TH		0x06
+#define WLAN_FAST_EDCA_BE_TH		0x06
+#define WLAN_FAST_EDCA_BK_TH		0x06
+#define WLAN_BAR_RETRY_LIMIT		0x01
+#define WLAN_BAR_ACK_TYPE		0x05
+#define WLAN_RA_TRY_RATE_AGG_LIMIT	0x08
+#define WLAN_RESP_TXRATE		0x84
+#define WLAN_ACK_TO			0x21
+#define WLAN_ACK_TO_CCK			0x6A
+
+/* 2 REG_RRSR_8822C */
+#define BIT_SHIFT_RRSR_RSC_8822C 21
+#define BIT_MASK_RRSR_RSC_8822C 0x3
+#define BIT_RRSR_RSC_8822C(x)                                                  \
+	(((x) & BIT_MASK_RRSR_RSC_8822C) << BIT_SHIFT_RRSR_RSC_8822C)
+#define BITS_RRSR_RSC_8822C                                                    \
+	(BIT_MASK_RRSR_RSC_8822C << BIT_SHIFT_RRSR_RSC_8822C)
+#define BIT_CLEAR_RRSR_RSC_8822C(x) ((x) & (~BITS_RRSR_RSC_8822C))
+#define BIT_GET_RRSR_RSC_8822C(x)                                              \
+	(((x) >> BIT_SHIFT_RRSR_RSC_8822C) & BIT_MASK_RRSR_RSC_8822C)
+#define BIT_SET_RRSR_RSC_8822C(x, v)                                           \
+	(BIT_CLEAR_RRSR_RSC_8822C(x) | BIT_RRSR_RSC_8822C(v))
+#define BIT_SHIFT_RRSC_BITMAP_8822C 0
+#define BIT_MASK_RRSC_BITMAP_8822C 0xfffff
+#define BIT_RRSC_BITMAP_8822C(x)                                               \
+	(((x) & BIT_MASK_RRSC_BITMAP_8822C) << BIT_SHIFT_RRSC_BITMAP_8822C)
+#define BITS_RRSC_BITMAP_8822C                                                 \
+	(BIT_MASK_RRSC_BITMAP_8822C << BIT_SHIFT_RRSC_BITMAP_8822C)
+#define BIT_CLEAR_RRSC_BITMAP_8822C(x) ((x) & (~BITS_RRSC_BITMAP_8822C))
+#define BIT_GET_RRSC_BITMAP_8822C(x)                                           \
+	(((x) >> BIT_SHIFT_RRSC_BITMAP_8822C) & BIT_MASK_RRSC_BITMAP_8822C)
+#define BIT_SET_RRSC_BITMAP_8822C(x, v)                                        \
+	(BIT_CLEAR_RRSC_BITMAP_8822C(x) | BIT_RRSC_BITMAP_8822C(v))
 static u32 init_protocol_cfg(struct mac_adapter *adapter)
+
 {
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u8 value8;
+	u16 pre_txcnt;
+	u32 max_agg_num;
+	u32 max_rts_agg_num;
+	u32 value32;
+
 	init_txq_ctrl(adapter);
 	init_sifs_ctrl(adapter);
 	init_rate_fallback_ctrl(adapter);
+
+
+	MAC_REG_W8(REG_AMPDU_MAX_TIME_V1, WLAN_AMPDU_MAX_TIME);
+	MAC_REG_W8_SET(REG_TX_HANG_CTRL, BIT_EN_EOF_V1);
+
+	pre_txcnt = WLAN_PRE_TXCNT_TIME_TH | BIT_EN_PRECNT;
+	MAC_REG_W8(REG_PRECNT_CTRL, (u8)(pre_txcnt & 0xFF));
+	MAC_REG_W8(REG_PRECNT_CTRL + 1, (u8)(pre_txcnt >> 8));
+
+	max_agg_num = WLAN_MAX_AGG_PKT_LIMIT;
+	max_rts_agg_num = WLAN_RTS_MAX_AGG_PKT_LIMIT;
+	value32 = WLAN_RTS_LEN_TH | (WLAN_RTS_TX_TIME_TH << 8) |
+				(max_agg_num << 16) | (max_rts_agg_num << 24);
+	MAC_REG_W32(REG_PROT_MODE_CTRL, value32);
+
+	MAC_REG_W16(REG_BAR_MODE_CTRL + 2,
+		       WLAN_BAR_RETRY_LIMIT | WLAN_RA_TRY_RATE_AGG_LIMIT << 8);
+
+	MAC_REG_W8(REG_FAST_EDCA_VOVI_SETTING, WALN_FAST_EDCA_VO_TH);
+	MAC_REG_W8(REG_FAST_EDCA_VOVI_SETTING + 2, WLAN_FAST_EDCA_VI_TH);
+	MAC_REG_W8(REG_FAST_EDCA_BEBK_SETTING, WLAN_FAST_EDCA_BE_TH);
+	MAC_REG_W8(REG_FAST_EDCA_BEBK_SETTING + 2, WLAN_FAST_EDCA_BK_TH);
+
+	/*close A/B/C/D-cut BA parser*/
+	MAC_REG_W8_CLR(REG_LIFETIME_EN, BIT(5));
+
+	/*Bypass TXBF error protection due to sounding failure*/
+	value32 = MAC_REG_R32(REG_BF0_TIME_SETTING) & (~BIT_BF0_UPDATE_EN);
+	MAC_REG_W32(REG_BF0_TIME_SETTING, value32 | BIT_BF0_TIMER_EN);
+	value32 = MAC_REG_R32(REG_BF1_TIME_SETTING) & (~BIT_BF1_UPDATE_EN);
+	MAC_REG_W32(REG_BF1_TIME_SETTING, value32 | BIT_BF1_TIMER_EN);
+	value32 = MAC_REG_R32(REG_BF_TIMEOUT_EN) & (~BIT_BF0_TIMEOUT_EN) &
+		 (~BIT_BF1_TIMEOUT_EN);
+	MAC_REG_W32(REG_BF_TIMEOUT_EN, value32);
+
+	/*Fix incorrect HW default value of RSC*/
+	value32 = BIT_CLEAR_RRSR_RSC_8822C(MAC_REG_R32(REG_RRSR));
+	MAC_REG_W32(REG_RRSR, value32);
+
+	value8 = MAC_REG_R8(REG_INIRTS_RATE_SEL);
+	MAC_REG_W8(REG_INIRTS_RATE_SEL, value8 | BIT(5));
 
 	return MACSUCCESS;
 }
