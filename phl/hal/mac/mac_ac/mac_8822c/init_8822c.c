@@ -167,7 +167,7 @@ static struct mac_ops mac8822c_ops = {
 #endif // NEO if 0
 	mac_pwr_switch, /* pwr_switch */
 	mac_sys_init, /* sys_init */
-	mac_trx_init, /* init */
+	mac_trx_init, /* trx_init */
 #if 0 // NEO
 	NULL, /* mac_romdl, */ /* romdl */
 	NULL, /* mac_enable_cpu, */ /* enable_cpu */

@@ -391,6 +391,27 @@ u32 mac_sys_init(struct mac_adapter *adapter)
 	return ret;
 }
 
+static void init_txq_ctrl(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u8 value8;
+
+	value8 = MAC_REG_R8(REG_FWHW_TXQ_CTRL);
+	value8 |= (BIT(7) & ~BIT(1) & ~BIT(2));
+	MAC_REG_W8(REG_FWHW_TXQ_CTRL, value8);
+
+	MAC_REG_W8(REG_FWHW_TXQ_CTRL + 1, 0x1F);
+}
+
+
+static u32 init_protocol_cfg(struct mac_adapter *adapter)
+{
+	init_txq_ctrl(adapter);
+
+
+	return MACSUCCESS;
+}
+
 u32 mac_trx_init(struct mac_adapter *adapter)
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
@@ -431,6 +452,12 @@ u32 mac_trx_init(struct mac_adapter *adapter)
 	ret = init_h2c(adapter);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR] int_h2c, ret=%d\n", ret);
+		return ret;
+	}
+
+	ret = init_protocol_cfg(adapter);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR] int_protocol_cfg, ret=%d\n", ret);
 		return ret;
 	}
 out:

@@ -2453,7 +2453,6 @@ resume_tx:
 		hal->drv_rsvd_page_number = 8;
 
 		/* 8. Init TRX Configuration */
-		mode = HALMAC_TRX_MODE_NORMAL;
 		hal_status = rtw_hal_mac_trx_init(hal_info);
 		if (hal_status != RTW_HAL_STATUS_SUCCESS) {
 			RTW_ERR("%s: drtw_hal_mac_trx_init FAIL! status=0x%02x\n", __func__, hal_status);
@@ -2494,8 +2493,6 @@ static int init_mac_flow(struct dvobj_priv *d)
 	_rtw_hal_set_fw_rsvd_page(p, _FALSE, &drv_rsvd_num);
 	halmac->txff_alloc.rsvd_drv_pg_num = 8;
 	hal->drv_rsvd_page_number = 8;
-
-	trx_mode = HALMAC_TRX_MODE_NORMAL;
 
 	hal_status = rtw_hal_mac_trx_init(hal_info);
 	if (hal_status != RTW_HAL_STATUS_SUCCESS) {

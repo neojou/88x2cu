@@ -352,9 +352,6 @@ set_trx_fifo_info_8822c(struct halmac_adapter *adapter,
 			enum halmac_trx_mode mode);
 
 static void
-init_txq_ctrl_8822c(struct halmac_adapter *adapter);
-
-static void
 init_sifs_ctrl_8822c(struct halmac_adapter *adapter);
 
 static void
@@ -586,7 +583,6 @@ init_protocol_cfg_8822c(struct halmac_adapter *adapter)
 
 	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
 
-	init_txq_ctrl_8822c(adapter);
 	init_sifs_ctrl_8822c(adapter);
 	init_rate_fallback_ctrl_8822c(adapter);
 
@@ -698,19 +694,6 @@ init_edca_cfg_8822c(struct halmac_adapter *adapter)
 	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
 
 	return HALMAC_RET_SUCCESS;
-}
-
-static void
-init_txq_ctrl_8822c(struct halmac_adapter *adapter)
-{
-	u8 value8;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-
-	value8 = HALMAC_REG_R8(REG_FWHW_TXQ_CTRL);
-	value8 |= (BIT(7) & ~BIT(1) & ~BIT(2));
-	HALMAC_REG_W8(REG_FWHW_TXQ_CTRL, value8);
-
-	HALMAC_REG_W8(REG_FWHW_TXQ_CTRL + 1, WLAN_TXQ_RPT_EN);
 }
 
 static void
