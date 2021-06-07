@@ -733,67 +733,6 @@ post_process:
 }
 #endif
 
-
-#ifdef CONFIG_EVENT_THREAD_MODE
-u32 rtw_enqueue_evt(struct evt_priv *pevtpriv, struct evt_obj *obj)
-{
-	int	res;
-	_queue *queue = &pevtpriv->evt_queue;
-
-
-	res = _SUCCESS;
-
-	if (obj == NULL) {
-		res = _FAIL;
-		goto exit;
-	}
-
-	_rtw_spinlock_bh(&queue->lock);
-
-	rtw_list_insert_tail(&obj->list, &queue->queue);
-
-	_rtw_spinunlock_bh(&queue->lock);
-
-exit:
-	return res;
-}
-
-struct evt_obj *rtw_dequeue_evt(_queue *queue)
-{
-	struct	evt_obj	*pevtobj;
-
-
-	_rtw_spinlock_bh(&queue->lock);
-
-	if (rtw_is_list_empty(&(queue->queue)))
-		pevtobj = NULL;
-	else {
-		pevtobj = LIST_CONTAINOR(get_next(&(queue->queue)), struct evt_obj, list);
-		rtw_list_delete(&pevtobj->list);
-	}
-
-	_rtw_spinunlock_bh(&queue->lock);
-
-	return pevtobj;
-}
-
-void rtw_free_evt_obj(struct evt_obj *pevtobj)
-{
-
-	if (pevtobj->parmbuf)
-		rtw_mfree((unsigned char *)pevtobj->parmbuf, pevtobj->evtsz);
-
-	rtw_mfree((unsigned char *)pevtobj, sizeof(struct evt_obj));
-
-}
-
-void rtw_evt_notify_isr(struct evt_priv *pevtpriv)
-{
-	pevtpriv->evt_done_cnt++;
-	_rtw_up_sema(&(pevtpriv->evt_notify));
-}
-#endif
-
 void rtw_readtssi_cmdrsp_callback(_adapter	*padapter,  struct cmd_obj *pcmd)
 {
 

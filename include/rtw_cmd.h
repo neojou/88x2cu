@@ -69,22 +69,7 @@ struct cmd_priv {
 
 };
 
-#ifdef CONFIG_EVENT_THREAD_MODE
-struct evt_obj {
-	u16	evtcode;
-	u8	res;
-	u8	*parmbuf;
-	u32	evtsz;
-	_list	list;
-};
-#endif
-
 struct	evt_priv {
-#ifdef CONFIG_EVENT_THREAD_MODE
-	_sema	evt_notify;
-
-	_queue	evt_queue;
-#endif
 
 #ifdef CONFIG_FW_C2H_REG
 	#define CONFIG_C2H_WK
@@ -166,12 +151,6 @@ struct P2P_WoWlan_Offload_t {
 extern u32 rtw_enqueue_cmd(struct cmd_priv *pcmdpriv, struct cmd_obj *obj);
 extern struct cmd_obj *rtw_dequeue_cmd(struct cmd_priv *pcmdpriv);
 extern void rtw_free_cmd_obj(struct cmd_obj *pcmd);
-
-#ifdef CONFIG_EVENT_THREAD_MODE
-extern u32 rtw_enqueue_evt(struct evt_priv *pevtpriv, struct evt_obj *obj);
-extern struct evt_obj *rtw_dequeue_evt(_queue *queue);
-extern void rtw_free_evt_obj(struct evt_obj *pcmd);
-#endif
 
 #ifdef CONFIG_CORE_CMD_THREAD
 void rtw_stop_cmd_thread(_adapter *adapter);

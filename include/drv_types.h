@@ -1801,10 +1801,6 @@ aa
 	_thread_hdl_ cmdThread;
 	#endif
 
-#ifdef CONFIG_EVENT_THREAD_MODE
-aa
-	_thread_hdl_ evtThread;
-#endif
 	u8 registered;
 
 	void (*intf_start)(_adapter *adapter);

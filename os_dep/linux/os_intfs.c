@@ -804,18 +804,6 @@ u32 rtw_start_drv_threads(_adapter *padapter)
 	}
 
 
-#ifdef CONFIG_EVENT_THREAD_MODE
-aa
-	if (padapter->evtThread == NULL) {
-		RTW_INFO(FUNC_ADPT_FMT " start RTW_EVENT_THREAD\n", FUNC_ADPT_ARG(padapter));
-		padapter->evtThread = kthread_run(event_thread, padapter, "RTW_EVENT_THREAD");
-		if (IS_ERR(padapter->evtThread)) {
-			padapter->evtThread = NULL;
-			_status = _FAIL;
-		}
-	}
-#endif
-
 	rtw_hal_start_thread(padapter);
 	return _status;
 
@@ -826,14 +814,6 @@ void rtw_stop_drv_threads(_adapter *padapter)
 	RTW_INFO(FUNC_ADPT_FMT" enter\n", FUNC_ADPT_ARG(padapter));
 	if (is_primary_adapter(padapter))
 		rtw_stop_cmd_thread(padapter);
-
-#ifdef CONFIG_EVENT_THREAD_MODE
-	if (padapter->evtThread) {
-		_rtw_up_sema(&padapter->evtpriv.evt_notify);
-		rtw_thread_stop(padapter->evtThread);
-		padapter->evtThread = NULL;
-	}
-#endif
 
 	rtw_hal_stop_thread(padapter);
 }
