@@ -371,9 +371,6 @@ get_hw_value_88xx(struct halmac_adapter *adapter, enum halmac_hw_id hw_id,
 	case HALMAC_HW_IC_VERSION:
 		*(u8 *)value = HALMAC_CHIP_VER_C_CUT;
 		break;
-	case HALMAC_HW_PAGE_SIZE:
-		*(u32 *)value = adapter->hw_cfg_info.page_size;
-		break;
 	case HALMAC_HW_TX_AGG_ALIGN_SIZE:
 		*(u16 *)value = adapter->hw_cfg_info.tx_align_size;
 		break;
