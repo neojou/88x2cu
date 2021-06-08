@@ -2202,9 +2202,7 @@ struct halmac_api {
 			    enum halmac_pri_ch_idx idx, enum halmac_bw bw);
 	enum halmac_ret_status
 	(*halmac_cfg_bw)(struct halmac_adapter *adapter, enum halmac_bw bw);
-	enum halmac_ret_status
-	(*halmac_init_mac_cfg)(struct halmac_adapter *adapter,
-			       enum halmac_trx_mode mode);
+	
 	enum halmac_ret_status
 	(*halmac_init_interface_cfg)(struct halmac_adapter *adapter);
 	enum halmac_ret_status

@@ -34,9 +34,6 @@ enum halmac_ret_status
 mount_api_88xx(struct halmac_adapter *adapter);
 
 enum halmac_ret_status
-init_mac_cfg_88xx(struct halmac_adapter *adapter, enum halmac_trx_mode mode);
-
-enum halmac_ret_status
 reset_ofld_feature_88xx(struct halmac_adapter *adapter,
 			enum halmac_feature_id feature_id);
 

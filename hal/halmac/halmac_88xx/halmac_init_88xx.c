@@ -204,7 +204,6 @@ mount_api_88xx(struct halmac_adapter *adapter)
 	api->halmac_cfg_multicast_addr = cfg_multicast_addr_88xx;
 	api->halmac_cfg_ch_bw = cfg_ch_bw_88xx;
 	api->halmac_cfg_bw = cfg_bw_88xx;
-	api->halmac_init_mac_cfg = init_mac_cfg_88xx;
 	api->halmac_dump_efuse_map = dump_efuse_map_88xx;
 	api->halmac_dump_efuse_map_bt = dump_efuse_map_bt_88xx;
 	api->halmac_write_efuse_bt = write_efuse_bt_88xx;
@@ -440,48 +439,6 @@ register_api_88xx(struct halmac_adapter *adapter,
 
 enum halmac_ret_status
 set_trx_fifo_info_8822c(struct halmac_adapter *adapter);
-
-/**
- * init_mac_cfg_88xx() - config page1~page7 register
- * @adapter : the adapter of halmac
- * @mode : trx mode
- * Author : KaiYuan Chang/Ivan Lin
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-init_mac_cfg_88xx(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
-{
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-	enum halmac_ret_status status = HALMAC_RET_SUCCESS;
-
-	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
-
-	status = set_trx_fifo_info_8822c(adapter);
-	if (status != HALMAC_RET_SUCCESS) {
-		PLTFM_MSG_ERR("[ERR]set trx fifo!\n");
-		return status;
-	}
-
-	adapter->pq_map[HALMAC_PQ_MAP_VO] = HALMAC_MAP2_NQ;
-	adapter->pq_map[HALMAC_PQ_MAP_VI] = HALMAC_MAP2_NQ;
-	adapter->pq_map[HALMAC_PQ_MAP_BE] = HALMAC_MAP2_LQ;
-	adapter->pq_map[HALMAC_PQ_MAP_BK] = HALMAC_MAP2_LQ;
-	adapter->pq_map[HALMAC_PQ_MAP_MG] = HALMAC_MAP2_HQ;
-	adapter->pq_map[HALMAC_PQ_MAP_HI] = HALMAC_MAP2_HQ;
-
-	adapter->txff_alloc.high_queue_pg_num = 64;
-	adapter->txff_alloc.low_queue_pg_num = 64;
-	adapter->txff_alloc.normal_queue_pg_num = 64;
-	adapter->txff_alloc.extra_queue_pg_num = 0;
-	adapter->txff_alloc.pub_queue_pg_num = 1;
-
-	adapter->h2c_info.buf_size = 1024;
-
-	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
-
-	return status;
-}
 
 /**
  * reset_ofld_feature_88xx() -reset async api cmd status

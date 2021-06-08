@@ -2469,6 +2469,9 @@ exit:
 	return err;
 }
 
+enum halmac_ret_status 
+set_trx_fifo_info_8822c(struct halmac_adapter *halmac);
+
 static int init_mac_flow(struct dvobj_priv *d)
 {
 	PADAPTER p;
@@ -2499,9 +2502,28 @@ static int init_mac_flow(struct dvobj_priv *d)
 		RTW_ERR("%s: drtw_hal_mac_trx_init FAIL! status=0x%02x\n", __func__, hal_status);
 		return -1;
 	}
-	status = api->halmac_init_mac_cfg(halmac, trx_mode);
-	if (status != HALMAC_RET_SUCCESS)
+
+
+	status = set_trx_fifo_info_8822c(halmac);
+	if (status != HALMAC_RET_SUCCESS) {
+		RTW_ERR("[ERR]set trx fifo!\n");
 		goto out;
+	}
+
+	halmac->pq_map[HALMAC_PQ_MAP_VO] = HALMAC_MAP2_NQ;
+	halmac->pq_map[HALMAC_PQ_MAP_VI] = HALMAC_MAP2_NQ;
+	halmac->pq_map[HALMAC_PQ_MAP_BE] = HALMAC_MAP2_LQ;
+	halmac->pq_map[HALMAC_PQ_MAP_BK] = HALMAC_MAP2_LQ;
+	halmac->pq_map[HALMAC_PQ_MAP_MG] = HALMAC_MAP2_HQ;
+	halmac->pq_map[HALMAC_PQ_MAP_HI] = HALMAC_MAP2_HQ;
+
+	halmac->txff_alloc.high_queue_pg_num = 64;
+	halmac->txff_alloc.low_queue_pg_num = 64;
+	halmac->txff_alloc.normal_queue_pg_num = 64;
+	halmac->txff_alloc.extra_queue_pg_num = 0;
+	halmac->txff_alloc.pub_queue_pg_num = 1;
+
+	halmac->h2c_info.buf_size = 1024;
 
 	/* Driver insert flow: Sync driver setting with register */
 	/* Sync driver RCR cache with register setting */
