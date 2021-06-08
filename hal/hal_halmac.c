@@ -2576,6 +2576,7 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 	struct halmac_api *api;
 	struct phl_info_t *phl_info = d->phl;
 	struct hal_info_t *hal_info = phl_info->hal;
+	struct halmac_fw_version *info;
 	enum halmac_ret_status status;
 	enum rtw_hal_status hal_status;
 	u32 ok;
@@ -2587,32 +2588,13 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 	halmac = dvobj_to_halmac(d);
 	if (!halmac)
 		goto out;
+	info = &halmac->fw_ver;
 	api = HALMAC_GET_API(halmac);
 
-	/* StatePowerOff */
-
-	/* SKIP: halmac_init_adapter (Already done before) */
-
-	ok = rtw_hal_power_on(adapter);
-	if (_FAIL == ok)
-		goto out;
-
-	/* StatePowerOn */
+	hal->bMacPwrCtrlOn = _TRUE;
 
 	/* DownloadFW */
 	if (fw && fwsize) {
-		struct halmac_fw_version *info = &halmac->fw_ver;
-
-		halmac->halmac_state.dlfw_state = HALMAC_DLFW_NONE;
-		/* 5. Download Firmware */
-		hal_status = rtw_hal_download_fw(phl_info->phl_com, hal_info);
-		if (hal_status != RTW_HAL_STATUS_SUCCESS) {
-			RTW_ERR("%s: download firmware FAIL! status=0x%02x\n",
-				__FUNCTION__, hal_status);
-			_debug_dlfw_fail(d);
-			err = -1;
-			goto out;
-		}
 		halmac->halmac_state.dlfw_state = HALMAC_DLFW_DONE;
 
 		/* 5.1. (Driver) Reset driver variables if needed */
@@ -2628,49 +2610,58 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 
 	/* InitMACFlow */
 	err = init_mac_flow(d);
-	if (err)
+	if (err) {
+		RTW_ERR("%s init_mac_flow err=%d\n", __func__, err);
 		goto out;
+	}
 
 	#ifdef CONFIG_CORE_CMD_THREAD 
 	/* Driver insert flow: Enable TR/RX */
 	err = _drv_enable_trx(d);
-	if (err)
+	if (err) {
+		RTW_ERR("%s _drv_enable_trx err=%d\n", __func__, err);
 		goto out;
+	}
 	#endif
 
 	/* halmac_send_general_info */
 	if (_TRUE == fw_ok) {
 		err = _send_general_info(d);
-		if (err)
+		if (err) {
+			RTW_ERR("%s _send_general_info err=%d\n", __func__, err);
 			goto out;
+		}
 	}
 
 	/* Init Phy parameter-MAC */
 	ok = rtw_hal_init_mac_register(adapter);
-	if (_FALSE == ok)
+	if (_FALSE == ok) {
+		RTW_ERR("%s rtw_hal_init_mac_register err=%d\n", __func__, ok);
 		goto out;
+	}
 
 	/* StateMacInitialized */
 
 	/* halmac_cfg_drv_info */
 	err = rtw_halmac_config_rx_info(d, HALMAC_DRV_INFO_PHY_STATUS);
-	if (err)
+	if (err) {
+		RTW_ERR("%s rtw_halmac_config_rx_info=%d\n", __func__, err);
 		goto out;
+	}
 
 	/* halmac_set_hw_value(HALMAC_HW_EN_BB_RF) */
 	/* Init BB, RF */
 	ok = rtw_hal_init_phy(adapter);
-	if (_FALSE == ok)
+	if (_FALSE == ok) {
+		RTW_ERR("%s rtw_hal_init_phy=%d\n", __func__, err);
 		goto out;
+	}
 
 	status = api->halmac_init_interface_cfg(halmac);
-	if (status != HALMAC_RET_SUCCESS)
+	if (status != HALMAC_RET_SUCCESS) {
+		RTW_ERR("%s halmac_init_interface_cfg status=%d\n", __func__, status);
 		goto out;
-
-	/* SKIP: halmac_verify_platform_api */
-	/* SKIP: halmac_h2c_lb */
-
-	/* StateRxIdle */
+	}
 
 	err_ret = 0;
 out:

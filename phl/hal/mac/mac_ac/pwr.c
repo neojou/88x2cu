@@ -369,7 +369,7 @@ u32 mac_pwr_switch(struct mac_adapter *adapter, u8 on)
 	u32 val32;
 	u32 ret;
 
-
+	pr_info("%s NEO %d\n", __func__, on);
 	if (!on) {
 		ret = _pwr_switch(adapter, false);
 		adapter->sm.pwr = MAC_PWR_OFF;

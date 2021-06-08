@@ -328,11 +328,11 @@ enum rtw_hal_status hal_start_8822c(struct rtw_phl_com_t *phl_com,
 	/* Read phy parameter files */
 	rtw_hal_dl_all_para_file(phl_com, init_info->ic_name, hal);
 
-#if 0 // NEO
 	hal_status = rtw_hal_mac_hal_init(phl_com, hal, init_info);
 	if (hal_status != RTW_HAL_STATUS_SUCCESS)
 		goto hal_init_fail;
 
+#if 0 // NEO
 	rtw_hal_set_rxfltr_by_mode(hal, HW_BAND_0, RX_FLTR_MODE_STA_NORMAL);
 	/* MAC Suggested : 11264 Byte */
 	rtw_hal_mac_set_rxfltr_mpdu_size(hal->hal_com, HW_BAND_0, 0x2c00);

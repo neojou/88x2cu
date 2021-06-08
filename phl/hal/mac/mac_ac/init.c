@@ -1018,6 +1018,8 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 	u32 ret;
 
+	pr_info("%s NEO mac_enable_fw\n", __func__);
+
 	ret = wait_txfifo_empty(adapter);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR]%s: wait_txfifo_empty fail\n", __func__);
