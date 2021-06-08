@@ -685,13 +685,29 @@
 #define REG_CCA_TXEN_CNT 0x0534
 #define REG_MAX_INTER_COLLISION 0x0538
 #define REG_MAX_INTER_COLLISION_CNT 0x053C
+
 #define REG_TBTT_PROHIBIT 0x0540
+#define BIT_SHIFT_TBTT_HOLD_TIME_AP 8
+#define BIT_MASK_TBTT_HOLD_TIME_AP 0xfff
+#define BIT_TBTT_HOLD_TIME_AP(x)                                               \
+	(((x) & BIT_MASK_TBTT_HOLD_TIME_AP) << BIT_SHIFT_TBTT_HOLD_TIME_AP)
+#define BITS_TBTT_HOLD_TIME_AP                                                 \
+	(BIT_MASK_TBTT_HOLD_TIME_AP << BIT_SHIFT_TBTT_HOLD_TIME_AP)
+#define BIT_CLEAR_TBTT_HOLD_TIME_AP(x) ((x) & (~BITS_TBTT_HOLD_TIME_AP))
+#define BIT_GET_TBTT_HOLD_TIME_AP(x)                                           \
+	(((x) >> BIT_SHIFT_TBTT_HOLD_TIME_AP) & BIT_MASK_TBTT_HOLD_TIME_AP)
+#define BIT_SET_TBTT_HOLD_TIME_AP(x, v)                                        \
+	(BIT_CLEAR_TBTT_HOLD_TIME_AP(x) | BIT_TBTT_HOLD_TIME_AP(v))
+
 #define REG_P2PPS_STATE 0x0543
 #define REG_RD_NAV_NXT 0x0544
 #define REG_NAV_PROT_LEN 0x0546
 #define REG_FTM_PTT 0x0548
 #define REG_FTM_TSF 0x054C
+
 #define REG_BCN_CTRL 0x0550
+#define BIT_EN_BCN_FUNCTION BIT(3)
+
 #define REG_BCN_CTRL_CLINT0 0x0551
 #define REG_MBID_NUM 0x0552
 #define REG_DUAL_TSF_RST 0x0553

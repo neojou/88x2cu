@@ -381,7 +381,6 @@ mount_api_8822c(struct halmac_adapter *adapter)
 	api->halmac_pre_init_system_cfg = pre_init_system_cfg_8822c;
 
 	api->halmac_init_wmac_cfg = init_wmac_cfg_8822c;
-	api->halmac_init_edca_cfg = init_edca_cfg_8822c;
 
 	if (adapter->intf == HALMAC_INTERFACE_SDIO) {
 #if HALMAC_SDIO_SUPPORT
@@ -557,69 +556,6 @@ init_system_cfg_8822c(struct halmac_adapter *adapter)
 	return HALMAC_RET_SUCCESS;
 }
 
-/**
- * init_edca_cfg_8822c() - init EDCA config
- * @adapter : the adapter of halmac
- * Author : KaiYuan Chang/Ivan Lin
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-init_edca_cfg_8822c(struct halmac_adapter *adapter)
-{
-	u8 value8;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-
-	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
-
-	HALMAC_REG_W32(REG_EDCA_VO_PARAM, WLAN_EDCA_VO_PARAM);
-	HALMAC_REG_W32(REG_EDCA_VI_PARAM, WLAN_EDCA_VI_PARAM);
-	HALMAC_REG_W32(REG_EDCA_BE_PARAM, WLAN_EDCA_BE_PARAM);
-	HALMAC_REG_W32(REG_EDCA_BK_PARAM, WLAN_EDCA_BK_PARAM);
-
-	HALMAC_REG_W8(REG_PIFS, WLAN_PIFS_TIME);
-
-	HALMAC_REG_W8_CLR(REG_TX_PTCL_CTRL + 1, BIT(4));
-
-	value8 = HALMAC_REG_R8(REG_RD_CTRL + 1);
-	value8 = (value8 | BIT(0) | BIT(1) | BIT(2));
-	HALMAC_REG_W8(REG_RD_CTRL + 1, value8);
-
-	cfg_mac_clk_88xx(adapter);
-
-	value8 = HALMAC_REG_R8(REG_MISC_CTRL);
-	value8 = (value8 | BIT(3) | BIT(1) | BIT(0));
-	HALMAC_REG_W8(REG_MISC_CTRL, value8);
-
-	/* Init SYNC_CLI_SEL : reg 0x5B4[6:4] = 0 */
-	HALMAC_REG_W8_CLR(REG_TIMER0_SRC_SEL, BIT(4) | BIT(5) | BIT(6));
-
-	/* Clear TX pause */
-	HALMAC_REG_W16(REG_TXPAUSE, 0x0000);
-
-	HALMAC_REG_W8(REG_SLOT, WLAN_SLOT_TIME);
-
-	HALMAC_REG_W32(REG_RD_NAV_NXT, WLAN_NAV_CFG);
-	HALMAC_REG_W16(REG_RXTSF_OFFSET_CCK, WLAN_RX_TSF_CFG);
-
-	/* Set beacon cotnrol - enable TSF and other related functions */
-	HALMAC_REG_W8(REG_BCN_CTRL, (u8)(HALMAC_REG_R8(REG_BCN_CTRL) |
-					  BIT_EN_BCN_FUNCTION));
-
-	/* Set send beacon related registers */
-	HALMAC_REG_W32(REG_TBTT_PROHIBIT, WLAN_TBTT_TIME);
-	HALMAC_REG_W8(REG_DRVERLYINT, WLAN_DRV_EARLY_INT);
-	HALMAC_REG_W8(REG_BCN_CTRL_CLINT0, WLAN_BCN_CTRL_CLT0);
-	HALMAC_REG_W8(REG_BCNDMATIM, WLAN_BCN_DMA_TIME);
-	HALMAC_REG_W8(REG_BCN_MAX_ERR, WLAN_BCN_MAX_ERR);
-
-	/* MU primary packet fail, BAR packet will not issue */
-	HALMAC_REG_W8_SET(REG_BAR_TX_CTRL, BIT(0));
-
-	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
-
-	return HALMAC_RET_SUCCESS;
-}
 
 /**
  * init_wmac_cfg_8822c() - init wmac config

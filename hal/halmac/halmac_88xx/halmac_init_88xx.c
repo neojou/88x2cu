@@ -478,12 +478,6 @@ init_mac_cfg_88xx(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
 
 	adapter->h2c_info.buf_size = 1024;
 
-	status = api->halmac_init_edca_cfg(adapter);
-	if (status != HALMAC_RET_SUCCESS) {
-		PLTFM_MSG_ERR("[ERR]init edca %x\n", status);
-		return status;
-	}
-
 	status = api->halmac_init_wmac_cfg(adapter);
 	if (status != HALMAC_RET_SUCCESS) {
 		PLTFM_MSG_ERR("[ERR]init wmac %x\n", status);

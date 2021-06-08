@@ -410,7 +410,17 @@ static void init_txq_ctrl(struct mac_adapter *adapter)
 #define WLAN_SIFS_OFDM_CONT_TX	0x0E
 #define WLAN_SIFS_CCK_TRX	0x0A
 #define WLAN_SIFS_OFDM_TRX	0x10
-
+#define WLAN_NAV_MAX		0xC8
+#define WLAN_RDG_NAV		0x05
+#define WLAN_TXOP_NAV		0x1B
+#define WLAN_CCK_RX_TSF		0x30
+#define WLAN_OFDM_RX_TSF	0x30
+#define WLAN_TBTT_PROHIBIT	0x04 /* unit : 32us */
+#define WLAN_TBTT_HOLD_TIME	0x064 /* unit : 32us */
+#define WLAN_DRV_EARLY_INT	0x04
+#define WLAN_BCN_CTRL_CLT0	0x10
+#define WLAN_BCN_DMA_TIME	0x02
+#define WLAN_BCN_MAX_ERR	0xFF
 #define WLAN_SIFS_CCK_DUR_TUNE	0x0A
 #define WLAN_SIFS_OFDM_DUR_TUNE	0x10
 #define WLAN_SIFS_CCK_CTX	0x0A
@@ -510,7 +520,7 @@ static void init_rate_fallback_ctrl(struct mac_adapter *adapter)
 	(((x) >> BIT_SHIFT_RRSC_BITMAP_8822C) & BIT_MASK_RRSC_BITMAP_8822C)
 #define BIT_SET_RRSC_BITMAP_8822C(x, v)                                        \
 	(BIT_CLEAR_RRSC_BITMAP_8822C(x) | BIT_RRSC_BITMAP_8822C(v))
-static u32 init_protocol_cfg(struct mac_adapter *adapter)
+static void init_protocol_cfg(struct mac_adapter *adapter)
 
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
@@ -564,8 +574,81 @@ static u32 init_protocol_cfg(struct mac_adapter *adapter)
 
 	value8 = MAC_REG_R8(REG_INIRTS_RATE_SEL);
 	MAC_REG_W8(REG_INIRTS_RATE_SEL, value8 | BIT(5));
+}
 
-	return MACSUCCESS;
+
+static void cfg_mac_clk(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 value32;
+
+	value32 = MAC_REG_R32(REG_AFE_CTRL1) & ~(BIT(20) | BIT(21));
+	value32 |= (MAC_CLK_HW_DEF_80M << BIT_SHIFT_MAC_CLK_SEL);
+	MAC_REG_W32(REG_AFE_CTRL1, value32);
+
+	MAC_REG_W8(REG_USTIME_TSF, MAC_CLK_SPEED);
+	MAC_REG_W8(REG_USTIME_EDCA, MAC_CLK_SPEED);
+}
+
+#define WLAN_EDCA_VO_PARAM	0x002FA226
+#define WLAN_EDCA_VI_PARAM	0x005EA328
+#define WLAN_EDCA_BE_PARAM	0x005EA42B
+#define WLAN_EDCA_BK_PARAM	0x0000A44F
+
+#define WLAN_TBTT_TIME	(WLAN_TBTT_PROHIBIT |\
+			(WLAN_TBTT_HOLD_TIME << BIT_SHIFT_TBTT_HOLD_TIME_AP))
+
+#define WLAN_NAV_CFG		(WLAN_RDG_NAV | (WLAN_TXOP_NAV << 16))
+#define WLAN_RX_TSF_CFG		(WLAN_CCK_RX_TSF | (WLAN_OFDM_RX_TSF) << 8)
+
+static  void init_edca_cfg(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u8 value8;
+
+	MAC_REG_W32(REG_EDCA_VO_PARAM, WLAN_EDCA_VO_PARAM);
+	MAC_REG_W32(REG_EDCA_VI_PARAM, WLAN_EDCA_VI_PARAM);
+	MAC_REG_W32(REG_EDCA_BE_PARAM, WLAN_EDCA_BE_PARAM);
+	MAC_REG_W32(REG_EDCA_BK_PARAM, WLAN_EDCA_BK_PARAM);
+
+	MAC_REG_W8(REG_PIFS, WLAN_PIFS_TIME);
+
+	MAC_REG_W8_CLR(REG_TX_PTCL_CTRL + 1, BIT(4));
+
+	value8 = MAC_REG_R8(REG_RD_CTRL + 1);
+	value8 = (value8 | BIT(0) | BIT(1) | BIT(2));
+	MAC_REG_W8(REG_RD_CTRL + 1, value8);
+
+	cfg_mac_clk(adapter);
+
+	value8 = MAC_REG_R8(REG_MISC_CTRL);
+	value8 = (value8 | BIT(3) | BIT(1) | BIT(0));
+	MAC_REG_W8(REG_MISC_CTRL, value8);
+
+	/* Init SYNC_CLI_SEL : reg 0x5B4[6:4] = 0 */
+	MAC_REG_W8_CLR(REG_TIMER0_SRC_SEL, BIT(4) | BIT(5) | BIT(6));
+
+	/* Clear TX pause */
+	MAC_REG_W16(REG_TXPAUSE, 0x0000);
+
+	MAC_REG_W8(REG_SLOT, WLAN_SLOT_TIME);
+
+	MAC_REG_W32(REG_RD_NAV_NXT, WLAN_NAV_CFG);
+	MAC_REG_W16(REG_RXTSF_OFFSET_CCK, WLAN_RX_TSF_CFG);
+
+	/* Set beacon cotnrol - enable TSF and other related functions */
+	MAC_REG_W8(REG_BCN_CTRL, (u8)(MAC_REG_R8(REG_BCN_CTRL) |
+					  BIT_EN_BCN_FUNCTION));
+
+	/* Set send beacon related registers */
+	MAC_REG_W32(REG_TBTT_PROHIBIT, WLAN_TBTT_TIME);
+	MAC_REG_W8(REG_DRVERLYINT, WLAN_DRV_EARLY_INT);
+	MAC_REG_W8(REG_BCN_CTRL_CLINT0, WLAN_BCN_CTRL_CLT0);
+	MAC_REG_W8(REG_BCNDMATIM, WLAN_BCN_DMA_TIME);
+	MAC_REG_W8(REG_BCN_MAX_ERR, WLAN_BCN_MAX_ERR);
+
+	/* MU primary packet fail, BAR packet will not issue */
+	MAC_REG_W8_SET(REG_BAR_TX_CTRL, BIT(0));
 }
 
 u32 mac_trx_init(struct mac_adapter *adapter)
@@ -611,11 +694,9 @@ u32 mac_trx_init(struct mac_adapter *adapter)
 		return ret;
 	}
 
-	ret = init_protocol_cfg(adapter);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR] int_protocol_cfg, ret=%d\n", ret);
-		return ret;
-	}
+	init_protocol_cfg(adapter);
+	init_edca_cfg(adapter);
+
 out:
 	return ret;
 }
