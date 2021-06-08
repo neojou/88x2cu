@@ -363,39 +363,6 @@ reset_wifi_fw_88xx(struct halmac_adapter *adapter)
 	return HALMAC_RET_SUCCESS;
 }
 
-/**
- * get_fw_version_88xx() - get FW version
- * @adapter : the adapter of halmac
- * @ver : fw version info
- * Author : Ivan Lin
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-get_fw_version_88xx(struct halmac_adapter *adapter,
-		    struct halmac_fw_version *ver)
-{
-	struct halmac_fw_version *info = &adapter->fw_ver;
-
-	if (!ver)
-		return HALMAC_RET_NULL_POINTER;
-
-	if (adapter->halmac_state.dlfw_state == HALMAC_DLFW_NONE)
-		return HALMAC_RET_NO_DLFW;
-
-	ver->version = info->version;
-	ver->sub_version = info->sub_version;
-	ver->sub_index = info->sub_index;
-	ver->h2c_version = info->h2c_version;
-	ver->build_time.month = info->build_time.month;
-	ver->build_time.date = info->build_time.date;
-	ver->build_time.hour = info->build_time.hour;
-	ver->build_time.min = info->build_time.min;
-	ver->build_time.year = info->build_time.year;
-
-	return HALMAC_RET_SUCCESS;
-}
-
 static enum halmac_ret_status
 update_fw_info_88xx(struct halmac_adapter *adapter, u8 *fw_bin)
 {

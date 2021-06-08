@@ -2369,7 +2369,7 @@ static int download_fw(struct dvobj_priv *d, u8 *fw, u32 fwsize, u8 re_dl)
 	PADAPTER p;
 	struct halmac_adapter *mac;
 	struct halmac_api *api;
-	struct halmac_fw_version fw_vesion;
+	struct halmac_fw_version *info;
 	struct phl_info_t *phl_info = d->phl;
 	struct hal_info_t *hal_info = phl_info->hal;
 	enum rtw_hal_status hal_status;
@@ -2381,6 +2381,7 @@ static int download_fw(struct dvobj_priv *d, u8 *fw, u32 fwsize, u8 re_dl)
 	hal = GET_HAL_DATA(p);
 	mac = dvobj_to_halmac(d);
 	api = HALMAC_GET_API(mac);
+	info = &mac->fw_ver;
 
 	if ((!fw) || (!fwsize))
 		return -1;
@@ -2424,17 +2425,12 @@ static int download_fw(struct dvobj_priv *d, u8 *fw, u32 fwsize, u8 re_dl)
 	}
 	mac->halmac_state.dlfw_state = HALMAC_DLFW_DONE;
 	
-
 	/* 5.1. (Driver) Reset driver variables if needed */
 	hal->LastHMEBoxNum = 0;
 
-	/* 5.2. (Driver) Get FW version */
-	status = api->halmac_get_fw_version(mac, &fw_vesion);
-	if (status == HALMAC_RET_SUCCESS) {
-		hal->firmware_version = fw_vesion.version;
-		hal->firmware_sub_version = fw_vesion.sub_version;
-		hal->firmware_size = fwsize;
-	}
+	hal->firmware_version = info->version;
+	hal->firmware_sub_version = info->sub_version;
+	hal->firmware_size = fwsize;
 
 resume_tx:
 	/* 6. Driver resume TX if needed */
@@ -2578,7 +2574,6 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 	PHAL_DATA_TYPE hal;
 	struct halmac_adapter *halmac;
 	struct halmac_api *api;
-	struct halmac_fw_version fw_vesion;
 	struct phl_info_t *phl_info = d->phl;
 	struct hal_info_t *hal_info = phl_info->hal;
 	enum halmac_ret_status status;
@@ -2606,6 +2601,8 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 
 	/* DownloadFW */
 	if (fw && fwsize) {
+		struct halmac_fw_version *info = &halmac->fw_ver;
+
 		halmac->halmac_state.dlfw_state = HALMAC_DLFW_NONE;
 		/* 5. Download Firmware */
 		hal_status = rtw_hal_download_fw(phl_info->phl_com, hal_info);
@@ -2622,12 +2619,9 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 		hal->LastHMEBoxNum = 0;
 
 		/* 5.2. (Driver) Get FW version */
-		status = api->halmac_get_fw_version(halmac, &fw_vesion);
-		if (status == HALMAC_RET_SUCCESS) {
-			hal->firmware_version = fw_vesion.version;
-			hal->firmware_sub_version = fw_vesion.sub_version;
-			hal->firmware_size = fwsize;
-		}
+		hal->firmware_version = info->version;
+		hal->firmware_sub_version = info->sub_version;
+		hal->firmware_size = fwsize;
 
 		fw_ok = _TRUE;
 	}

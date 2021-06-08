@@ -193,7 +193,6 @@ mount_api_88xx(struct halmac_adapter *adapter)
 	api->halmac_register_api = register_api_88xx;
 	api->halmac_free_download_firmware = free_download_firmware_88xx;
 	api->halmac_reset_wifi_fw = reset_wifi_fw_88xx;
-	api->halmac_get_fw_version = get_fw_version_88xx;
 	api->halmac_cfg_mac_addr = cfg_mac_addr_88xx;
 	api->halmac_cfg_bssid = cfg_bssid_88xx;
 	api->halmac_cfg_transmitter_addr = cfg_transmitter_addr_88xx;

@@ -30,10 +30,6 @@ enum halmac_ret_status
 reset_wifi_fw_88xx(struct halmac_adapter *adapter);
 
 enum halmac_ret_status
-get_fw_version_88xx(struct halmac_adapter *adapter,
-		    struct halmac_fw_version *ver);
-
-enum halmac_ret_status
 check_fw_status_88xx(struct halmac_adapter *adapter, u8 *fw_status);
 
 enum halmac_ret_status

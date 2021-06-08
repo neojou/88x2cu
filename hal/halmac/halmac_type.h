@@ -2179,9 +2179,6 @@ struct halmac_api {
 	enum halmac_ret_status
 	(*halmac_reset_wifi_fw)(struct halmac_adapter *adapter);
 	enum halmac_ret_status
-	(*halmac_get_fw_version)(struct halmac_adapter *adapter,
-				 struct halmac_fw_version *ver);
-	enum halmac_ret_status
 	(*halmac_cfg_mac_addr)(struct halmac_adapter *adapter,
 			       u8 port, union halmac_wlan_addr *addr);
 	enum halmac_ret_status
