@@ -348,10 +348,6 @@ static struct halmac_pg_num HALMAC_PG_NUM_4BULKOUT_8822C[] = {
 };
 
 enum halmac_ret_status
-set_trx_fifo_info_8822c(struct halmac_adapter *adapter,
-			enum halmac_trx_mode mode);
-
-enum halmac_ret_status
 mount_api_8822c(struct halmac_adapter *adapter)
 {
 	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
@@ -379,8 +375,6 @@ mount_api_8822c(struct halmac_adapter *adapter)
 	api->halmac_fill_txdesc_checksum = fill_txdesc_check_sum_8822c;
 	api->halmac_init_low_pwr = init_low_pwr_8822c;
 	api->halmac_pre_init_system_cfg = pre_init_system_cfg_8822c;
-
-	api->halmac_init_wmac_cfg = init_wmac_cfg_8822c;
 
 	if (adapter->intf == HALMAC_INTERFACE_SDIO) {
 #if HALMAC_SDIO_SUPPORT
@@ -429,8 +423,7 @@ mount_api_8822c(struct halmac_adapter *adapter)
 }
 
 enum halmac_ret_status
-set_trx_fifo_info_8822c(struct halmac_adapter *adapter,
-			enum halmac_trx_mode mode)
+set_trx_fifo_info_8822c(struct halmac_adapter *adapter)
 {
 	u16 cur_pg_addr;
 	u32 txff_size = TX_FIFO_SIZE_8822C;
@@ -471,9 +464,6 @@ set_trx_fifo_info_8822c(struct halmac_adapter *adapter,
 					RSVD_PG_FW_TXBUF_NUM +
 					RSVD_PG_CSIBUF_NUM;
 
-	if (mode == HALMAC_TRX_MODE_DELAY_LOOPBACK)
-		info->rsvd_pg_num += RSVD_PG_DLLB_NUM;
-
 	if (info->rsvd_pg_num > info->tx_fifo_pg_num)
 		return HALMAC_RET_CFG_TXFIFO_PAGE_FAIL;
 
@@ -496,15 +486,11 @@ set_trx_fifo_info_8822c(struct halmac_adapter *adapter,
 	cur_pg_addr -= info->rsvd_drv_pg_num;
 	info->rsvd_drv_addr = cur_pg_addr;
 
-	if (mode == HALMAC_TRX_MODE_DELAY_LOOPBACK)
-		info->rsvd_drv_addr -= RSVD_PG_DLLB_NUM;
-
 	if (info->rsvd_boundary != info->rsvd_drv_addr)
 		return HALMAC_RET_CFG_TXFIFO_PAGE_FAIL;
 
 	return HALMAC_RET_SUCCESS;
 }
-
 /**
  * init_system_cfg_8822c() -  init system config
  * @adapter : the adapter of halmac
@@ -556,68 +542,6 @@ init_system_cfg_8822c(struct halmac_adapter *adapter)
 	return HALMAC_RET_SUCCESS;
 }
 
-
-/**
- * init_wmac_cfg_8822c() - init wmac config
- * @adapter : the adapter of halmac
- * Author : KaiYuan Chang/Ivan Lin
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-init_wmac_cfg_8822c(struct halmac_adapter *adapter)
-{
-	u8 value8;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-	enum halmac_ret_status status = HALMAC_RET_SUCCESS;
-
-	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
-
-	HALMAC_REG_W32(REG_MAR, 0xFFFFFFFF);
-	HALMAC_REG_W32(REG_MAR + 4, 0xFFFFFFFF);
-
-	HALMAC_REG_W8(REG_BBPSF_CTRL + 2, WLAN_RESP_TXRATE);
-	HALMAC_REG_W8(REG_ACKTO, WLAN_ACK_TO);
-	HALMAC_REG_W8(REG_ACKTO_CCK, WLAN_ACK_TO_CCK);
-	HALMAC_REG_W16(REG_EIFS, WLAN_EIFS_DUR_TUNE);
-
-	HALMAC_REG_W8(REG_NAV_CTRL + 2, WLAN_NAV_MAX);
-
-	HALMAC_REG_W8_SET(REG_WMAC_TRXPTCL_CTL_H, BIT_EN_TXCTS_IN_RXNAV_V1);
-	HALMAC_REG_W8(REG_WMAC_TRXPTCL_CTL_H  + 2, WLAN_BAR_ACK_TYPE);
-
-	HALMAC_REG_W32(REG_RXFLTMAP0, WLAN_RX_FILTER0);
-	HALMAC_REG_W16(REG_RXFLTMAP2, WLAN_RX_FILTER2);
-
-	HALMAC_REG_W32(REG_RCR, WLAN_RCR_CFG);
-	value8 = HALMAC_REG_R8(REG_RXPSF_CTRL + 2);
-	value8 = value8 | 0xe;
-	HALMAC_REG_W8(REG_RXPSF_CTRL + 2, value8);
-
-	HALMAC_REG_W8(REG_RX_PKT_LIMIT, WLAN_RXPKT_MAX_SZ_512);
-
-	HALMAC_REG_W8(REG_TCR + 2, WLAN_TX_FUNC_CFG2);
-	HALMAC_REG_W8(REG_TCR + 1, WLAN_TX_FUNC_CFG1);
-
-	HALMAC_REG_W16_SET(REG_GENERAL_OPTION,
-			   BIT_DUMMY_FCS_READY_MASK_EN | BIT_RXFIFO_GNT_CUT);
-
-	HALMAC_REG_W8_SET(REG_SND_PTCL_CTRL, BIT_R_DISABLE_CHECK_VHTSIGB_CRC);
-
-	HALMAC_REG_W32(REG_WMAC_OPTION_FUNCTION_2, WLAN_MAC_OPT_FUNC2);
-
-	value8 = WLAN_MAC_OPT_NORM_FUNC1;
-
-	HALMAC_REG_W8(REG_WMAC_OPTION_FUNCTION_1, value8);
-
-	status = api->halmac_init_low_pwr(adapter);
-	if (status != HALMAC_RET_SUCCESS)
-		return status;
-
-	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
-
-	return HALMAC_RET_SUCCESS;
-}
 
 /**
  * pre_init_system_cfg_8822c() - pre-init system config

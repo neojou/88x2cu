@@ -438,7 +438,7 @@ register_api_88xx(struct halmac_adapter *adapter,
 	return HALMAC_RET_SUCCESS;
 }
 
-static enum halmac_ret_status
+enum halmac_ret_status
 set_trx_fifo_info_8822c(struct halmac_adapter *adapter);
 
 /**
@@ -477,12 +477,6 @@ init_mac_cfg_88xx(struct halmac_adapter *adapter, enum halmac_trx_mode mode)
 	adapter->txff_alloc.pub_queue_pg_num = 1;
 
 	adapter->h2c_info.buf_size = 1024;
-
-	status = api->halmac_init_wmac_cfg(adapter);
-	if (status != HALMAC_RET_SUCCESS) {
-		PLTFM_MSG_ERR("[ERR]init wmac %x\n", status);
-		return status;
-	}
 
 	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
 

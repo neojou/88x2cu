@@ -651,6 +651,110 @@ static  void init_edca_cfg(struct mac_adapter *adapter)
 	MAC_REG_W8_SET(REG_BAR_TX_CTRL, BIT(0));
 }
 
+#define BIT_SHIFT_RXPSF_PKTLENTHR 13
+#define BIT_MASK_RXPSF_PKTLENTHR 0x7
+#define BIT_RXPSF_PKTLENTHR(x)                                                 \
+	(((x) & BIT_MASK_RXPSF_PKTLENTHR) << BIT_SHIFT_RXPSF_PKTLENTHR)
+#define BITS_RXPSF_PKTLENTHR                                                   \
+	(BIT_MASK_RXPSF_PKTLENTHR << BIT_SHIFT_RXPSF_PKTLENTHR)
+#define BIT_CLEAR_RXPSF_PKTLENTHR(x) ((x) & (~BITS_RXPSF_PKTLENTHR))
+#define BIT_GET_RXPSF_PKTLENTHR(x)                                             \
+	(((x) >> BIT_SHIFT_RXPSF_PKTLENTHR) & BIT_MASK_RXPSF_PKTLENTHR)
+#define BIT_SET_RXPSF_PKTLENTHR(x, v)                                          \
+	(BIT_CLEAR_RXPSF_PKTLENTHR(x) | BIT_RXPSF_PKTLENTHR(v))
+
+#define BIT_RXPSF_CTRLEN BIT(12)
+#define BIT_RXPSF_VHTCHKEN BIT(11)
+#define BIT_RXPSF_HTCHKEN BIT(10)
+#define BIT_RXPSF_OFDMCHKEN BIT(9)
+#define BIT_RXPSF_CCKCHKEN BIT(8)
+#define BIT_RXPSF_OFDMRST BIT(7)
+#define BIT_RXPSF_CCKRST BIT(6)
+#define BIT_RXPSF_MHCHKEN BIT(5)
+#define BIT_RXPSF_CONT_ERRCHKEN BIT(4)
+#define BIT_RXPSF_ALL_ERRCHKEN BIT(3)
+
+static void init_low_pwr(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u16 value16;
+
+	/*RXGCK FIFO threshold CFG*/
+	value16 = (MAC_REG_R16(REG_RXPSF_CTRL + 2) & 0xF00F);
+	value16 |= BIT(10) | BIT(8) | BIT(6) | BIT(4);
+	MAC_REG_W16(REG_RXPSF_CTRL + 2, value16);
+
+	/*invalid_pkt CFG*/
+	value16 = 0;
+	value16 = BIT_SET_RXPSF_PKTLENTHR(value16, 1);
+	value16 |= BIT_RXPSF_CTRLEN | BIT_RXPSF_VHTCHKEN | BIT_RXPSF_HTCHKEN
+		| BIT_RXPSF_OFDMCHKEN | BIT_RXPSF_CCKCHKEN
+		| BIT_RXPSF_OFDMRST;
+
+	MAC_REG_W16(REG_RXPSF_CTRL, value16);
+	MAC_REG_W32(REG_RXPSF_TYPE_CTRL, 0xFFFFFFFF);
+
+}
+
+#define WLAN_EIFS_DUR_TUNE 0x40
+
+#define WLAN_RX_FILTER0		0xFFFFFFFF
+#define WLAN_RX_FILTER2		0xFFFF
+#define WLAN_RCR_CFG		0xE410220E
+#define WLAN_RXPKT_MAX_SZ	12288
+#define WLAN_RXPKT_MAX_SZ_512	(WLAN_RXPKT_MAX_SZ >> 9)
+
+#define WLAN_TX_FUNC_CFG1		0x30
+#define WLAN_TX_FUNC_CFG2		0x30
+#define WLAN_MAC_OPT_NORM_FUNC1		0x98
+#define WLAN_MAC_OPT_LB_FUNC1		0x80
+#define WLAN_MAC_OPT_FUNC2		0xB1810041
+
+static void init_wmac_cfg(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u8 value8;
+
+	MAC_REG_W32(REG_MAR, 0xFFFFFFFF);
+	MAC_REG_W32(REG_MAR + 4, 0xFFFFFFFF);
+
+	MAC_REG_W8(REG_BBPSF_CTRL + 2, WLAN_RESP_TXRATE);
+	MAC_REG_W8(REG_ACKTO, WLAN_ACK_TO);
+	MAC_REG_W8(REG_ACKTO_CCK, WLAN_ACK_TO_CCK);
+	MAC_REG_W16(REG_EIFS, WLAN_EIFS_DUR_TUNE);
+
+	MAC_REG_W8(REG_NAV_CTRL + 2, WLAN_NAV_MAX);
+
+	MAC_REG_W8_SET(REG_WMAC_TRXPTCL_CTL_H, BIT_EN_TXCTS_IN_RXNAV_V1);
+	MAC_REG_W8(REG_WMAC_TRXPTCL_CTL_H  + 2, WLAN_BAR_ACK_TYPE);
+
+	MAC_REG_W32(REG_RXFLTMAP0, WLAN_RX_FILTER0);
+	MAC_REG_W16(REG_RXFLTMAP2, WLAN_RX_FILTER2);
+
+	MAC_REG_W32(REG_RCR, WLAN_RCR_CFG);
+	value8 = MAC_REG_R8(REG_RXPSF_CTRL + 2);
+	value8 = value8 | 0xe;
+	MAC_REG_W8(REG_RXPSF_CTRL + 2, value8);
+
+	MAC_REG_W8(REG_RX_PKT_LIMIT, WLAN_RXPKT_MAX_SZ_512);
+
+	MAC_REG_W8(REG_TCR + 2, WLAN_TX_FUNC_CFG2);
+	MAC_REG_W8(REG_TCR + 1, WLAN_TX_FUNC_CFG1);
+
+	MAC_REG_W16_SET(REG_GENERAL_OPTION,
+			   BIT_DUMMY_FCS_READY_MASK_EN | BIT_RXFIFO_GNT_CUT);
+
+	MAC_REG_W8_SET(REG_SND_PTCL_CTRL, BIT_R_DISABLE_CHECK_VHTSIGB_CRC);
+
+	MAC_REG_W32(REG_WMAC_OPTION_FUNCTION_2, WLAN_MAC_OPT_FUNC2);
+
+	value8 = WLAN_MAC_OPT_NORM_FUNC1;
+
+	MAC_REG_W8(REG_WMAC_OPTION_FUNCTION_1, value8);
+
+	init_low_pwr(adapter);	
+}
+
 u32 mac_trx_init(struct mac_adapter *adapter)
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
@@ -696,6 +800,7 @@ u32 mac_trx_init(struct mac_adapter *adapter)
 
 	init_protocol_cfg(adapter);
 	init_edca_cfg(adapter);
+	init_wmac_cfg(adapter);
 
 out:
 	return ret;

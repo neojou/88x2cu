@@ -27,9 +27,6 @@ enum halmac_ret_status
 init_system_cfg_8822c(struct halmac_adapter *adapter);
 
 enum halmac_ret_status
-init_wmac_cfg_8822c(struct halmac_adapter *adapter);
-
-enum halmac_ret_status
 pre_init_system_cfg_8822c(struct halmac_adapter *adapter);
 
 #endif /* HALMAC_8822C_SUPPORT */
