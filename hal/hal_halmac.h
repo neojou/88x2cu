@@ -142,7 +142,6 @@ int rtw_halmac_set_bcn_ctrl(struct dvobj_priv *d, enum phl_hw_port hwport, struc
 int rtw_halmac_set_aid(struct dvobj_priv *d, enum phl_hw_port hwport, u16 aid);
 int rtw_halmac_set_bandwidth(struct dvobj_priv *d, u8 channel, u8 pri_ch_idx, u8 bw);
 int rtw_halmac_set_edca(struct dvobj_priv *d, u8 queue, u8 aifs, u8 cw, u16 txop);
-int rtw_halmac_set_rts_full_bw(struct dvobj_priv *d, u8 enable);
 
 /* Functions */
 int rtw_halmac_init_hal_fw(struct dvobj_priv *, u8 *fw, u32 fwsize);

@@ -5860,6 +5860,8 @@ enum rtw_hal_status rtw_hal_mac_set_rxfltr_acpt_crc_err(
 	return RTW_HAL_STATUS_SUCCESS;
 }
 
+#endif //NEO
+
 /**
  * rtw_hal_mac_set_rxfltr_mpdu_size - Set max MPDU size
  * @hal_com:	pointer of struct rtw_hal_com_t
@@ -5873,6 +5875,8 @@ enum rtw_hal_status rtw_hal_mac_set_rxfltr_acpt_crc_err(
 enum rtw_hal_status rtw_hal_mac_set_rxfltr_mpdu_size(
 		struct rtw_hal_com_t *hal_com, u8 band, u16 size)
 {
+	pr_info("%s NEO TODO\n", __func__);
+#if 0 //NEO
 	struct hal_info_t *hal_info = hal_com->hal_priv;
 	struct mac_adapter *mac = hal_to_mac(hal_info);
 	struct mac_ax_rx_fltr_ctrl_t ctrl = {0};
@@ -5888,9 +5892,11 @@ enum rtw_hal_status rtw_hal_mac_set_rxfltr_mpdu_size(
 	err = mac->ops->set_rx_fltr_opt(mac, &ctrl, &mask, band);
 	if (err)
 		return RTW_HAL_STATUS_FAILURE;
-
+#endif //NEO
 	return RTW_HAL_STATUS_SUCCESS;
 }
+
+#if 0 //NEO
 
 /**
  * rtw_hal_mac_set_rxfltr_by_type - Filter RX frame by frame type
@@ -7654,3 +7660,17 @@ exit:
 #endif /* CONFIG_MCC_SUPPORT */
 
 #endif // if 0 NEO
+
+enum rtw_hal_status rtw_hal_mac_set_hw_rts_full(struct hal_info_t *hal, bool enable)
+{
+	struct mac_adapter *mac = hal_to_mac(hal);
+	enum rtw_hal_status hal_status = RTW_HAL_STATUS_FAILURE;
+	u32 err;
+
+	err = mac->ops->set_rts_full(mac, enable);
+	if (err)
+		return RTW_HAL_STATUS_FAILURE;
+
+	return RTW_HAL_STATUS_SUCCESS;
+}
+

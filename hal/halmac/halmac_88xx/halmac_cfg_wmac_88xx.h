@@ -119,9 +119,6 @@ get_mac_addr_88xx(struct halmac_adapter *adapter, u8 port,
 		  union halmac_wlan_addr *addr);
 
 void
-rts_full_bw_88xx(struct halmac_adapter *adapter, u8 enable);
-
-void
 cfg_mac_clk_88xx(struct halmac_adapter *adapter);
 
 #endif/* HALMAC_88XX_SUPPORT */

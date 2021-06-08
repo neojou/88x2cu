@@ -1929,36 +1929,6 @@ int rtw_halmac_set_edca(struct dvobj_priv *d, u8 queue, u8 aifs, u8 cw, u16 txop
 	return 0;
 }
 
-/**
- * rtw_halmac_set_rts_full_bw() - Send RTS to all covered channels
- * @d:		struct dvobj_priv*
- * @enable:	_TRUE(enable), _FALSE(disable)
- *
- * Hradware will duplicate RTS packet to all channels which are covered in used
- * bandwidth.
- *
- * Return 0 if process OK, otherwise -1.
- */
-int rtw_halmac_set_rts_full_bw(struct dvobj_priv *d, u8 enable)
-{
-	struct halmac_adapter *mac;
-	struct halmac_api *api;
-	enum halmac_ret_status status;
-	u8 full;
-
-
-	mac = dvobj_to_halmac(d);
-	api = HALMAC_GET_API(mac);
-	full = (enable == _TRUE) ? 1 : 0;
-
-	status = api->halmac_set_hw_value(mac, HALMAC_HW_RTS_FULL_BW, &full);
-	if (HALMAC_RET_SUCCESS != status)
-		return -1;
-
-	return 0;
-}
-
-
 #ifdef CONFIG_SUPPORT_TRX_SHARED
 static inline enum halmac_rx_fifo_expanding_mode _trx_share_mode_drv2halmac(u8 trx_share_mode)
 {
@@ -2524,10 +2494,6 @@ static int init_mac_flow(struct dvobj_priv *d)
 	/* Driver insert flow: Sync driver setting with register */
 	/* Sync driver RCR cache with register setting */
 	rtw_hal_get_hwreg(dvobj_get_primary_adapter(d), HW_VAR_RCR, NULL);
-
-	err = rtw_halmac_set_rts_full_bw(d, _FALSE);
-	if (err)
-		RTW_WARN("%s: Fail to disable RTS FULL BW mode\n", __FUNCTION__);
 
 	_init_trx_cfg_drv(d);
 	/* Driver inser flow end */

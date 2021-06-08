@@ -64,4 +64,6 @@ u32 mac_hal_deinit(struct mac_ax_adapter *adapter);
 u32 mac_ax_init_state(struct mac_ax_adapter *adapter);
 #endif // if 0 NEO
 
+u32 mac_set_rts_full(struct mac_adapter *adapter, bool enable);
+
 #endif

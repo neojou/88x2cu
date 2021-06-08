@@ -513,9 +513,6 @@ set_hw_value_88xx(struct halmac_adapter *adapter, enum halmac_hw_id hw_id,
 		fast_edca_cfg_88xx(adapter,
 				   (struct halmac_fast_edca_cfg *)value);
 		break;
-	case HALMAC_HW_RTS_FULL_BW:
-		rts_full_bw_88xx(adapter, *(u8 *)value);
-		break;
 	case HALMAC_HW_FREE_CNT_EN:
 		HALMAC_REG_W8_SET(REG_MISC_CTRL, BIT_EN_FREECNT);
 		break;

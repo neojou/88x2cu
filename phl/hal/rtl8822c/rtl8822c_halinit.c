@@ -332,10 +332,10 @@ enum rtw_hal_status hal_start_8822c(struct rtw_phl_com_t *phl_com,
 	if (hal_status != RTW_HAL_STATUS_SUCCESS)
 		goto hal_init_fail;
 
-#if 0 // NEO
 	rtw_hal_set_rxfltr_by_mode(hal, HW_BAND_0, RX_FLTR_MODE_STA_NORMAL);
 	/* MAC Suggested : 11264 Byte */
 	rtw_hal_mac_set_rxfltr_mpdu_size(hal->hal_com, HW_BAND_0, 0x2c00);
+	rtw_hal_mac_set_hw_rts_full(hal, false);
 	if (hal->hal_com->dbcc_en == true) {
 		rtw_hal_set_rxfltr_by_mode(hal, HW_BAND_1, RX_FLTR_MODE_STA_NORMAL);
 		rtw_hal_mac_set_rxfltr_mpdu_size(hal->hal_com, HW_BAND_1, 0x2c00);
@@ -345,6 +345,7 @@ enum rtw_hal_status hal_start_8822c(struct rtw_phl_com_t *phl_com,
 	rtw_hal_btc_power_on_ntfy(hal);
 #endif
 
+#if 0 // NEO
 	/* EFUSE config */
 	rtw_hal_efuse_process(hal, init_info->ic_name);
 	rtw_hal_final_cap_decision(phl_com, hal);

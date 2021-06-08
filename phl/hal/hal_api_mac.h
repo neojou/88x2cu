@@ -496,4 +496,7 @@ enum rtw_hal_status rtw_hal_mac_get_mcc_status_rpt(struct hal_info_t *hal,
 
 #endif /* CONFIG_MCC_SUPPORT */
 
+
+enum rtw_hal_status rtw_hal_mac_set_hw_rts_full(struct hal_info_t *hal, bool enable);
+
 #endif /*_HAL_API_MAC_H_*/

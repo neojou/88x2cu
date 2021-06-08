@@ -176,6 +176,7 @@ static struct mac_ops mac8822c_ops = {
 #endif // NEO if 0
 	mac_fwdl, /* fwdl */
 	mac_enable_fw, /* enable_fw */
+	mac_set_rts_full, /* set_rts_full */
 #if 0 // NEO
 	NULL, /* mac_lv1_rcvy, */ /* lv1_rcvy */
 	NULL, /* mac_get_macaddr, */

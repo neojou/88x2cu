@@ -1147,18 +1147,4 @@ get_mac_addr_88xx(struct halmac_adapter *adapter, u8 port,
 	return HALMAC_RET_SUCCESS;
 }
 
-void
-rts_full_bw_88xx(struct halmac_adapter *adapter, u8 enable)
-{
-	u8 value8;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-
-	value8 = HALMAC_REG_R8(REG_INIRTS_RATE_SEL);
-
-	if (enable == 1)
-		HALMAC_REG_W8(REG_INIRTS_RATE_SEL, value8 | BIT(5));
-	else
-		HALMAC_REG_W8(REG_INIRTS_RATE_SEL, value8 & ~(BIT(5)));
-}
-
 #endif /* HALMAC_88XX_SUPPORT */

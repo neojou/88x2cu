@@ -858,6 +858,23 @@ send_general_info(struct mac_adapter *adapter)
 	return ret;
 }
 
+u32 mac_set_rts_full(struct mac_adapter *adapter, bool enable)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u8 value8;
+
+	pr_info("%s NEO enable=%d\n", __func__, enable);
+
+	value8 = MAC_REG_R8(REG_INIRTS_RATE_SEL);
+
+	if (enable)
+		MAC_REG_W8(REG_INIRTS_RATE_SEL, value8 | BIT(5));
+	else
+		MAC_REG_W8(REG_INIRTS_RATE_SEL, value8 & ~(BIT(5)));
+
+	return MACSUCCESS;
+}
+
 #if 0 // NEO
 u32 dmac_func_en(struct mac_ax_adapter *adapter)
 {
