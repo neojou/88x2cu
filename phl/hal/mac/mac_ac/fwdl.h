@@ -19,9 +19,9 @@
 
 #include "../type.h"
 #include "fwcmd.h"
+#include "trx_desc.h"
 
 #if 0 //NEO
-#include "trx_desc.h"
 #include "trxcfg.h"
 #include "dle.h"
 #include "hci_fc.h"

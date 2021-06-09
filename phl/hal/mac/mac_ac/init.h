@@ -28,13 +28,10 @@
 #endif
 
 #include "role.h"
-#if 0 // NEO
 #include "fwdl.h"
 #if MAC_PCIE_SUPPORT
 #include "_pcie.h"
 #endif
-
-#endif // if 0 NEO
 
 #ifdef CONFIG_NEW_HALMAC_INTERFACE
 struct mac_ax_adapter *get_mac_ax_adapter(enum mac_ax_intf intf,

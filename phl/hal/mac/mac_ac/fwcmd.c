@@ -455,14 +455,16 @@ u32 h2c_pkt_set_cmd(struct mac_ax_adapter *adapter, struct rtw_h2c_pkt *h2cb,
 	return MACSUCCESS;
 }
 
-u32 h2c_pkt_build_txd(struct mac_ax_adapter *adapter, struct rtw_h2c_pkt *h2cb)
+#endif //NEO
+
+u32 h2c_pkt_build_txd(struct mac_adapter *adapter, struct rtw_h2c_pkt *h2cb)
 {
 	u8 *buf;
 	u32 ret;
 	u32 txd_len;
-	struct mac_ax_txpkt_info info = {0};
+	struct mac_txpkt_info info = {0};
 
-	info.type = MAC_AX_PKT_H2C;
+	info.type = MAC_PKT_H2C;
 	info.pktsize = h2cb->data_len;
 	txd_len = mac_txdesc_len(adapter, &info);
 
@@ -476,6 +478,8 @@ u32 h2c_pkt_build_txd(struct mac_ax_adapter *adapter, struct rtw_h2c_pkt *h2cb)
 
 	return MACSUCCESS;
 }
+
+#if 0 //NEO
 
 u32 fwcmd_wq_idle(struct mac_ax_adapter *adapter, u32 id)
 {

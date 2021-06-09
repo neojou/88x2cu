@@ -21,7 +21,7 @@
 
 //#include "fwcmd_intf.h"
 //#include "fwcmd_intf_f2p.h"
-//#include "trx_desc.h"
+#include "trx_desc.h"
 //#include "fwofld.h"
 
 #define FWCMD_HDR_LEN		8
