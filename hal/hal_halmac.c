@@ -2503,28 +2503,6 @@ out:
 	return err_ret;
 }
 
-#ifdef CONFIG_CORE_CMD_THREAD 
-static int _drv_enable_trx(struct dvobj_priv *d)
-{
-	struct _ADAPTER *adapter;
-	u32 status;
-
-
-	adapter = dvobj_get_primary_adapter(d);
-	if (adapter->netif_up == _FALSE) {
-		status = rtw_mi_start_drv_threads(adapter);
-		if (status == _FAIL) {
-			RTW_ERR("%s: Start threads Failed!\n", __FUNCTION__);
-			return -1;
-		}
-	}
-
-	//rtw_intf_start(adapter);
-
-	return 0;
-}
-#endif
-
 /*
  * Notices:
  *	Make sure following information
@@ -2582,11 +2560,16 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 	}
 
 	#ifdef CONFIG_CORE_CMD_THREAD 
-	/* Driver insert flow: Enable TR/RX */
-	err = _drv_enable_trx(d);
-	if (err) {
-		RTW_ERR("%s _drv_enable_trx err=%d\n", __func__, err);
-		goto out;
+	if (is_primary_adapter(adapter) && !adapter->cmdThread) {
+		RTW_INFO(FUNC_ADPT_FMT " start RTW_CMD_THREAD\n", FUNC_ADPT_ARG(adapter));
+		adapter->cmdThread = kthread_run(rtw_cmd_thread, adapter, "RTW_CMD_THREAD");
+		if (IS_ERR(adapter->cmdThread)) {
+			adapter->cmdThread = NULL;
+			err = _FAIL;
+			goto out;
+		}
+		else
+			_rtw_down_sema(&adapter_to_dvobj(adapter)->cmdpriv.start_cmdthread_sema); /* wait for cmd_thread to run */
 	}
 	#endif
 

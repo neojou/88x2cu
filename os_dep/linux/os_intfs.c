@@ -784,29 +784,6 @@ void rtw_os_ndevs_free(struct dvobj_priv *dvobj)
 }
 
 #ifdef CONFIG_CORE_CMD_THREAD
-u32 rtw_start_drv_threads(_adapter *padapter)
-{
-	u32 _status = _SUCCESS;
-
-	RTW_INFO(FUNC_ADPT_FMT" enter\n", FUNC_ADPT_ARG(padapter));
-
-	if (is_primary_adapter(padapter)) {
-		if (padapter->cmdThread == NULL) {
-			RTW_INFO(FUNC_ADPT_FMT " start RTW_CMD_THREAD\n", FUNC_ADPT_ARG(padapter));
-			padapter->cmdThread = kthread_run(rtw_cmd_thread, padapter, "RTW_CMD_THREAD");
-			if (IS_ERR(padapter->cmdThread)) {
-				padapter->cmdThread = NULL;
-				_status = _FAIL;
-			}
-			else
-				_rtw_down_sema(&adapter_to_dvobj(padapter)->cmdpriv.start_cmdthread_sema); /* wait for cmd_thread to run */
-		}
-	}
-
-	return _status;
-
-}
-
 void rtw_stop_drv_threads(_adapter *padapter)
 {
 	RTW_INFO(FUNC_ADPT_FMT" enter\n", FUNC_ADPT_ARG(padapter));
@@ -2142,15 +2119,6 @@ static int _netdev_open(struct net_device *pnetdev)
 		if (status == _FAIL)
 			goto netdev_open_error;
 		rtw_led_control(padapter, LED_CTL_NO_LINK);
-
-		#if 0 /*#ifdef CONFIG_CORE_DM_CHK_TIMER*/
-		if (0){
-			_set_timer(&dvobj->dynamic_chk_timer, 2000);
-		}
-		#endif
-		#if 0 /*CONFIG_CORE_THREAD*/
-		_drv_enable_trx(dvobj);/*FPGA_test*/
-		#endif
 	}
 
 	if (padapter->netif_up == _FALSE) {
@@ -3295,9 +3263,6 @@ int rtw_resume_process_wow(_adapter *padapter)
 	if(registry_par->suspend_type == FW_IPS_WRC)
 		rtw_hal_set_hwreg(padapter, HW_VAR_VENDOR_WOW_MODE, &en);
 
-	#if 0
-	rtw_mi_start_drv_threads(padapter);
-	#endif
 	rtw_mi_intf_start(padapter);
 
 	if(registry_par->suspend_type == FW_IPS_DISABLE_BBRF && !check_fwstate(pmlmepriv, WIFI_ASOC_STATE)) {
@@ -3424,10 +3389,6 @@ int rtw_resume_process_ap_wow(_adapter *padapter)
 
 	rtw_clr_drv_stopped(padapter);
 	RTW_INFO("%s: wowmode resuming, DriverStopped:%s\n", __func__, rtw_is_drv_stopped(padapter) ? "True" : "False");
-
-	#if 0
-	rtw_mi_start_drv_threads(padapter);
-	#endif
 
 	if (rtw_mi_check_status(padapter, MI_LINKED)) {
 		ch =  rtw_mi_get_union_chan(padapter);
