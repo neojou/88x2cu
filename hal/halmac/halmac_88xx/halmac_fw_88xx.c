@@ -963,6 +963,8 @@ proc_send_general_info_88xx(struct halmac_adapter *adapter,
 	hdr_info.ack = 0;
 	set_h2c_pkt_hdr_88xx(adapter, h2c_buf, &hdr_info, &seq_num);
 
+	print_hex_dump(KERN_INFO, "NEO general info: ", DUMP_PREFIX_OFFSET, 16, 1,
+		       h2c_buf, H2C_PKT_SIZE_88XX, 1);
 	status = send_h2c_pkt_88xx(adapter, h2c_buf);
 
 	if (status != HALMAC_RET_SUCCESS)

@@ -832,8 +832,6 @@ mac_init(struct mac_adapter *adapter)
 static u32
 send_general_info(struct mac_adapter *adapter)
 {
-	return MACSUCCESS;
-#if 0 //NEO
 	struct mac_fifo_info *fifo = &adapter->fifo_info;
 	#if MAC_PHL_H2C
 	struct rtw_h2c_pkt *h2cb;
@@ -864,17 +862,21 @@ send_general_info(struct mac_adapter *adapter)
 					fifo->rsvd_fw_txbuf_addr -
 					fifo->rsvd_boundary);
 
+#if 0 //NEO
 	ret = h2c_pkt_build_txd(adapter, h2cb);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR] h2c_pkt_build_txd failed, ret=%d\n", ret);
 		goto send_general_info_fail;
 	}
 
+	print_hex_dump(KERN_INFO, "NEO G6 general info: ", DUMP_PREFIX_OFFSET, 16, 1,
+		       buf, H2C_PKT_GENERAL_INFO, 1);
 	ret = PLTFM_TX(h2cb);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR] PLTFM_TX failed, ret=%d\n", ret);
 		goto send_general_info_fail;
 	}
+#endif //NEO
 
 	h2cb_free(adapter, h2cb);
 	return MACSUCCESS;
@@ -882,7 +884,6 @@ send_general_info(struct mac_adapter *adapter)
 send_general_info_fail:
 	h2cb_free(adapter, h2cb);
 	return ret;
-#endif //NEO
 }
 
 u32 mac_set_rts_full(struct mac_adapter *adapter, bool enable)

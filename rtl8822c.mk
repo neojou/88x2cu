@@ -17,33 +17,10 @@ ifeq ($(CONFIG_USB_HCI), y)
 _HAL_INTFS_FILES +=	hal/rtl8822c/$(HCI_NAME)/rtl8822cu_halinit.o \
 			hal/rtl8822c/$(HCI_NAME)/rtl8822cu_halmac.o \
 			hal/rtl8822c/$(HCI_NAME)/rtl8822cu_xmit.o \
-			hal/rtl8822c/$(HCI_NAME)/rtl8822cu_recv.o \
 			hal/rtl8822c/$(HCI_NAME)/rtl8822cu_led.o \
 			hal/rtl8822c/$(HCI_NAME)/rtl8822cu_ops.o
 
 _HAL_INTFS_FILES +=hal/efuse/rtl8822c/HalEfuseMask8822C_USB.o
-endif
-ifeq ($(CONFIG_PCI_HCI), y)
-_HAL_INTFS_FILES +=	hal/rtl8822c/$(HCI_NAME)/rtl8822ce_halinit.o \
-			hal/rtl8822c/$(HCI_NAME)/rtl8822ce_halmac.o \
-			hal/rtl8822c/$(HCI_NAME)/rtl8822ce_xmit.o \
-			hal/rtl8822c/$(HCI_NAME)/rtl8822ce_recv.o \
-			hal/rtl8822c/$(HCI_NAME)/rtl8822ce_led.o \
-			hal/rtl8822c/$(HCI_NAME)/rtl8822ce_ops.o
-
-_HAL_INTFS_FILES +=hal/efuse/rtl8822c/HalEfuseMask8822C_PCIE.o
-endif
-ifeq ($(CONFIG_SDIO_HCI), y)
-_HAL_INTFS_FILES +=	hal/rtl8822c/$(HCI_NAME)/rtl8822cs_halinit.o \
-			hal/rtl8822c/$(HCI_NAME)/rtl8822cs_halmac.o \
-			hal/rtl8822c/$(HCI_NAME)/rtl8822cs_xmit.o \
-			hal/rtl8822c/$(HCI_NAME)/rtl8822cs_recv.o \
-			hal/rtl8822c/$(HCI_NAME)/rtl8822cs_led.o \
-			hal/rtl8822c/$(HCI_NAME)/rtl8822cs_ops.o
-
-_HAL_INTFS_FILES +=hal/efuse/rtl8822c/HalEfuseMask8822C_SDIO.o
-
-_HAL_INTFS_FILES +=hal/hal_hci/hal_sdio_coex.o
 endif
 
 include $(src)/halmac.mk
