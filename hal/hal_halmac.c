@@ -2311,13 +2311,6 @@ exit:
 	return err;
 }
 
-static void _init_trx_cfg_drv(struct dvobj_priv *d)
-{
-#ifdef CONFIG_PCI_HCI
-	rtw_hal_irp_reset(dvobj_get_primary_adapter(d));
-#endif
-}
-
 /*
  * Description:
  *	Downlaod Firmware Flow
@@ -2494,9 +2487,6 @@ static int init_mac_flow(struct dvobj_priv *d)
 	/* Driver insert flow: Sync driver setting with register */
 	/* Sync driver RCR cache with register setting */
 	rtw_hal_get_hwreg(dvobj_get_primary_adapter(d), HW_VAR_RCR, NULL);
-
-	_init_trx_cfg_drv(d);
-	/* Driver inser flow end */
 
 	err_ret = 0;
 out:
