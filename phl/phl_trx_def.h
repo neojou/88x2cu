@@ -27,9 +27,9 @@
 #define _H2CB_LONG_DATA_QLEN 200 /* should be refined */
 #define MAX_H2C_PKT_NUM (_H2CB_CMD_QLEN + _H2CB_DATA_QLEN + _H2CB_LONG_DATA_QLEN)
 
-#define FWCMD_HDR_LEN 8
-#define _WD_BODY_LEN 24
-#define H2C_CMD_LEN 64
+#define FWCMD_HDR_LEN 48
+#define _WD_BODY_LEN 0
+#define H2C_CMD_LEN 32
 #define H2C_DATA_LEN 256
 #define H2C_LONG_DATA_LEN 8192
 

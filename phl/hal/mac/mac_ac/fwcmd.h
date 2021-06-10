@@ -26,7 +26,7 @@
 
 #define FWCMD_HDR_LEN		8
 
-#define H2C_CMD_LEN		64
+#define H2C_CMD_LEN		32
 #define H2C_DATA_LEN		256
 #define H2C_LONG_DATA_LEN	8192
 

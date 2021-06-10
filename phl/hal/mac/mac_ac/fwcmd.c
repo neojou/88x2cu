@@ -347,12 +347,18 @@ void h2cb_free(struct mac_adapter *adapter, struct rtw_h2c_pkt *h2cb)
 
 u8 *h2cb_push(struct rtw_h2c_pkt *h2cb, u32 len)
 {
+	pr_info("%s len: %u, vir_head:%u, vir_data:%u, data_len:%u\n",
+		__func__, len, h2cb->vir_head, h2cb->vir_data, h2cb->data_len);
+
 	h2cb->vir_data -= len;
 	h2cb->data_len  += len;
 
 	if (h2cb->vir_data < h2cb->vir_head)
 		return NULL;
 
+	pr_info("%s vir_data:%u, data_len:%u\n",
+		__func__, h2cb->vir_data, h2cb->data_len);
+	
 	return h2cb->vir_data;
 }
 
@@ -375,12 +381,16 @@ u8 *h2cb_put(struct rtw_h2c_pkt *h2cb, u32 len)
 {
 	u8 *tmp = h2cb_tail_pointer(h2cb);
 
+	pr_info("%s len: %u, vir_tail:%u, vir_end:%u, data_len:%u\n",
+		__func__, len, h2cb->vir_tail, h2cb->vir_end, h2cb->data_len);
 	h2cb->vir_tail += len;
 	h2cb->data_len += len;
 
 	if (h2cb->vir_tail > h2cb->vir_end)
 		return NULL;
 
+	pr_info("%s tmp:%p, vir_tail:%u, data_len:%u\n",
+		__func__, tmp, h2cb->vir_tail, h2cb->vir_end, h2cb->data_len);
 	return tmp;
 }
 
@@ -459,10 +469,11 @@ u32 h2c_pkt_set_cmd(struct mac_ax_adapter *adapter, struct rtw_h2c_pkt *h2cb,
 
 u32 h2c_pkt_build_txd(struct mac_adapter *adapter, struct rtw_h2c_pkt *h2cb)
 {
-	u8 *buf;
-	u32 ret;
-	u32 txd_len;
 	struct mac_txpkt_info info = {0};
+	u8 *buf;
+	u32 txd_len;
+	u32 ret;
+
 
 	info.type = MAC_PKT_H2C;
 	info.pktsize = h2cb->data_len;
@@ -472,7 +483,7 @@ u32 h2c_pkt_build_txd(struct mac_adapter *adapter, struct rtw_h2c_pkt *h2cb)
 	if (!buf)
 		return MACNPTR;
 
-	ret = mac_build_txdesc(adapter, &info, buf, txd_len);
+	ret = mac_build_txdesc(adapter, &info, buf, 32);
 	if (ret)
 		return ret;
 
