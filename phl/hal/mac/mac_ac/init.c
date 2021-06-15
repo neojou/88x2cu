@@ -28,43 +28,6 @@
 
 #define TX_PAGE_SIZE_SHIFT	7
 
-// H2C, C2H : need to move to G6's H2C, fwcmd.c/fwcmd.h, and rewrite to common style
-/* PKT H2C */
-#define H2C_PKT_CMD_ID 0xFF
-#define H2C_PKT_CATEGORY 0x01
-
-#define H2C_PKT_GENERAL_INFO 0x0D
-#define H2C_PKT_PHYDM_INFO 0x11
-#define H2C_PKT_IQK 0x0E
-
-#define H2C_PKT_CH_SWITCH 0x02
-#define H2C_PKT_UPDATE_PKT 0x0C
-
-#define H2C_PKT_CH_SWITCH_LEN 0x20
-#define H2C_PKT_UPDATE_PKT_LEN 0x4
-#define C2H_PKT_BUF		256
-#define H2C_PKT_SIZE		32
-#define H2C_PKT_HDR_SIZE	8
-
-#define SET_PKT_H2C_CATEGORY(h2c_pkt, value)                                   \
-	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x00, value, GENMASK(6, 0))
-#define SET_PKT_H2C_CMD_ID(h2c_pkt, value)                                     \
-	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x00, value, GENMASK(15, 8))
-#define SET_PKT_H2C_SUB_CMD_ID(h2c_pkt, value)                                 \
-	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x00, value, GENMASK(31, 16))
-#define SET_PKT_H2C_TOTAL_LEN(h2c_pkt, value)                                  \
-	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x01, value, GENMASK(15, 0))
-
-#define GENERAL_INFO_SET_FW_TX_BOUNDARY(h2c_pkt, value)                        \
-	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x02, value, GENMASK(23, 16))
-
-static inline void rtw_h2c_pkt_set_header(u8 *h2c_pkt, u8 sub_id)
-{
-	SET_PKT_H2C_CATEGORY(h2c_pkt, H2C_PKT_CATEGORY);
-	SET_PKT_H2C_CMD_ID(h2c_pkt, H2C_PKT_CMD_ID);
-	SET_PKT_H2C_SUB_CMD_ID(h2c_pkt, sub_id);
-}
-
 enum rtw_dma_mapping {
 	RTW_DMA_MAPPING_EXTRA	= 0,
 	RTW_DMA_MAPPING_LOW	= 1,
@@ -829,62 +792,6 @@ mac_init(struct mac_adapter *adapter)
 	return ret;
 }
 
-static u32
-send_general_info(struct mac_adapter *adapter)
-{
-	struct mac_fifo_info *fifo = &adapter->fifo_info;
-	#if MAC_PHL_H2C
-	struct rtw_h2c_pkt *h2cb;
-	#else
-	struct h2c_buf *h2cb;
-	#endif
-	u8 *buf;
-	u16 total_size = H2C_PKT_HDR_SIZE + 4;
-	u32 ret;
-
-	h2cb = h2cb_alloc(adapter, H2CB_CLASS_CMD);
-	if (!h2cb) {
-		PLTFM_MSG_ERR("[ERR] h2cb_alloc failed\n");
-		return MACNPTR;
-	}
-
-	buf = h2cb_put(h2cb, H2C_PKT_SIZE);
-	if (!buf) {
-		PLTFM_MSG_ERR("[ERR] h2c buf failed\n");
-		return MACNOBUF;
-	}
-		
-	rtw_h2c_pkt_set_header(buf, H2C_PKT_GENERAL_INFO);
-
-	SET_PKT_H2C_TOTAL_LEN(buf, total_size);
-
-	GENERAL_INFO_SET_FW_TX_BOUNDARY(buf,
-					fifo->rsvd_fw_txbuf_addr -
-					fifo->rsvd_boundary);
-
-	ret = h2c_pkt_build_txd(adapter, h2cb);
-	if (ret != MACSUCCESS) {
-		PLTFM_MSG_ERR("[ERR] h2c_pkt_build_txd failed, ret=%d\n", ret);
-		goto send_general_info_fail;
-	}
-
-	print_hex_dump(KERN_INFO, "NEO G6 general info: ", DUMP_PREFIX_OFFSET, 16, 1,
-		       h2cb->vir_data, h2cb->data_len, 1);
-
-	ret = PLTFM_TX(h2cb);
-	if (ret) {
-		PLTFM_MSG_ERR("[ERR] PLTFM_TX failed, ret=%d\n", ret);
-		goto send_general_info_fail;
-	}
-
-	h2cb_free(adapter, h2cb);
-	return MACSUCCESS;
-
-send_general_info_fail:
-	h2cb_free(adapter, h2cb);
-	return ret;
-}
-
 u32 mac_set_rts_full(struct mac_adapter *adapter, bool enable)
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
@@ -1130,7 +1037,7 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
-	ret = send_general_info(adapter);
+	ret = mac_send_general_info_h2c(adapter);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]send_general_info failed: %d\n", ret);
 		return ret;

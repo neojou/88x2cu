@@ -880,22 +880,6 @@ send_general_info_88xx(struct halmac_adapter *adapter,
 	enum halmac_ret_status status = HALMAC_RET_SUCCESS;
 	u8 cnt;
 
-	if (halmac_fw_validate(adapter) != HALMAC_RET_SUCCESS)
-		return HALMAC_RET_NO_DLFW;
-
-	if (adapter->fw_ver.h2c_version < 4)
-		return HALMAC_RET_FW_NO_SUPPORT;
-
-	if (adapter->fw_ver.h2c_version < 14)
-		PLTFM_MSG_WARN("[WARN]the H2C ver. does not match halmac\n");
-
-	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
-
-	if (adapter->halmac_state.dlfw_state == HALMAC_DLFW_NONE) {
-		PLTFM_MSG_ERR("[ERR]no dl fw!!\n");
-		return HALMAC_RET_NO_DLFW;
-	}
-
 	status = proc_send_phydm_info_88xx(adapter, info);
 	if (status != HALMAC_RET_SUCCESS) {
 		PLTFM_MSG_ERR("[ERR]send phydm info\n");

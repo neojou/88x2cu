@@ -31,6 +31,27 @@
 #define H2C_LONG_DATA_LEN	8192
 
 //NEO
+// H2C, C2H : need to move to G6's H2C, fwcmd.c/fwcmd.h, and rewrite to common style
+/* PKT H2C */
+#define H2C_PKT_CMD_ID 0xFF
+#define H2C_PKT_CATEGORY 0x01
+
+#define H2C_PKT_GENERAL_INFO 0x0D
+#define H2C_PKT_PHYDM_INFO 0x11
+#define H2C_PKT_IQK 0x0E
+
+#define H2C_PKT_CH_SWITCH 0x02
+#define H2C_PKT_UPDATE_PKT 0x0C
+
+#define H2C_PKT_CH_SWITCH_LEN 0x20
+#define H2C_PKT_UPDATE_PKT_LEN 0x4
+#define C2H_PKT_BUF		256
+#define H2C_PKT_SIZE		32
+#define H2C_PKT_HDR_SIZE	8
+
+#define H2C_PKT_SIZE		32
+#define H2C_PKT_HDR_SIZE	8
+
 #define C2H_GET_CMD_ID(ch2_pkt) LE_BITS_TO_4BYTE(ch2_pkt + 0x00, 0, 8)
 #define C2H_GET_SEQ(c2h_pkt) LE_BITS_TO_4BYTE(c2h_pkt + 0x00, 8, 8)
 
@@ -160,6 +181,7 @@ u32 mac_process_c2h(struct mac_adapter *adapter, u8 *buf, u32 len,
 u8 c2h_field_parsing(struct fwcmd_hdr *hdr, struct rtw_c2h_info *info);
 u32 mac_fw_log_cfg(struct mac_adapter *adapter,
 		   struct mac_fw_log *log_cfg);
+u32 mac_send_general_info_h2c(struct mac_adapter *adapter);
 u32 mac_send_bcn_h2c(struct mac_adapter *adapter,
 		     struct mac_bcn_info *info);
 u32 mac_host_getpkt_h2c(struct mac_adapter *adapter, u8 macid, u8 pkttype);
