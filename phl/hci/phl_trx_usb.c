@@ -1661,19 +1661,31 @@ static enum rtw_phl_status phl_rx_usb(struct phl_info_t *phl_info)
 	return RTW_PHL_STATUS_SUCCESS;
 }
 
-enum rtw_phl_status phl_pltfm_tx_usb(struct phl_info_t *phl_info,
-									void *pkt)
+enum rtw_phl_status phl_pltfm_tx_usb(struct phl_info_t *phl_info, void *pkt)
 {
 	enum rtw_phl_status pstatus = RTW_PHL_STATUS_FAILURE;
-
 	struct rtw_h2c_pkt *h2c_pkt = (struct rtw_h2c_pkt *)pkt;
+#if 1 //NEO
+	struct sk_buff *skb;
+
+	skb = dev_alloc_skb(h2c_pkt->data_len);
+	if (unlikely(!skb)) {
+		PHL_ERR("%s failed to alloc skb\n", __func__);
+		return RTW_PHL_STATUS_FAILURE;
+	}
+
+	skb_put_data(skb, h2c_pkt->vir_data, h2c_pkt->data_len);
+
+	print_hex_dump(KERN_INFO, "NEO tx h2c:", DUMP_PREFIX_OFFSET, 16, 1, skb->data, skb->len, 1); 
+	pstatus = os_usb_write_h2c(phl_to_drvpriv(phl_info), skb);
+
+	return pstatus;
+#else //NEO
+
 	struct phl_usb_tx_buf_resource *reso = NULL;
 	struct phl_usb_buf *tx_buf = NULL;
-	u8 bulk_id = 0;
+	struct sk_buff *skb;
 
-	PHL_INFO("%s NEO TODO\n", __func__);
-	return RTW_PHL_STATUS_SUCCESS;
-#if 0 //NEO TODO
 	reso = (struct phl_usb_tx_buf_resource *)phl_info->hci->txbuf_pool;
 
 	if (reso)
@@ -1684,9 +1696,14 @@ enum rtw_phl_status phl_pltfm_tx_usb(struct phl_info_t *phl_info,
 	if (tx_buf) {
 		tx_buf->buffer = (u8 *)h2c_pkt;
 
-		bulk_id = rtw_hal_get_bulkout_id(phl_info->hal, 0x13, 0);
-		pstatus = os_usb_tx(phl_to_drvpriv(phl_info),
-			(u8 *)tx_buf, bulk_id, h2c_pkt->data_len, h2c_pkt->vir_data);
+		skb = dev_alloc_skb(h2c_pkt->data_len);
+		if (unlikely(!skb)) {
+			PHL_ERR("%s failed to alloc skb\n", __func__);
+			return RTW_PHL_STATUS_FAILURE;
+		}
+
+		skb_put_data(skb, h2c_pkt->vir_data, h2c_pkt->data_len);
+		pstatus = os_usb_write_h2c(phl_to_drvpriv(phl_info), skb);
 		if (pstatus == RTW_PHL_STATUS_FAILURE) {
 			phl_enqueue_idle_h2c_pkt(phl_info,
 				(struct rtw_h2c_pkt *)tx_buf->buffer);
@@ -1706,6 +1723,15 @@ enum rtw_phl_status phl_pltfm_send_rsvd_page_usb(struct phl_info_t *phl_info,
 	enum rtw_phl_status pstatus = RTW_PHL_STATUS_FAILURE;
 
 	pstatus = os_usb_write_rsvd_page(phl_to_drvpriv(phl_info), skb); 
+	return pstatus;
+}
+
+enum rtw_phl_status phl_pltfm_send_h2c_usb(struct phl_info_t *phl_info,
+						 struct sk_buff *skb)
+{
+	enum rtw_phl_status pstatus = RTW_PHL_STATUS_FAILURE;
+
+	pstatus = os_usb_write_h2c(phl_to_drvpriv(phl_info), skb); 
 	return pstatus;
 }
 
@@ -1801,6 +1827,7 @@ static struct phl_hci_trx_ops ops= {
 	.pend_rxbuf = phl_pend_rxbuf_usb,
 	.pltfm_tx = phl_pltfm_tx_usb,
 	.pltfm_send_rsvd_page = phl_pltfm_send_rsvd_page_usb,
+	.pltfm_send_h2c = phl_pltfm_send_h2c_usb,
 	.alloc_h2c_pkt_buf = _phl_alloc_h2c_pkt_buf_usb,
 	.free_h2c_pkt_buf = _phl_free_h2c_pkt_buf_usb,
 	.trx_reset = phl_trx_reset_usb,

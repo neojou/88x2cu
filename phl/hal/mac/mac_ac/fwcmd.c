@@ -470,6 +470,7 @@ u32 h2c_pkt_set_cmd(struct mac_ax_adapter *adapter, struct rtw_h2c_pkt *h2cb,
 u32 h2c_pkt_build_txd(struct mac_adapter *adapter, struct rtw_h2c_pkt *h2cb)
 {
 	struct mac_txpkt_info info = {0};
+	struct mac_pkt_data *pkt_info = &info.u.data;
 	u8 *buf;
 	u32 txd_len;
 	u32 ret;
@@ -483,8 +484,8 @@ u32 h2c_pkt_build_txd(struct mac_adapter *adapter, struct rtw_h2c_pkt *h2cb)
 	if (!buf)
 		return MACNPTR;
 
-	info.u.data.qsel = TX_DESC_QSEL_H2C;
-	ret = mac_build_txdesc(adapter, &info, buf, 32);
+	pkt_info->qsel = TX_DESC_QSEL_H2C;
+	ret = mac_build_txdesc(adapter, &info, buf, 48);
 	if (ret)
 		return ret;
 

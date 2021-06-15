@@ -90,7 +90,7 @@ struct fwld_info {
 };
 
 static u32
-dl_rsvd_page_88xx(struct mac_adapter *adapter, u16 pg_addr, struct sk_buff *skb)
+dl_rsvd_page(struct mac_adapter *adapter, u16 pg_addr, struct sk_buff *skb)
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 	u8 restore[2];
@@ -212,7 +212,7 @@ send_fwpkt_88xx(struct mac_adapter *adapter, u16 pg_addr, u8 *fw_bin, u32 size)
 		goto out;
 	}
 
-	ret = dl_rsvd_page_88xx(adapter, pg_addr, skb);
+	ret = dl_rsvd_page(adapter, pg_addr, skb);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR]dl rsvd page!!\n");
 		goto out;

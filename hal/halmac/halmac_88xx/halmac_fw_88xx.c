@@ -95,10 +95,6 @@ static void
 pltfm_reset_88xx(struct halmac_adapter *adapter);
 
 static enum halmac_ret_status
-proc_send_general_info_88xx(struct halmac_adapter *adapter,
-			    struct halmac_general_info *info);
-
-static enum halmac_ret_status
 proc_send_phydm_info_88xx(struct halmac_adapter *adapter,
 			  struct halmac_general_info *info);
 
@@ -900,12 +896,6 @@ send_general_info_88xx(struct halmac_adapter *adapter,
 		return HALMAC_RET_NO_DLFW;
 	}
 
-	status = proc_send_general_info_88xx(adapter, info);
-	if (status != HALMAC_RET_SUCCESS) {
-		PLTFM_MSG_ERR("[ERR]send gen info!!\n");
-		return status;
-	}
-
 	status = proc_send_phydm_info_88xx(adapter, info);
 	if (status != HALMAC_RET_SUCCESS) {
 		PLTFM_MSG_ERR("[ERR]send phydm info\n");
@@ -941,34 +931,6 @@ send_general_info_88xx(struct halmac_adapter *adapter,
 	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
 
 	return HALMAC_RET_SUCCESS;
-}
-
-static enum halmac_ret_status
-proc_send_general_info_88xx(struct halmac_adapter *adapter,
-			    struct halmac_general_info *info)
-{
-	u8 h2c_buf[H2C_PKT_SIZE_88XX] = { 0 };
-	u16 seq_num = 0;
-	struct halmac_h2c_header_info hdr_info;
-	enum halmac_ret_status status = HALMAC_RET_SUCCESS;
-
-	PLTFM_MSG_TRACE("[TRACE]%s\n", __func__);
-
-	GENERAL_INFO_SET_FW_TX_BOUNDARY(h2c_buf,
-					adapter->txff_alloc.rsvd_fw_txbuf_addr -
-					adapter->txff_alloc.rsvd_boundary);
-
-	hdr_info.sub_cmd_id = SUB_CMD_ID_GENERAL_INFO;
-	hdr_info.content_size = 4;
-	hdr_info.ack = 0;
-	set_h2c_pkt_hdr_88xx(adapter, h2c_buf, &hdr_info, &seq_num);
-
-	status = send_h2c_pkt_88xx(adapter, h2c_buf);
-
-	if (status != HALMAC_RET_SUCCESS)
-		PLTFM_MSG_ERR("[ERR]send h2c!!\n");
-
-	return status;
 }
 
 static enum halmac_ret_status

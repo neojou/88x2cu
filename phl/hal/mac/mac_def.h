@@ -148,8 +148,10 @@
 #define PLTFM_REG_W32(addr, val)                                               \
 	adapter->pltfm_cb->reg_w32(adapter->drv_adapter, addr, val)
 
-#define PLTFM_SEND_RSVD_PAGE(skb)                                                          \
+#define PLTFM_SEND_RSVD_PAGE(skb)                                              \
 	adapter->pltfm_cb->send_rsvd_page(adapter->phl_adapter, adapter->drv_adapter, skb)
+#define PLTFM_SEND_H2C(skb)                                                    \
+	adapter->pltfm_cb->send_h2c(adapter->phl_adapter, adapter->drv_adapter, skb)
 
 #if MAC_PHL_H2C
 #define PLTFM_TX(buf)                                                          \
@@ -4546,6 +4548,9 @@ struct mac_pltfm_cb {
 	enum rtw_hal_status (*send_rsvd_page)(struct rtw_phl_com_t *phl_com,
 					      struct rtw_hal_com_t *hal_com,
 					      struct sk_buff *skb);
+	enum rtw_hal_status (*send_h2c)(struct rtw_phl_com_t *phl_com,
+					struct rtw_hal_com_t *hal_com,
+					struct sk_buff *skb);
 #if MAC_PHL_H2C
 	enum rtw_hal_status (*tx)(struct rtw_phl_com_t *phl_com,
 				  struct rtw_hal_com_t *hal_com,

@@ -734,7 +734,12 @@ static inline int os_usb_tx(void *d, u8 *tx_buf_ptr,
 
 static inline int os_usb_write_rsvd_page(void *d, struct sk_buff *skb)
 {
-	return rtw_usb_write_rsvd_page((struct dvobj_priv *)d, skb);
+	return rtw_usb_write_data((struct dvobj_priv *)d, 0, skb);
+}
+
+static inline int os_usb_write_h2c(void *d, struct sk_buff *skb)
+{
+	return rtw_usb_write_data((struct dvobj_priv *)d, 0, skb);
 }
 
 static __inline void os_enable_usb_out_pipes(void *drv_priv)

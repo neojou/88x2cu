@@ -407,6 +407,10 @@ static enum rtw_phl_status _phl_hci_ops_check(struct phl_info_t *phl_info)
 		phl_ops_error_msg("pltfm_send_rsvd_page");
 		status = RTW_PHL_STATUS_FAILURE;
 	}
+	if (!trx_ops->pltfm_send_h2c) {
+		phl_ops_error_msg("pltfm_send_h2c");
+		status = RTW_PHL_STATUS_FAILURE;
+	}
 	if (!trx_ops->alloc_h2c_pkt_buf) {
 		phl_ops_error_msg("alloc_h2c_pkt_buf");
 		status = RTW_PHL_STATUS_FAILURE;
