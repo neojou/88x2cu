@@ -3596,19 +3596,6 @@ int rtw_halmac_rx_agg_switch(struct dvobj_priv *d, u8 enable)
 }
 #endif //NEO
 
-int rtw_halmac_download_rsvd_page(struct dvobj_priv *dvobj, u8 pg_offset, u8 *pbuf, u32 size)
-{
-	enum halmac_ret_status status = HALMAC_RET_SUCCESS;
-	struct halmac_adapter *halmac = dvobj_to_halmac(dvobj);
-	struct halmac_api *api = HALMAC_GET_API(halmac);
-
-	status = api->halmac_dl_drv_rsvd_page(halmac, pg_offset, pbuf, size);
-	if (status != HALMAC_RET_SUCCESS)
-		return -1;
-
-	return 0;
-}
-
 /*
  * Description
  *	Fill following spec info from HALMAC API:

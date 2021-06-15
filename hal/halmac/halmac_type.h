@@ -2425,9 +2425,6 @@ struct halmac_api {
 	enum halmac_ret_status
 	(*halmac_chk_txdesc)(struct halmac_adapter *adapter, u8 *buf, u32 size);
 	enum halmac_ret_status
-	(*halmac_dl_drv_rsvd_page)(struct halmac_adapter *adapter, u8 pg_offset,
-				   u8 *buf, u32 size);
-	enum halmac_ret_status
 	(*halmac_pcie_switch)(struct halmac_adapter *adapter,
 			      enum halmac_pcie_cfg cfg);
 	enum halmac_ret_status

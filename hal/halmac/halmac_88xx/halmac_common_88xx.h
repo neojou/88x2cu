@@ -27,10 +27,6 @@ ofld_func_cfg_88xx(struct halmac_adapter *adapter,
 		   struct halmac_ofld_func_info *info);
 
 enum halmac_ret_status
-dl_drv_rsvd_page_88xx(struct halmac_adapter *adapter, u8 pg_offset, u8 *buf,
-		      u32 size);
-
-enum halmac_ret_status
 dl_rsvd_page_88xx(struct halmac_adapter *adapter, u16 pg_addr, u8 *buf,
 		  u32 size);
 

@@ -229,48 +229,6 @@ ofld_func_cfg_88xx(struct halmac_adapter *adapter,
 	return HALMAC_RET_SUCCESS;
 }
 
-/**
- * dl_drv_rsvd_page_88xx() - download packet to rsvd page
- * @adapter : the adapter of halmac
- * @pg_offset : page offset of driver's rsvd page
- * @halmac_buf : data to be downloaded, tx_desc is not included
- * @halmac_size : data size to be downloaded
- * Author : KaiYuan Chang
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-dl_drv_rsvd_page_88xx(struct halmac_adapter *adapter, u8 pg_offset, u8 *buf,
-		      u32 size)
-{
-	enum halmac_ret_status status;
-	u32 pg_size;
-	u32 pg_num = 0;
-	u16 pg_addr = 0;
-
-	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
-
-	pg_size = 128;
-	pg_num = size / pg_size + ((size & (pg_size - 1)) ? 1 : 0);
-	if (pg_offset + pg_num > adapter->txff_alloc.rsvd_drv_pg_num) {
-		PLTFM_MSG_ERR("[ERR] pkt overflow!!\n");
-		return HALMAC_RET_DRV_DL_ERR;
-	}
-
-	pg_addr = adapter->txff_alloc.rsvd_drv_addr + pg_offset;
-
-	status = dl_rsvd_page_88xx(adapter, pg_addr, buf, size);
-
-	if (status != HALMAC_RET_SUCCESS) {
-		PLTFM_MSG_ERR("[ERR]dl rsvd page fail!!\n");
-		return status;
-	}
-
-	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
-
-	return HALMAC_RET_SUCCESS;
-}
-
 enum halmac_ret_status
 dl_rsvd_page_88xx(struct halmac_adapter *adapter, u16 pg_addr, u8 *buf,
 		  u32 size)

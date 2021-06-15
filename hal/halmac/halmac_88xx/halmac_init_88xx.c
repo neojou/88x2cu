@@ -272,7 +272,6 @@ mount_api_88xx(struct halmac_adapter *adapter)
 	api->halmac_get_fifo_size = get_fifo_size_88xx;
 
 	api->halmac_chk_txdesc = chk_txdesc_88xx;
-	api->halmac_dl_drv_rsvd_page = dl_drv_rsvd_page_88xx;
 	api->halmac_cfg_csi_rate = cfg_csi_rate_88xx;
 
 	api->halmac_txfifo_is_empty = txfifo_is_empty_88xx;
