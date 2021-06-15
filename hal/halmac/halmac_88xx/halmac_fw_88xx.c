@@ -94,10 +94,6 @@ wlan_cpu_en_88xx(struct halmac_adapter *adapter, u8 enable);
 static void
 pltfm_reset_88xx(struct halmac_adapter *adapter);
 
-static enum halmac_ret_status
-proc_send_phydm_info_88xx(struct halmac_adapter *adapter,
-			  struct halmac_general_info *info);
-
 void set_adapter_dlfw_state(struct halmac_adapter *adapter, enum halmac_dlfw_state state)
 {
 	adapter->halmac_state.dlfw_state = state;
@@ -880,12 +876,6 @@ send_general_info_88xx(struct halmac_adapter *adapter,
 	enum halmac_ret_status status = HALMAC_RET_SUCCESS;
 	u8 cnt;
 
-	status = proc_send_phydm_info_88xx(adapter, info);
-	if (status != HALMAC_RET_SUCCESS) {
-		PLTFM_MSG_ERR("[ERR]send phydm info\n");
-		return status;
-	}
-
 	h2cq_addr = adapter->txff_alloc.rsvd_h2cq_addr;
 	h2cq_addr <<= TX_PAGE_SIZE_SHIFT_88XX;
 
@@ -915,39 +905,6 @@ send_general_info_88xx(struct halmac_adapter *adapter,
 	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
 
 	return HALMAC_RET_SUCCESS;
-}
-
-static enum halmac_ret_status
-proc_send_phydm_info_88xx(struct halmac_adapter *adapter,
-			  struct halmac_general_info *info)
-{
-	u8 h2c_buf[H2C_PKT_SIZE_88XX] = { 0 };
-	u16 seq_num = 0;
-	struct halmac_h2c_header_info hdr_info;
-	enum halmac_ret_status status = HALMAC_RET_SUCCESS;
-
-	PLTFM_MSG_TRACE("[TRACE]%s\n", __func__);
-
-	PHYDM_INFO_SET_REF_TYPE(h2c_buf, info->rfe_type);
-	PHYDM_INFO_SET_RF_TYPE(h2c_buf, info->rf_type);
-	PHYDM_INFO_SET_CUT_VER(h2c_buf, 2); //suppose to C-cut first
-	PHYDM_INFO_SET_RX_ANT_STATUS(h2c_buf, info->rx_ant_status);
-	PHYDM_INFO_SET_TX_ANT_STATUS(h2c_buf, info->tx_ant_status);
-	PHYDM_INFO_SET_EXT_PA(h2c_buf, info->ext_pa);
-	PHYDM_INFO_SET_PACKAGE_TYPE(h2c_buf, info->package_type);
-	PHYDM_INFO_SET_MP_MODE(h2c_buf, info->mp_mode);
-
-	hdr_info.sub_cmd_id = SUB_CMD_ID_PHYDM_INFO;
-	hdr_info.content_size = 8;
-	hdr_info.ack = 0;
-	set_h2c_pkt_hdr_88xx(adapter, h2c_buf, &hdr_info, &seq_num);
-
-	status = send_h2c_pkt_88xx(adapter, h2c_buf);
-
-	if (status != HALMAC_RET_SUCCESS)
-		PLTFM_MSG_ERR("[ERR]send h2c!!\n");
-
-	return status;
 }
 
 #endif /* HALMAC_88XX_SUPPORT */

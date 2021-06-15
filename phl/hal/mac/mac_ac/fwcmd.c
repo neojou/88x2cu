@@ -53,23 +53,59 @@ struct fwcmd_outsrc_info {
 };
 
 //NEO
-#define SET_PKT_H2C_CATEGORY(h2c_pkt, value)                                   \
+#define SET_PKT_H2C_CATEGORY(h2c_pkt, value)					\
 	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x00, value, GENMASK(6, 0))
-#define SET_PKT_H2C_CMD_ID(h2c_pkt, value)                                     \
+#define SET_PKT_H2C_CMD_ID(h2c_pkt, value)					\
 	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x00, value, GENMASK(15, 8))
-#define SET_PKT_H2C_SUB_CMD_ID(h2c_pkt, value)                                 \
+#define SET_PKT_H2C_SUB_CMD_ID(h2c_pkt, value)					\
 	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x00, value, GENMASK(31, 16))
-#define SET_PKT_H2C_TOTAL_LEN(h2c_pkt, value)                                  \
+#define SET_PKT_H2C_TOTAL_LEN(h2c_pkt, value)					\
 	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x01, value, GENMASK(15, 0))
 
-#define GENERAL_INFO_SET_FW_TX_BOUNDARY(h2c_pkt, value)                        \
+#define GENERAL_INFO_SET_FW_TX_BOUNDARY(h2c_pkt, value)				\
 	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x02, value, GENMASK(23, 16))
 
-static inline void rtw_h2c_pkt_set_header(u8 *h2c_pkt, u8 sub_id)
+
+#define PHYDM_INFO_SET_REF_TYPE(h2c_pkt, value)                                \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x02, value, GENMASK(7, 0))
+#define PHYDM_INFO_SET_RF_TYPE(h2c_pkt, value)                                 \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x02, value, GENMASK(15, 8))
+#define PHYDM_INFO_SET_CUT_VER(h2c_pkt, value)                                 \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x02, value, GENMASK(23, 16))
+#define PHYDM_INFO_SET_RX_ANT_STATUS(h2c_pkt, value)                           \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x02, value, GENMASK(27, 24))
+#define PHYDM_INFO_SET_TX_ANT_STATUS(h2c_pkt, value)                           \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x02, value, GENMASK(31, 28))
+#define PHYDM_INFO_SET_EXT_PA(h2c_pkt, value)                                  \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x03, value, GENMASK(7, 0))
+#define PHYDM_INFO_SET_PACKAGE_TYPE(h2c_pkt, value)                            \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x03, value, GENMASK(15, 8))
+#define PHYDM_INFO_SET_MP_MODE(h2c_pkt, value)                                 \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x03, value, GENMASK(17, 16))
+
+#define FW_OFFLOAD_H2C_SET_ACK(h2c_pkt, value)                                 \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0x00, value, GENMASK(7, 6))
+#define FW_OFFLOAD_H2C_SET_SEQ_NUM(h2c_pkt, value)                             \
+	le32p_replace_bits((__le32 *)(h2c_pkt) + 0X04, value, GENMASK(31, 17))
+
+struct mac_h2c_header_info {
+	u16 sub_cmd_id;
+	u16 content_size;
+	u8 ack;
+};
+
+static void
+rtw_h2c_pkt_set_header(struct mac_adapter *adapter, u8 *h2c_pkt, u8 sub_id, u16 total_size)
 {
+	struct mac_fw_info *fw_info = &adapter->fw_info;
+
 	SET_PKT_H2C_CATEGORY(h2c_pkt, H2C_PKT_CATEGORY);
 	SET_PKT_H2C_CMD_ID(h2c_pkt, H2C_PKT_CMD_ID);
 	SET_PKT_H2C_SUB_CMD_ID(h2c_pkt, sub_id);
+
+	SET_PKT_H2C_TOTAL_LEN(h2c_pkt, total_size);
+
+	FW_OFFLOAD_H2C_SET_SEQ_NUM(h2c_pkt, fw_info->h2c_seq);
 }
 
 static inline u32 h2cb_queue_len(struct h2c_buf_head *list)
@@ -334,7 +370,9 @@ u32 h2cb_exit(struct mac_adapter *adapter)
 	return MACSUCCESS;
 }
 
-u32 h2c_end_flow(struct mac_ax_adapter *adapter)
+#endif //NEO
+
+u32 h2c_end_flow(struct mac_adapter *adapter)
 {
 	struct mac_fw_info *fwinfo = &adapter->fw_info;
 
@@ -344,8 +382,6 @@ u32 h2c_end_flow(struct mac_ax_adapter *adapter)
 
 	return MACSUCCESS;
 }
-
-#endif //NEO
 
 struct rtw_h2c_pkt *h2cb_alloc(struct mac_adapter *adapter,
 			       enum h2c_buf_class buf_class)
@@ -1575,7 +1611,7 @@ u32 mac_send_general_info_h2c(struct mac_adapter *adapter)
 	#endif
 	u8 *buf;
 	u16 total_size = H2C_PKT_HDR_SIZE + 4;
-	u32 ret;
+	u32 ret = MACSUCCESS;
 
 	h2cb = h2cb_alloc(adapter, H2CB_CLASS_CMD);
 	if (!h2cb) {
@@ -1586,12 +1622,12 @@ u32 mac_send_general_info_h2c(struct mac_adapter *adapter)
 	buf = h2cb_put(h2cb, H2C_PKT_SIZE);
 	if (!buf) {
 		PLTFM_MSG_ERR("[ERR] h2c buf failed\n");
-		return MACNOBUF;
+		ret = MACNOBUF;
+		goto out;
 	}
 		
-	rtw_h2c_pkt_set_header(buf, H2C_PKT_GENERAL_INFO);
+	rtw_h2c_pkt_set_header(adapter, buf, H2C_PKT_GENERAL_INFO, total_size);
 
-	SET_PKT_H2C_TOTAL_LEN(buf, total_size);
 
 	GENERAL_INFO_SET_FW_TX_BOUNDARY(buf,
 					fifo->rsvd_fw_txbuf_addr -
@@ -1600,7 +1636,7 @@ u32 mac_send_general_info_h2c(struct mac_adapter *adapter)
 	ret = h2c_pkt_build_txd(adapter, h2cb);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR] h2c_pkt_build_txd failed, ret=%d\n", ret);
-		goto send_general_info_fail;
+		goto out;
 	}
 
 	print_hex_dump(KERN_INFO, "NEO G6 general info: ", DUMP_PREFIX_OFFSET, 16, 1,
@@ -1609,19 +1645,75 @@ u32 mac_send_general_info_h2c(struct mac_adapter *adapter)
 	ret = PLTFM_TX(h2cb);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR] PLTFM_TX failed, ret=%d\n", ret);
-		goto send_general_info_fail;
+		goto out;
 	}
 
-	h2cb_free(adapter, h2cb);
-	return MACSUCCESS;
+	h2c_end_flow(adapter);
 
-send_general_info_fail:
+out:
+	h2cb_free(adapter, h2cb);
+	return ret;
+}
+
+u32 mac_send_phydm_info_h2c(struct mac_adapter *adapter)
+{
+	#if MAC_PHL_H2C
+	struct rtw_h2c_pkt *h2cb;
+	#else
+	struct h2c_buf *h2cb;
+	#endif
+	u8 *h2c_buf;
+	u16 seq_num = 0;
+	u16 total_size = H2C_PKT_HDR_SIZE + 8;
+	u32 ret;
+
+	h2cb = h2cb_alloc(adapter, H2CB_CLASS_CMD);
+	if (!h2cb) {
+		PLTFM_MSG_ERR("[ERR] h2cb_alloc failed\n");
+		return MACNPTR;
+	}
+
+	h2c_buf = h2cb_put(h2cb, H2C_PKT_SIZE);
+	if (!h2c_buf) {
+		PLTFM_MSG_ERR("[ERR] h2c buf failed\n");
+		ret = MACNOBUF;
+		goto out;
+	}
+
+	rtw_h2c_pkt_set_header(adapter, h2c_buf, H2C_PKT_PHYDM_INFO, total_size);
+		
+	PHYDM_INFO_SET_REF_TYPE(h2c_buf, 0); //info->rfe_type
+	PHYDM_INFO_SET_RF_TYPE(h2c_buf, 2); //info->rf_type
+	PHYDM_INFO_SET_CUT_VER(h2c_buf, 2); //C-cut
+	PHYDM_INFO_SET_RX_ANT_STATUS(h2c_buf, 3); //info->rx_ant_status
+	PHYDM_INFO_SET_TX_ANT_STATUS(h2c_buf, 3); //info->tx_ant_status
+	PHYDM_INFO_SET_EXT_PA(h2c_buf, 0); //info->ext_pa
+	PHYDM_INFO_SET_PACKAGE_TYPE(h2c_buf, 0); //info->package_type
+	PHYDM_INFO_SET_MP_MODE(h2c_buf, 0); //info->mp_mode
+
+	ret = h2c_pkt_build_txd(adapter, h2cb);
+	if (ret != MACSUCCESS) {
+		PLTFM_MSG_ERR("[ERR] h2c_pkt_build_txd failed, ret=%d\n", ret);
+		goto out;
+	}
+
+	print_hex_dump(KERN_INFO, "NEO G6 phydm info: ", DUMP_PREFIX_OFFSET, 16, 1,
+		       h2cb->vir_data, h2cb->data_len, 1);
+
+	ret = PLTFM_TX(h2cb);
+	if (ret) {
+		PLTFM_MSG_ERR("[ERR] PLTFM_TX failed, ret=%d\n", ret);
+		goto out;
+	}
+
+	h2c_end_flow(adapter);
+
+out:
 	h2cb_free(adapter, h2cb);
 	return ret;
 }
 
 #if 0 //NEO
-
 u32 mac_send_bcn_h2c(struct mac_ax_adapter *adapter,
 		     struct mac_ax_bcn_info *info)
 {

@@ -1043,6 +1043,12 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
+	ret = mac_send_phydm_info_h2c(adapter);
+	if (ret != MACSUCCESS) {
+		PLTFM_MSG_ERR("[ERR]send_phydm_info failed: %d\n", ret);
+		return ret;
+	}
+
 #if 0 //NEO
 	ret = set_enable_bb_rf(adapter, MAC_AX_FUNC_EN);
 	if (ret != MACSUCCESS) {
@@ -1170,11 +1176,9 @@ u32 mac_hal_fast_init(struct mac_adapter *adapter,
 	return ret;
 }
 
-#if 0 //NEO
-
-u32 mac_ax_init_state(struct mac_ax_adapter *adapter)
+u32 mac_init_state(struct mac_adapter *adapter)
 {
-	struct mac_ax_state_mach sm = MAC_AX_DFLT_SM;
+	struct mac_state_mach sm = MAC_DFLT_SM;
 
 	adapter->sm = sm;
 	adapter->fw_info.h2c_seq = 0;
@@ -1183,4 +1187,3 @@ u32 mac_ax_init_state(struct mac_ax_adapter *adapter)
 	return MACSUCCESS;
 }
 
-#endif // if 0

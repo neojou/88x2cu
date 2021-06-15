@@ -56,10 +56,8 @@ u32 mac_hal_fast_init(struct mac_adapter *adapter,
 		      struct mac_trx_info *trx_info,
 		      struct mac_fwdl_info *fwdl_info,
 		      struct mac_intf_info *intf_info);
-#if 0 // NEO
-u32 mac_hal_deinit(struct mac_ax_adapter *adapter);
-u32 mac_ax_init_state(struct mac_ax_adapter *adapter);
-#endif // if 0 NEO
+u32 mac_hal_deinit(struct mac_adapter *adapter);
+u32 mac_init_state(struct mac_adapter *adapter);
 
 u32 mac_set_rts_full(struct mac_adapter *adapter, bool enable);
 

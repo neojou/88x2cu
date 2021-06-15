@@ -395,6 +395,8 @@ u32 mac_pwr_switch(struct mac_adapter *adapter, u8 on)
 		return MACHWERR;
 	}
 
+	mac_init_state(adapter);
+
 	/* init system cfg 8822c */
 	val32 = MAC_REG_R32(REG_CPU_DMEM_CON);
 	val32 |= BIT(16) | BIT(8);

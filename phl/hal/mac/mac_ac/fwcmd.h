@@ -182,6 +182,7 @@ u8 c2h_field_parsing(struct fwcmd_hdr *hdr, struct rtw_c2h_info *info);
 u32 mac_fw_log_cfg(struct mac_adapter *adapter,
 		   struct mac_fw_log *log_cfg);
 u32 mac_send_general_info_h2c(struct mac_adapter *adapter);
+u32 mac_send_phydm_info_h2c(struct mac_adapter *adapter);
 u32 mac_send_bcn_h2c(struct mac_adapter *adapter,
 		     struct mac_bcn_info *info);
 u32 mac_host_getpkt_h2c(struct mac_adapter *adapter, u8 macid, u8 pkttype);
