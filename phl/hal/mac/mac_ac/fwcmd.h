@@ -24,7 +24,7 @@
 #include "trx_desc.h"
 //#include "fwofld.h"
 
-#define FWCMD_HDR_LEN		8
+#define FWCMD_HDR_LEN		48
 
 #define H2C_CMD_LEN		32
 #define H2C_DATA_LEN		256

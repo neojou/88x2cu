@@ -589,7 +589,7 @@ static s32 rtw_dump_xframe(PADAPTER padapter, struct xmit_frame *pxmitframe)
 		if (pattrib->qsel == HALMAC_TXDESC_QSEL_H2C_CMD) {
 			update_txdesc_h2c_pkt(pxmitframe, mem_addr, sz);
 			w_sz = sz + TXDESC_SIZE;
-
+			print_hex_dump(KERN_INFO, "NEO h2c: ", DUMP_PREFIX_OFFSET, 16, 1, mem_addr, w_sz, 1);
 		} else {
 
 			pull = update_txdesc(pxmitframe, mem_addr, sz, _FALSE);

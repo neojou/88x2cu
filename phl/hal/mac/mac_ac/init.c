@@ -869,15 +869,13 @@ send_general_info(struct mac_adapter *adapter)
 	}
 
 	print_hex_dump(KERN_INFO, "NEO G6 general info: ", DUMP_PREFIX_OFFSET, 16, 1,
-		       buf, H2C_PKT_GENERAL_INFO, 1);
+		       h2cb->vir_data, h2cb->data_len, 1);
 
-#if 0 //NEO
 	ret = PLTFM_TX(h2cb);
 	if (ret) {
 		PLTFM_MSG_ERR("[ERR] PLTFM_TX failed, ret=%d\n", ret);
 		goto send_general_info_fail;
 	}
-#endif //NEO
 
 	h2cb_free(adapter, h2cb);
 	return MACSUCCESS;

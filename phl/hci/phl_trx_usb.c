@@ -1666,14 +1666,14 @@ enum rtw_phl_status phl_pltfm_tx_usb(struct phl_info_t *phl_info,
 {
 	enum rtw_phl_status pstatus = RTW_PHL_STATUS_FAILURE;
 
-	RTW_ERR("%s NEO TODO\n", __func__);
-#if 0
 	struct rtw_h2c_pkt *h2c_pkt = (struct rtw_h2c_pkt *)pkt;
 	struct phl_usb_tx_buf_resource *reso = NULL;
 	struct phl_usb_buf *tx_buf = NULL;
 	u8 bulk_id = 0;
-	u8 dma_ch = rtw_hal_get_fwcmd_queue_idx(phl_info->hal);
 
+	PHL_INFO("%s NEO TODO\n", __func__);
+	return RTW_PHL_STATUS_SUCCESS;
+#if 0 //NEO TODO
 	reso = (struct phl_usb_tx_buf_resource *)phl_info->hci->txbuf_pool;
 
 	if (reso)
@@ -1684,10 +1684,9 @@ enum rtw_phl_status phl_pltfm_tx_usb(struct phl_info_t *phl_info,
 	if (tx_buf) {
 		tx_buf->buffer = (u8 *)h2c_pkt;
 
-		bulk_id = rtw_hal_get_bulkout_id(phl_info->hal,
-			dma_ch, 0);
+		bulk_id = rtw_hal_get_bulkout_id(phl_info->hal, 0x13, 0);
 		pstatus = os_usb_tx(phl_to_drvpriv(phl_info),
-			(u8 *)tx_buf, bulk_id, h2c_pkt->data_len, h2c_pkt->vir_head);
+			(u8 *)tx_buf, bulk_id, h2c_pkt->data_len, h2c_pkt->vir_data);
 		if (pstatus == RTW_PHL_STATUS_FAILURE) {
 			phl_enqueue_idle_h2c_pkt(phl_info,
 				(struct rtw_h2c_pkt *)tx_buf->buffer);
@@ -1696,8 +1695,9 @@ enum rtw_phl_status phl_pltfm_tx_usb(struct phl_info_t *phl_info,
 				&reso->h2c_txbuf_list, tx_buf, _tail);
 		}
 	}
-#endif
+
 	return pstatus;
+#endif //NEO
 }
 
 enum rtw_phl_status phl_pltfm_send_rsvd_page_usb(struct phl_info_t *phl_info,

@@ -47,30 +47,6 @@ void reg_write32_usb(struct mac_adapter *adapter, u32 addr, u32 val)
 	PLTFM_REG_W32(addr, val);
 }
 
-
-enum rtw_tx_desc_queue_select {
-	TX_DESC_QSEL_TID0	= 0,
-	TX_DESC_QSEL_TID1	= 1,
-	TX_DESC_QSEL_TID2	= 2,
-	TX_DESC_QSEL_TID3	= 3,
-	TX_DESC_QSEL_TID4	= 4,
-	TX_DESC_QSEL_TID5	= 5,
-	TX_DESC_QSEL_TID6	= 6,
-	TX_DESC_QSEL_TID7	= 7,
-	TX_DESC_QSEL_TID8	= 8,
-	TX_DESC_QSEL_TID9	= 9,
-	TX_DESC_QSEL_TID10	= 10,
-	TX_DESC_QSEL_TID11	= 11,
-	TX_DESC_QSEL_TID12	= 12,
-	TX_DESC_QSEL_TID13	= 13,
-	TX_DESC_QSEL_TID14	= 14,
-	TX_DESC_QSEL_TID15	= 15,
-	TX_DESC_QSEL_BEACON	= 16,
-	TX_DESC_QSEL_HIGH	= 17,
-	TX_DESC_QSEL_MGMT	= 18,
-	TX_DESC_QSEL_H2C	= 19,
-};
-
 enum rtw_tx_queue_type {
 	/* the order of AC queues matters */
 	RTW_TX_QUEUE_BK = 0x0,
@@ -86,13 +62,11 @@ enum rtw_tx_queue_type {
 	RTK_MAX_TX_QUEUE_NUM
 };
 
-u8 get_bulkout_id(struct mac_adapter *adapter, u8 ch_dma, u8 mode)
+u8 get_bulkout_id(struct mac_adapter *adapter, u8 qsel, u8 mode)
 {
 	u8 bulkout_id = 0;
 
-#if 1 // NEO : 8822cu
-
-	switch (ch_dma) { // qsel
+	switch (qsel) {
 	case TX_DESC_QSEL_BEACON:
 		bulkout_id = RTW_TX_QUEUE_BCN;
 		break;
@@ -122,181 +96,11 @@ u8 get_bulkout_id(struct mac_adapter *adapter, u8 ch_dma, u8 mode)
 		bulkout_id = RTW_TX_QUEUE_BK;
 		break;
 	default:
-		RTW_ERR("%s NEO qsel=%d unknown\n", __func__, ch_dma);
+		RTW_ERR("%s NEO qsel=%d unknown\n", __func__, qsel);
 		bulkout_id = RTW_TX_QUEUE_BCN;
 		break;
 	}
 
-#else // NEO : G6
-
-	if (mode == 0 && adapter->usb_info.ep5 && adapter->usb_info.ep6 &&
-	    adapter->usb_info.ep12) {
-		if (is_chip_id(adapter, MAC_AX_CHIP_ID_8852A) &&
-		    is_chip_cut(adapter, CHIP_CUT_A)) {
-			switch (ch_dma) {
-			case MAC_AX_DMA_ACH0:
-				bulkout_id = 3;
-				break;
-			case MAC_AX_DMA_ACH2:
-				bulkout_id = 5;
-				break;
-			case MAC_AX_DMA_ACH4:
-				bulkout_id = 4;
-				break;
-			case MAC_AX_DMA_ACH6:
-				bulkout_id = 6;
-				break;
-			case MAC_AX_DMA_B0MG:
-			case MAC_AX_DMA_B0HI:
-			case MAC_AX_DMA_B1MG:
-			case MAC_AX_DMA_B1HI:
-				bulkout_id = 1;
-				break;
-			case MAC_AX_DMA_H2C:
-				bulkout_id = 2;
-				break;
-			default:
-				return USBEPMAPERR;
-			}
-		} else if (is_chip_id(adapter, MAC_AX_CHIP_ID_8852A)) {
-			switch (ch_dma) {
-			case MAC_AX_DMA_ACH0:
-				bulkout_id = 3;
-				break;
-			case MAC_AX_DMA_ACH2:
-				bulkout_id = 5;
-				break;
-			case MAC_AX_DMA_ACH4:
-				bulkout_id = 4;
-				break;
-			case MAC_AX_DMA_ACH6:
-				bulkout_id = 6;
-				break;
-			case MAC_AX_DMA_B0MG:
-			case MAC_AX_DMA_B0HI:
-				bulkout_id = 0;
-				break;
-			case MAC_AX_DMA_B1MG:
-			case MAC_AX_DMA_B1HI:
-				bulkout_id = 1;
-				break;
-			case MAC_AX_DMA_H2C:
-				bulkout_id = 2;
-				break;
-			default:
-				return USBEPMAPERR;
-			}
-		} else if (is_chip_id(adapter, MAC_AX_CHIP_ID_8852B)) {
-			switch (ch_dma) {
-			case MAC_AX_DMA_ACH0:
-				bulkout_id = 3;
-				break;
-			case MAC_AX_DMA_ACH1:
-				bulkout_id = 4;
-				break;
-			case MAC_AX_DMA_ACH2:
-				bulkout_id = 5;
-				break;
-			case MAC_AX_DMA_ACH3:
-				bulkout_id = 6;
-				break;
-			case MAC_AX_DMA_B0MG:
-				bulkout_id = 0;
-				break;
-			case MAC_AX_DMA_B0HI:
-				bulkout_id = 1;
-				break;
-			case MAC_AX_DMA_H2C:
-				bulkout_id = 2;
-				break;
-			default:
-				return USBEPMAPERR;
-			}
-		}
-	} else if ((mode == 1) && adapter->usb_info.ep5 &&
-			adapter->usb_info.ep6 && adapter->usb_info.ep12) {
-		if (is_chip_id(adapter, MAC_AX_CHIP_ID_8852A) &&
-		    is_chip_cut(adapter, CHIP_CUT_A)) {
-			switch (ch_dma) {
-			case MAC_AX_DMA_ACH0:
-				bulkout_id = 2;
-				break;
-			case MAC_AX_DMA_ACH2:
-				bulkout_id = 4;
-				break;
-			case MAC_AX_DMA_ACH4:
-				bulkout_id = 3;
-				break;
-			case MAC_AX_DMA_ACH6:
-				bulkout_id = 5;
-				break;
-			case MAC_AX_DMA_B0MG:
-			case MAC_AX_DMA_B0HI:
-			case MAC_AX_DMA_B1MG:
-			case MAC_AX_DMA_B1HI:
-				bulkout_id = 1;
-				break;
-			case MAC_AX_DMA_H2C:
-				bulkout_id = 2;
-				break;
-			default:
-				bulkout_id = USBEPMAPERR;
-			}
-		} else if (is_chip_id(adapter, MAC_AX_CHIP_ID_8852A)) {
-			switch (ch_dma) {
-			case MAC_AX_DMA_ACH0:
-				bulkout_id = 2;
-				break;
-			case MAC_AX_DMA_ACH2:
-				bulkout_id = 4;
-				break;
-			case MAC_AX_DMA_ACH4:
-				bulkout_id = 3;
-				break;
-			case MAC_AX_DMA_ACH6:
-				bulkout_id = 5;
-				break;
-			case MAC_AX_DMA_B0MG:
-			case MAC_AX_DMA_B0HI:
-			case MAC_AX_DMA_B1MG:
-			case MAC_AX_DMA_B1HI:
-				bulkout_id = 0;
-				break;
-			case MAC_AX_DMA_H2C:
-				bulkout_id = 2;
-				break;
-			default:
-				bulkout_id = USBEPMAPERR;
-			}
-		} else if (is_chip_id(adapter, MAC_AX_CHIP_ID_8852B)) {
-			switch (ch_dma) {
-			case MAC_AX_DMA_ACH0:
-				bulkout_id = 2;
-				break;
-			case MAC_AX_DMA_ACH1:
-				bulkout_id = 3;
-				break;
-			case MAC_AX_DMA_ACH2:
-				bulkout_id = 4;
-				break;
-			case MAC_AX_DMA_ACH3:
-				bulkout_id = 5;
-				break;
-			case MAC_AX_DMA_B0MG:
-			case MAC_AX_DMA_B0HI:
-				bulkout_id = 0;
-				break;
-			case MAC_AX_DMA_H2C:
-				bulkout_id = 2;
-				break;
-			default:
-				bulkout_id = USBEPMAPERR;
-			}
-		}
-	} else {
-		bulkout_id = USBEPMAPERR;
-	}
-#endif // if 0 NEO
 	return bulkout_id;
 }
 

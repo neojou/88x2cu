@@ -72,7 +72,14 @@ u32 mac_txdesc_len(struct mac_adapter *adapter,
 	u32 len = 48;
 	struct mac_pkt_data *data = &info->u.data;
 
-	data->offset = len;
+	switch (info->type) {
+	case MAC_PKT_H2C:
+		break;
+	default:
+		data->offset = len;
+		break;
+	}
+
 	return len;
 }
 
@@ -490,9 +497,13 @@ u32 mac_wd_checksum(struct mac_adapter *adapter,
 u32 mac_build_txdesc(struct mac_adapter *adapter,
 		     struct mac_txpkt_info *info, u8 *buf, u32 len)
 {
-#if 1 // NEO
 	struct mac_pkt_data *pkt_info = &info->u.data;
 	__le32 *txdesc = (__le32 *)buf;
+
+	if (!info) {
+		PLTFM_MSG_ERR("[ERR] info is NULL\n");
+		return MACNPTR;
+	}
 
 	SET_TX_DESC_TXPKTSIZE(txdesc,  info->pktsize);
 	SET_TX_DESC_OFFSET(txdesc, pkt_info->offset);
@@ -522,26 +533,6 @@ u32 mac_build_txdesc(struct mac_adapter *adapter,
 	mac_wd_checksum(adapter, info, (u8 *)(txdesc));
 
 	return MACSUCCESS;
-#else
-	struct txd_proc_type *proc = txdes_proc_mac;
-	enum mac_ax_pkt_t pkt_type = info->type;
-	u32 (*handler)(struct mac_ax_adapter *adapter,
-		       struct mac_ax_txpkt_info *info, u8 *buf, u32 len) = NULL;
-
-	for (; proc->type != MAC_AX_PKT_INVALID; proc++) {
-		if (pkt_type == proc->type) {
-			handler = proc->handler;
-			break;
-		}
-	}
-
-	if (!handler) {
-		PLTFM_MSG_ERR("[ERR]null type handler type: %X\n", proc->type);
-		return MACNOITEM;
-	}
-
-	return handler(adapter, info, buf, len);
-#endif
 }
 
 #if 0 // NEO

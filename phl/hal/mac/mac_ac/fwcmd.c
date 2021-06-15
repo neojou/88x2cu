@@ -14,7 +14,7 @@
  ******************************************************************************/
 
 #include "fwcmd.h"
-
+#include "../mac.h"
 #if 0 // NEO mark off first
 
 //#include "mcc.h"
@@ -483,6 +483,7 @@ u32 h2c_pkt_build_txd(struct mac_adapter *adapter, struct rtw_h2c_pkt *h2cb)
 	if (!buf)
 		return MACNPTR;
 
+	info.u.data.qsel = TX_DESC_QSEL_H2C;
 	ret = mac_build_txdesc(adapter, &info, buf, 32);
 	if (ret)
 		return ret;
