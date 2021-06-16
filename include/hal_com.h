@@ -605,7 +605,6 @@ struct rtw_ndp_info {
 #ifdef CONFIG_PROC_DEBUG
 void rtw_dump_phy_cap(void *sel, _adapter *adapter);
 #endif
-void rtw_dump_rsvd_page(void *sel, _adapter *adapter, u8 page_offset, u8 page_num);
 #ifdef CONFIG_SUPPORT_FIFO_DUMP
 void rtw_dump_fifo(void *sel, _adapter *adapter, u8 fifo_sel, u32 fifo_addr, u32 fifo_size);
 #endif

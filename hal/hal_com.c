@@ -4290,37 +4290,6 @@ int rtw_hal_get_rsvd_page(_adapter *adapter, u32 page_offset,
 	return rst;
 }
 
-void rtw_dump_rsvd_page(void *sel, _adapter *adapter, u8 page_offset, u8 page_num)
-{
-#if defined(CONFIG_RTW_DEBUG) || defined(CONFIG_PROC_DEBUG)
-	u32 page_size = 0;
-	u8 *buffer = NULL;
-	u32 buf_size = 0;
-
-	if (page_num == 0)
-		return;
-
-	RTW_PRINT_SEL(sel, "======= RSVD PAGE DUMP =======\n");
-	RTW_PRINT_SEL(sel, "page_offset:%d, page_num:%d\n", page_offset, page_num);
-
-	page_size = 128;
-	if (page_size) {
-		buf_size = page_size * page_num;
-		buffer = rtw_zvmalloc(buf_size);
-
-		if (buffer) {
-			rtw_hal_get_rsvd_page(adapter, page_offset, page_num, buffer, buf_size);
-			RTW_DUMP_SEL(sel, buffer, buf_size);
-			rtw_vmfree(buffer, buf_size);
-		} else
-			RTW_PRINT_SEL(sel, "ERROR - rsvd_buf mem allocate failed\n");
-	} else
-			RTW_PRINT_SEL(sel, "ERROR - Tx page size is zero ??\n");
-
-	RTW_PRINT_SEL(sel, "==========================\n");
-#endif
-}
-
 #ifdef CONFIG_SUPPORT_FIFO_DUMP
 void rtw_dump_fifo(void *sel, _adapter *adapter, u8 fifo_sel, u32 fifo_addr, u32 fifo_size)
 {
@@ -10156,7 +10125,6 @@ void rtw_hal_set_wow_fw_rsvd_page(_adapter *adapter, u8 *pframe, u16 index,
 #endif /* defined(CONFIG_OFFLOAD_MDNS_V4) || defined(CONFIG_OFFLOAD_MDNS_V6) */
 
 			}
-			//rtw_dump_rsvd_page(RTW_DBGDUMP, adapter, rsvd_page_loc->LocIpParm, 46);
 #endif /* CONFIG_WAR_OFFLOAD */
 
 #if defined(CONFIG_WOW_PATTERN_IN_TXFIFO)
