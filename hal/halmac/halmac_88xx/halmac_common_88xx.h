@@ -75,10 +75,6 @@ enum halmac_ret_status
 run_datapack_88xx(struct halmac_adapter *adapter,
 		  enum halmac_data_type data_type);
 
-enum halmac_ret_status
-dump_fifo_88xx(struct halmac_adapter *adapter, enum hal_fifo_sel sel,
-	       u32 start_addr, u32 size, u8 *data);
-
 u32
 get_fifo_size_88xx(struct halmac_adapter *adapter, enum hal_fifo_sel sel);
 
