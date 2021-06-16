@@ -531,64 +531,6 @@ struct halmac_platform_api rtw_halmac_platform_api = {
 	.EVENT_INDICATION = _halmac_event_indication,
 };
 
-static void _read_register(struct dvobj_priv *d, u32 addr, u32 cnt, u8 *buf)
-{
-#if 1
-	struct _ADAPTER *a;
-	u32 i, n;
-	u16 val16;
-	u32 val32;
-
-
-	a = dvobj_get_primary_adapter(d);
-
-	i = addr & 0x3;
-	/* Handle address not start from 4 bytes alignment case */
-	if (i) {
-		val32 = cpu_to_le32(rtw_read32(a, addr & ~0x3));
-		n = 4 - i;
-		_rtw_memcpy(buf, ((u8 *)&val32) + i, n);
-		i = n;
-		cnt -= n;
-	}
-
-	while (cnt) {
-		if (cnt >= 4)
-			n = 4;
-		else if (cnt >= 2)
-			n = 2;
-		else
-			n = 1;
-		cnt -= n;
-
-		switch (n) {
-		case 1:
-			buf[i] = rtw_read8(a, addr+i);
-			i++;
-			break;
-		case 2:
-			val16 = cpu_to_le16(rtw_read16(a, addr+i));
-			_rtw_memcpy(&buf[i], &val16, 2);
-			i += 2;
-			break;
-		case 4:
-			val32 = cpu_to_le32(rtw_read32(a, addr+i));
-			_rtw_memcpy(&buf[i], &val32, 4);
-			i += 4;
-			break;
-		}
-	}
-#else
-	struct _ADAPTER *a;
-	u32 i;
-
-
-	a = dvobj_get_primary_adapter(d);
-	for (i = 0; i < cnt; i++)
-		buf[i] = rtw_read8(a, addr + i);
-#endif
-}
-
 static int init_write_rsvd_page_size(struct dvobj_priv *d)
 {
 	struct halmac_adapter *mac;
@@ -2046,23 +1988,6 @@ static inline enum rf_type _rf_type_halmac2drv(enum halmac_rf_type rf_mac)
 	return rf_drv;
 }
 
-static enum odm_cut_version _cut_version_drv2phydm(
-				enum tag_HAL_Cut_Version_Definition cut_drv)
-{
-	enum odm_cut_version cut_phydm = ODM_CUT_A;
-	u32 diff;
-
-
-	if (cut_drv > K_CUT_VERSION)
-		RTW_WARN("%s: unknown cut_ver=%d !!\n", __FUNCTION__, cut_drv);
-
-	diff = cut_drv - A_CUT_VERSION;
-	cut_phydm += diff;
-
-	return cut_phydm;
-}
-
-
 void _rtw_hal_set_fw_rsvd_page(_adapter *adapter, bool finished, u8 *page_num);
 
 static void _debug_dlfw_fail(struct dvobj_priv *d)
@@ -3339,26 +3264,6 @@ int rtw_halmac_read_bt_physical_efuse_map(struct dvobj_priv *d, u8 *map, u32 siz
 	printk("%s: OK!\n", __FUNCTION__);
 
 	return 0;
-}
-
-static enum hal_fifo_sel _fifo_sel_drv2halmac(u8 fifo_sel)
-{
-	switch (fifo_sel) {
-	case 0:
-		return HAL_FIFO_SEL_TX;
-	case 1:
-		return HAL_FIFO_SEL_RX;
-	case 2:
-		return HAL_FIFO_SEL_RSVD_PAGE;
-	case 3:
-		return HAL_FIFO_SEL_REPORT;
-	case 4:
-		return HAL_FIFO_SEL_LLT;
-	case 5:
-		return HAL_FIFO_SEL_RXBUF_FW;
-	}
-
-	return HAL_FIFO_SEL_RSVD_PAGE;
 }
 
 /*
