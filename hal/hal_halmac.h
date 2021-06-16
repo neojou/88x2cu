@@ -170,8 +170,6 @@ int rtw_halmac_write_logical_efuse(struct dvobj_priv *, u32 offset, u32 cnt, u8 
 int rtw_halmac_write_bt_physical_efuse(struct dvobj_priv *, u32 offset, u32 cnt, u8 *data);
 int rtw_halmac_read_bt_physical_efuse_map(struct dvobj_priv *, u8 *map, u32 size);
 
-int rtw_halmac_dump_fifo(struct dvobj_priv *d, u8 fifo_sel, u32 addr, u32 size, u8 *buffer);
-
 /* Specific function APIs*/
 int rtw_halmac_fill_hal_spec(struct dvobj_priv *, struct hal_spec_t *);
 int rtw_halmac_p2pps(struct dvobj_priv *dvobj, PHAL_P2P_PS_PARA pp2p_ps_para);
