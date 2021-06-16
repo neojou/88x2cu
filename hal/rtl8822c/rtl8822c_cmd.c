@@ -313,35 +313,6 @@ void rtl8822c_set_FwPwrModeInIPS_cmd(PADAPTER adapter, u8 cmd_param)
 	rtw_halmac_send_h2c(adapter_to_dvobj(adapter), h2c);
 }
 
-#ifdef CONFIG_WOWLAN
-
-void rtl8822c_set_fw_pwrmode_inips_cmd_wowlan(PADAPTER padapter, u8 ps_mode)
-{
-	struct registry_priv  *registry_par = &padapter->registrypriv;
-	u8 param[H2C_INACTIVE_PS_LEN] = {0};
-	struct mlme_priv *pmlmepriv = &padapter->mlmepriv;
-
-	RTW_INFO("%s, ps_mode: %d\n", __func__, ps_mode);
-	if (ps_mode == PM_PS_MODE_ACTIVE) {
-		SET_H2CCMD_INACTIVE_PS_EN(param, 0);
-	}
-	else {
-		SET_H2CCMD_INACTIVE_PS_EN(param, 1);
-		if(registry_par->suspend_type == FW_IPS_DISABLE_BBRF && !check_fwstate(pmlmepriv, WIFI_ASOC_STATE))
-			SET_H2CCMD_INACTIVE_DISBBRF(param, 1);
-		if(registry_par->suspend_type == FW_IPS_WRC) {
-			SET_H2CCMD_INACTIVE_PERIOD_SCAN_EN(param, 1);
-			SET_H2CCMD_INACTIVE_PS_FREQ(param, 3);
-			SET_H2CCMD_INACTIVE_PS_DURATION(param, 1);
-			SET_H2CCMD_INACTIVE_PS_PERIOD_SCAN_TIME(param, 3);
-		}
-	}
-
-	rtl8822c_fillh2ccmd(padapter, H2C_INACTIVE_PS_, sizeof(param), param);
-}
-
-#endif /* CONFIG_WOWLAN */
-
 void rtl8822c_set_usb_suspend_mode(PADAPTER padapter)
 {
 	struct pwrctrl_priv *ppwrpriv = adapter_to_pwrctl(padapter);
@@ -592,22 +563,6 @@ static void process_c2h_event(PADAPTER adapter, u8 *c2h, u32 size)
 
 void rtl8822c_c2h_handler(PADAPTER adapter, u8 *pbuf, u16 length)
 {
-#ifdef CONFIG_WOWLAN
-	struct pwrctrl_priv *pwrpriv = adapter_to_pwrctl(adapter);
-
-
-	if (pwrpriv->wowlan_mode == _TRUE) {
-#ifdef CONFIG_RTW_DEBUG
-		u32 desc_size;
-
-		desc_size = rtl8822c_get_rx_desc_size(adapter);
-		RTW_INFO("%s: return because wowolan_mode==TRUE! CMDID=%d\n",
-			 __FUNCTION__, C2H_GET_CMD_ID(pbuf + desc_size));
-#endif /* CONFIG_RTW_DEBUG */
-		return;
-	}
-#endif /* CONFIG_WOWLAN*/
-
 	RTW_INFO("%s NEO\n", __func__);
 	process_c2h_event(adapter, pbuf, length);
 }
