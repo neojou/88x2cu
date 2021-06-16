@@ -4201,48 +4201,6 @@ void rtw_hal_set_fw_dbg_msg_pkt_rsvd_page_cmd(PADAPTER padapter, PRSVDPAGE_LOC r
 }
 #endif /*DBG_FW_DEBUG_MSG_PKT*/
 
-/*#define DBG_GET_RSVD_PAGE*/
-int rtw_hal_get_rsvd_page(_adapter *adapter, u32 page_offset,
-	u32 page_num, u8 *buffer, u32 buffer_size)
-{
-	u32 addr = 0, size = 0, count = 0;
-	u32 page_size = 0, data_low = 0, data_high = 0;
-	u16 txbndy = 0, offset = 0;
-	u8 i = 0;
-	bool rst = _FALSE;
-
-#ifdef DBG_LA_MODE
-	struct registry_priv *registry_par = &adapter->registrypriv;
-
-	if(registry_par->la_mode_en == 1) {
-		RTW_INFO("%s LA debug mode can't dump rsvd pg \n", __func__);
-		return rst;
-	}
-#endif
-	page_size = 128;
-
-	addr = page_offset * page_size;
-	size = page_num * page_size;
-
-	if (buffer_size < size) {
-		RTW_ERR("%s buffer_size(%d) < get page total size(%d)\n",
-			__func__, buffer_size, size);
-		return rst;
-	}
-	if (rtw_halmac_dump_fifo(adapter_to_dvobj(adapter), 2, addr, size, buffer) < 0)
-		rst = _FALSE;
-	else
-		rst = _TRUE;
-
-#ifdef DBG_GET_RSVD_PAGE
-	RTW_INFO("%s [page_offset:%d , page_num:%d][start_addr:0x%04x , size:%d]\n",
-		 __func__, page_offset, page_num, addr, size);
-	RTW_INFO_DUMP("\n", buffer, size);
-	RTW_INFO(" ==================================================\n");
-#endif
-	return rst;
-}
-
 #ifdef CONFIG_SUPPORT_FIFO_DUMP
 void rtw_dump_fifo(void *sel, _adapter *adapter, u8 fifo_sel, u32 fifo_addr, u32 fifo_size)
 {

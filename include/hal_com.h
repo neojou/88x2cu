@@ -564,7 +564,6 @@ void StopTxBeacon(_adapter *padapter);
 	void rtw_hal_read_sta_dk_key(_adapter *adapter, u8 key_id);
 #endif
 
-int rtw_hal_get_rsvd_page(_adapter *adapter, u32 page_offset, u32 page_num, u8 *buffer, u32 buffer_size);
 void rtw_hal_construct_beacon(_adapter *padapter, u8 *pframe, u32 *pLength);
 void rtw_hal_construct_NullFunctionData(PADAPTER, u8 *pframe, u32 *pLength,
 				u8 bQoS, u8 AC, u8 bEosp, u8 bForcePowerSave);
