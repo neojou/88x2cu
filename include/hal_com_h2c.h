@@ -736,22 +736,4 @@ void rsvd_page_cache_free_data(struct rsvd_page_cache_t *cache);
 void rsvd_page_cache_free(struct rsvd_page_cache_t *cache);
 
 #endif
-#ifdef CONFIG_WOWLAN
-void dump_TX_FIFO(PADAPTER padapter, u8 page_num, u16 page_size);
-#endif
-u8 rtw_hal_set_fw_media_status_cmd(_adapter *adapter, u8 mstatus, u8 macid);
-#if defined(CONFIG_WOWLAN) || defined(CONFIG_AP_WOWLAN)
-	/* WOW command function */
-	void rtw_hal_set_fw_wow_related_cmd(_adapter *padapter, u8 enable);
-	#ifdef CONFIG_P2P_WOWLAN
-		/* H2C 0x8A */
-		u8 rtw_hal_set_FwP2PRsvdPage_cmd(_adapter *adapter, PRSVDPAGE_LOC rsvdpageloc);
-		/* H2C 0x8B */
-		u8 rtw_hal_set_p2p_wowlan_offload_cmd(_adapter *adapter);
-	#endif /* CONFIG_P2P_WOWLAN */
-#endif
 
-#ifdef RTW_PER_CMD_SUPPORT_FW
-u8 rtw_hal_set_req_per_rpt_cmd(_adapter *adapter, u8 group_macid,
-			       u8 rpt_type, u32 macid_bitmap);
-#endif

@@ -5025,70 +5025,6 @@ exit:
 	return;
 }
 
-#if defined(CONFIG_RTW_MESH) && defined(RTW_PER_CMD_SUPPORT_FW)
-static s32 rtw_req_per_cmd_hdl(_adapter *adapter)
-{
-	struct dvobj_priv *dvobj = adapter_to_dvobj(adapter);
-	struct macid_ctl_t *macid_ctl = dvobj_to_macidctl(dvobj);
-	struct macid_bmp req_macid_bmp, *macid_bmp;
-	u8 i, ret = _FAIL;
-
-	macid_bmp = &macid_ctl->if_g[adapter->iface_id];
-	_rtw_memcpy(&req_macid_bmp, macid_bmp, sizeof(struct macid_bmp));
-
-	/* Clear none mesh's macid */
-	for (i = 0; i < macid_ctl->num; i++) {
-		u8 role;
-		role = GET_H2CCMD_MSRRPT_PARM_ROLE(&macid_ctl->h2c_msr[i]);
-		if (role != H2C_MSR_ROLE_MESH)
-			rtw_macid_map_clr(&req_macid_bmp, i);
-	}
-
-	/* group_macid: always be 0 in NIC, so only pass macid_bitmap.m0
-	 * rpt_type: 0 includes all info in 1, use 0 for now 
-	 * macid_bitmap: pass m0 only for NIC
-	 */
-	ret = rtw_hal_set_req_per_rpt_cmd(adapter, 0, 0, req_macid_bmp.m0);
-
-	return ret;
-}
-
-u8 rtw_req_per_cmd(_adapter *adapter)
-{
-	struct cmd_obj *cmdobj;
-	struct drvextra_cmd_parm *parm;
-	struct cmd_priv *pcmdpriv = &adapter_to_dvobj(adapter)->cmdpriv;
-	struct submit_ctx sctx;
-	u8 res = _SUCCESS;
-
-	parm = (struct drvextra_cmd_parm *)rtw_zmalloc(sizeof(struct drvextra_cmd_parm));
-	if (parm == NULL) {
-		res = _FAIL;
-		goto exit;
-	}
-
-	parm->ec_id = REQ_PER_CMD_WK_CID;
-	parm->type = 0;
-	parm->size = 0;
-	parm->pbuf = NULL;
-
-	cmdobj = (struct cmd_obj *)rtw_zmalloc(sizeof(*cmdobj));
-	if (cmdobj == NULL) {
-		res = _FAIL;
-		rtw_mfree((u8 *)parm, sizeof(*parm));
-		goto exit;
-	}
-
-	init_h2fwcmd_w_parm_no_rsp(cmdobj, parm, CMD_SET_DRV_EXTRA);
-
-	res = rtw_enqueue_cmd(pcmdpriv, cmdobj);
-
-exit:
-	return res;
-}
-#endif
-
-
 void rtw_ac_parm_cmd_hdl(_adapter *padapter, u8 *_ac_parm_buf, int ac_type)
 {
 
@@ -5121,7 +5057,6 @@ void rtw_ac_parm_cmd_hdl(_adapter *padapter, u8 *_ac_parm_buf, int ac_type)
 	}
 
 }
-
 
 u8 rtw_drvextra_cmd_hdl(_adapter *padapter, unsigned char *pbuf)
 {

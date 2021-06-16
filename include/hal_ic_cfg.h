@@ -119,10 +119,6 @@
 		#endif
 	#endif /* RTW_CHANNEL_SWITCH_OFFLOAD */
 
-	#if defined(CONFIG_RTW_MESH) && !defined(RTW_PER_CMD_SUPPORT_FW)
-		/* Supported since fw v22.1 */
-		#define RTW_PER_CMD_SUPPORT_FW
-	#endif /* RTW_PER_CMD_SUPPORT_FW */
 	#define CONFIG_SUPPORT_FIFO_DUMP
 	#define CONFIG_HW_P0_TSF_SYNC
 	#define CONFIG_BCN_RECV_TIME

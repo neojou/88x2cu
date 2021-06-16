@@ -1157,11 +1157,6 @@ s32 c2h_handler(_adapter *adapter, u8 id, u8 seq, u8 plen, u8 *payload)
 		c2h_customer_str_rpt_2_hdl(adapter, payload, plen);
 		break;
 #endif
-#ifdef RTW_PER_CMD_SUPPORT_FW
-	case C2H_PER_RATE_RPT:
-		c2h_per_rate_rpt_hdl(adapter, payload, plen);
-		break;
-#endif
 #ifdef CONFIG_FW_OFFLOAD_SET_TXPWR_IDX
 	case C2H_SET_TXPWR_FINISH:
 		c2h_txpwr_idx_offload_done(adapter, payload, plen);
