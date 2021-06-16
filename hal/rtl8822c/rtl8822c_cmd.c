@@ -313,19 +313,6 @@ void rtl8822c_set_FwPwrModeInIPS_cmd(PADAPTER adapter, u8 cmd_param)
 	rtw_halmac_send_h2c(adapter_to_dvobj(adapter), h2c);
 }
 
-void rtl8822c_set_usb_suspend_mode(PADAPTER padapter)
-{
-	struct pwrctrl_priv *ppwrpriv = adapter_to_pwrctl(padapter);
-	u8 param[H2C_BT_UNKNOWN_DEVICE_WA_LEN] = {0};
-
-	SET_H2CCMD_BT_UNKNOWN_DEVICE_WA_FORCE_IB_EN(param, 1);
-	rtl8822c_fillh2ccmd(padapter, H2C_BT_UNKNOWN_DEVICE_WA, H2C_BT_UNKNOWN_DEVICE_WA_LEN, param);
-}
-
-
-
-
-
 #ifdef CONFIG_BTC
 void rtl8822c_download_BTCoex_AP_mode_rsvd_page(PADAPTER adapter)
 {

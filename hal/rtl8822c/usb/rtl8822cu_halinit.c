@@ -64,10 +64,6 @@ u32 rtl8822cu_init(PADAPTER padapter)
 	else
 		hal_init_misc(padapter);
 
-#ifdef CONFIG_USB_CONFIG_OFFLOAD_8822C
-	rtl8822c_set_usb_suspend_mode(padapter);
-#endif
-
 	RTW_INFO("%s in %dms, status=%d\n", __func__, rtw_get_passing_time_ms(init_start_time), status);
 	return status;
 }

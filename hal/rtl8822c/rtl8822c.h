@@ -105,7 +105,6 @@ void rtl8822c_c2h_handler(PADAPTER, u8 *pbuf, u16 length);
 #ifdef CONFIG_WOWLAN
 void rtl8822c_set_fw_pwrmode_inips_cmd_wowlan(PADAPTER padapter, u8 ps_mode);
 #endif
-void rtl8822c_set_usb_suspend_mode(PADAPTER padapter);
 
 void rtl8822c_c2h_handler_no_io(PADAPTER, u8 *pbuf, u16 length);
 
