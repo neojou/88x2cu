@@ -267,7 +267,6 @@ mount_api_88xx(struct halmac_adapter *adapter)
 	api->halmac_dump_fw_dmem = dump_fw_dmem_88xx;
 	api->halmac_cfg_max_dl_size = cfg_max_dl_size_88xx;
 
-	api->halmac_dump_fifo = dump_fifo_88xx;
 	api->halmac_get_fifo_size = get_fifo_size_88xx;
 
 	api->halmac_chk_txdesc = chk_txdesc_88xx;

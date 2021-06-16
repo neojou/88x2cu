@@ -2319,10 +2319,6 @@ struct halmac_api {
 	(*halmac_get_fifo_size)(struct halmac_adapter *adapter,
 				enum hal_fifo_sel sel);
 	enum halmac_ret_status
-	(*halmac_dump_fifo)(struct halmac_adapter *adapter,
-			    enum hal_fifo_sel sel, u32 start_addr, u32 size,
-			    u8 *data);
-	enum halmac_ret_status
 	(*halmac_cfg_txbf)(struct halmac_adapter *adapter, u8 userid,
 			   enum halmac_bw bw, u8 txbf_en);
 	enum halmac_ret_status
