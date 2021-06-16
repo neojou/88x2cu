@@ -31,10 +31,6 @@ void
 cfg_rxgck_fifo_8822c(struct halmac_adapter *adapter, u8 enable);
 
 void
-cfg_rx_ignore_8822c(struct halmac_adapter *adapter,
-		    struct halmac_mac_rx_ignore_cfg *cfg);
-
-void
 cfg_ampdu_8822c(struct halmac_adapter *adapter,
 		struct halmac_ampdu_config *cfg);
 

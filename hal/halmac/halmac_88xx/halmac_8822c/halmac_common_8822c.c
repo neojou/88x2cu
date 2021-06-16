@@ -111,10 +111,6 @@ set_hw_value_8822c(struct halmac_adapter *adapter, enum halmac_hw_id hw_id,
 	case HALMAC_HW_RXGCK_FIFO:
 		cfg_rxgck_fifo_8822c(adapter, *(u8 *)value);
 		break;
-	case HALMAC_HW_RX_IGNORE:
-		cfg_rx_ignore_8822c(adapter,
-				    (struct halmac_mac_rx_ignore_cfg *)value);
-		break;
 	case HALMAC_HW_LDO25_EN:
 		cfg_ldo25_8822c(adapter, *(u8 *)value);
 		break;

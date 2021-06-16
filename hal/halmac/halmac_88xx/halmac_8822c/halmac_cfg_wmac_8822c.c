@@ -62,11 +62,13 @@ cfg_drv_info_8822c(struct halmac_adapter *adapter,
 		return HALMAC_RET_SW_CASE_NOT_SUPPORT;
 	}
 
+#if 0 //NEO
 	cfg.hdr_chk_en = info->hdr_chk_en;
 	cfg.fcs_chk_en = info->fcs_chk_en;
 	cfg.cck_rst_en = info->cck_rst_en;
 	cfg.fcs_chk_thr = info->fcs_chk_thr;
 	api->halmac_set_hw_value(adapter, HALMAC_HW_RX_IGNORE, &cfg);
+#endif 
 
 	HALMAC_REG_W8(REG_RX_DRVINFO_SZ, drv_info_size);
 
@@ -134,49 +136,6 @@ cfg_rxgck_fifo_8822c(struct halmac_adapter *adapter, u8 enable)
 	} else {
 		HALMAC_REG_W8_CLR(REG_RXPSF_CTRL + 3, BIT(4));
 	}
-}
-
-void
-cfg_rx_ignore_8822c(struct halmac_adapter *adapter,
-		    struct halmac_mac_rx_ignore_cfg *cfg)
-{
-	u16 value16;
-	struct halmac_rx_ignore_info *info = &adapter->rx_ignore_info;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-
-	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
-
-	value16 = HALMAC_REG_R16(REG_RXPSF_CTRL);
-
-	info->hdr_chk_en = cfg->hdr_chk_en;
-	info->fcs_chk_en = cfg->fcs_chk_en;
-	info->cck_rst_en = cfg->cck_rst_en;
-	info->fcs_chk_thr = cfg->fcs_chk_thr;
-
-	/*mac header check enable*/
-	if (cfg->hdr_chk_en == 1 && info->hdr_chk_mask == 1)
-		value16 |= BIT_RXPSF_MHCHKEN;
-	else
-		value16 &= ~(BIT_RXPSF_MHCHKEN);
-
-	/*continuous FCS error counter enable*/
-	if (cfg->fcs_chk_en == 1 && info->fcs_chk_mask == 1)
-		value16 |= BIT_RXPSF_CONT_ERRCHKEN;
-	else
-		value16 &= ~(BIT_RXPSF_CONT_ERRCHKEN);
-
-	/*MAC Rx reset when CCK enable*/
-	if (cfg->cck_rst_en == 1)
-		value16 |= BIT_RXPSF_CCKRST;
-	else
-		value16 &= ~(BIT_RXPSF_CCKRST);
-
-	/*FCS error counter threshold*/
-	value16 = BIT_SET_RXPSF_ERRTHR(value16, cfg->fcs_chk_thr);
-
-	HALMAC_REG_W16(REG_RXPSF_CTRL, value16);
-
-	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
 }
 
 void

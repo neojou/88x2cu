@@ -1109,6 +1109,27 @@ u32 mac_send_general_info_reg(struct mac_adapter *adapter)
 	return mac_send_h2c_reg(adapter, h2c);
 }
 
+u32 mac_cfg_drv_info(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u16 value16;
+
+	value16 = MAC_REG_R16(REG_RXPSF_CTRL);
+
+	// disable hdr check
+	value16 &= ~(BIT_RXPSF_MHCHKEN);
+
+	// disable fcs error counter
+	value16 &= ~(BIT_RXPSF_CONT_ERRCHKEN);
+
+	// disable ccx reset
+	value16 &= ~(BIT_RXPSF_CCKRST);
+
+	MAC_REG_W16(REG_RXPSF_CTRL, value16);
+
+	return MACSUCCESS;
+}
+
 u32 mac_hal_init(struct mac_adapter *adapter,
 		 struct mac_trx_info *trx_info,
 		 struct mac_fwdl_info *fwdl_info,
@@ -1181,6 +1202,12 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 	ret = mac_send_general_info_reg(adapter);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR] send general info reg failed: %d\n", ret);
+		return ret;
+	}
+
+	ret = mac_cfg_drv_info(adapter);
+	if (ret != MACSUCCESS) {
+		PLTFM_MSG_ERR("[ERR] cfg drv info failed: %d\n", ret);
 		return ret;
 	}
 
