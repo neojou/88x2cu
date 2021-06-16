@@ -986,6 +986,57 @@ u32 mac_enable_fw(struct mac_adapter *adapter)
 	return ret;
 }
 
+
+u32 mac_check_h2cq_fifo(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	struct mac_fifo_info *fifo = &adapter->fifo_info;
+	u8 cnt;
+	u8 value8;
+	u16 value16;
+	u32 i;
+	u32 start_pg;
+	u32 residue;
+	u32 value32;
+	u32 h2cq_addr;
+	u32 h2cq_ele;
+	u32 ret = MACSUCCESS;
+
+	h2cq_addr = fifo->rsvd_h2cq_addr << TX_PAGE_SIZE_SHIFT;
+
+	cnt = 100;
+	do {
+		// disable clk gate
+		value8 = MAC_REG_R8(REG_RCR + 2);
+		MAC_REG_W8(REG_RCR + 2, value8 | BIT(3));
+
+		start_pg = h2cq_addr >> 12;
+		start_pg += 0x780;
+		residue = h2cq_addr & (4096 - 1);
+
+		value16 = MAC_REG_R16(REG_PKTBUF_DBG_CTRL) & 0xF000;
+
+		MAC_REG_W16(REG_PKTBUF_DBG_CTRL, (u16)(start_pg) | value16);
+		h2cq_ele = MAC_REG_R32(0x8000 + residue);
+		MAC_REG_W16(REG_PKTBUF_DBG_CTRL, value16);
+
+		// restore for clk gate setting
+		MAC_REG_W8(REG_RCR + 2, value8);
+
+		if ((h2cq_ele & 0xFFFF) == 0xFF01)
+			goto out;
+
+		PLTFM_DELAY_US(5);
+	} while (cnt--);
+
+	PLTFM_MSG_ERR("[ERR]%s: h2cq compare!!\n", __func__);
+	ret = MACFFCFG;
+
+out:
+	return ret;
+
+}
+
 u32 mac_hal_init(struct mac_adapter *adapter,
 		 struct mac_trx_info *trx_info,
 		 struct mac_fwdl_info *fwdl_info,
@@ -1048,6 +1099,13 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		PLTFM_MSG_ERR("[ERR]send_phydm_info failed: %d\n", ret);
 		return ret;
 	}
+
+	ret = mac_check_h2cq_fifo(adapter);
+	if (ret != MACSUCCESS) {
+		PLTFM_MSG_ERR("[ERR] check h2cq fifo failed: %d\n", ret);
+		return ret;
+	}
+
 
 #if 0 //NEO
 	ret = set_enable_bb_rf(adapter, MAC_AX_FUNC_EN);

@@ -46,10 +46,6 @@ get_cpu_mode_88xx(struct halmac_adapter *adapter,
 		  enum halmac_wlcpu_mode *mode);
 
 enum halmac_ret_status
-send_general_info_88xx(struct halmac_adapter *adapter,
-		       struct halmac_general_info *info);
-
-enum halmac_ret_status
 drv_fwctrl_88xx(struct halmac_adapter *adapter, u8 *payload, u32 size, u8 ack);
 
 #endif /* HALMAC_88XX_SUPPORT */

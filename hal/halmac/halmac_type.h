@@ -2369,9 +2369,6 @@ struct halmac_api {
 	(*halmac_clear_ch_info)(struct halmac_adapter *adapter);
 
 	enum halmac_ret_status
-	(*halmac_send_general_info)(struct halmac_adapter *adapter,
-				    struct halmac_general_info *info);
-	enum halmac_ret_status
 	(*halmac_start_iqk)(struct halmac_adapter *adapter,
 			    struct halmac_iqk_para *param);
 	enum halmac_ret_status

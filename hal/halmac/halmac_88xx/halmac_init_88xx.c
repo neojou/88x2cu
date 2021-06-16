@@ -248,7 +248,6 @@ mount_api_88xx(struct halmac_adapter *adapter)
 	api->halmac_add_extra_ch_info = add_extra_ch_info_88xx;
 	api->halmac_p2pps = p2pps_88xx;
 	api->halmac_clear_ch_info = clear_ch_info_88xx;
-	api->halmac_send_general_info = send_general_info_88xx;
 
 	api->halmac_start_iqk = start_iqk_88xx;
 	api->halmac_cfg_la_mode = cfg_la_mode_88xx;

@@ -2129,17 +2129,9 @@ static int _send_general_info(struct dvobj_priv *d)
 	info.package_type = hal->PackageType;
 	info.mp_mode = adapter->registrypriv.mp_mode;
 
-	status = api->halmac_send_general_info(halmac, &info);
-	switch (status) {
-	case HALMAC_RET_SUCCESS:
-		break;
-	case HALMAC_RET_NO_DLFW:
-		RTW_WARN("%s: halmac_send_general_info() fail because fw not dl!\n",
-			 __FUNCTION__);
-		/* fall through */
-	default:
-		return -1;
-	}
+
+	if (halmac->halmac_state.dlfw_state == HALMAC_DLFW_DONE)
+		halmac->halmac_state.dlfw_state = HALMAC_GEN_INFO_SENT;
 
 	err = _send_general_info_by_reg(d, &info);
 	if (err) {
@@ -2563,7 +2555,6 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 	}
 	#endif
 
-	/* halmac_send_general_info */
 	if (_TRUE == fw_ok) {
 		err = _send_general_info(d);
 		if (err) {
