@@ -332,6 +332,7 @@ init_h2c(struct mac_adapter *adapter)
 		return MACBUFSZ;
 	}
 
+	adapter->last_hmebox_num = 0;
 	return MACSUCCESS;
 }
 
@@ -1037,6 +1038,77 @@ out:
 
 }
 
+static bool _is_fw_read_cmd_down(struct mac_adapter *adapter, u8 msgbox_num)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	int retry_cnts = 100;
+	u8 valid;
+
+	do {
+		valid = MAC_REG_R8(REG_HMETFR);
+		valid &= BIT(msgbox_num);
+		if (!valid)
+			return true;
+
+		PLTFM_DELAY_MS(1);
+	} while (retry_cnts--);
+
+	return false;
+}
+
+u32 mac_send_h2c_reg(struct mac_adapter *adapter, u8 *h2c)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u8 h2c_box_num = adapter->last_hmebox_num;
+	u32 msgbox_addr = 0;
+	u32 msgbox_ex_addr = 0;
+	u32 h2c_cmd = 0;
+	u32 h2c_cmd_ex = 0;
+
+	if (!_is_fw_read_cmd_down(adapter, h2c_box_num)) {
+		return MACPOLLTO;
+	}
+
+	/* Write Ext command (byte 4~7) */
+	msgbox_ex_addr = 0x0088 + (h2c_box_num * 4);
+	memcpy((u8 *)(&h2c_cmd_ex), h2c + 4, 4);
+	MAC_REG_W32(msgbox_ex_addr, h2c_cmd_ex);
+
+	/* Write command (byte 0~3) */
+	msgbox_addr = 0x01D0 + (h2c_box_num * 4);
+	memcpy((u8 *)(&h2c_cmd), h2c, 4);
+	MAC_REG_W32(msgbox_addr, h2c_cmd);
+
+	/* update last msg box number */
+	adapter->last_hmebox_num = (h2c_box_num + 1) % 4;
+
+	return MACSUCCESS;
+}
+
+u32 mac_send_general_info_reg(struct mac_adapter *adapter)
+{
+	u8 h2c[8] = {0};
+
+#define CLASS_GENERAL_INFO_REG				0x02
+#define CMD_ID_GENERAL_INFO_REG				0x0C
+#define GENERAL_INFO_REG_SET_CMD_ID(buf, v)		le32p_replace_bits((__le32 *)(buf), v, GENMASK(4, 0))
+#define GENERAL_INFO_REG_SET_CLASS(buf, v)		le32p_replace_bits((__le32 *)(buf), v, GENMASK(7, 5))
+#define GENERAL_INFO_REG_SET_RFE_TYPE(buf, v)		le32p_replace_bits((__le32 *)(buf), v, GENMASK(15, 8))
+#define GENERAL_INFO_REG_SET_RF_TYPE(buf, v)		le32p_replace_bits((__le32 *)(buf), v, GENMASK(23, 16))
+#define GENERAL_INFO_REG_SET_CUT_VERSION(buf, v)	le32p_replace_bits((__le32 *)(buf), v, GENMASK(31, 24))
+#define GENERAL_INFO_REG_SET_RX_ANT_STATUS(buf, v)	le32p_replace_bits((__le32 *)(buf)+1, v, GENMASK(3, 0))
+#define GENERAL_INFO_REG_SET_TX_ANT_STATUS(buf, v)	le32p_replace_bits((__le32 *)(buf)+1, v, GENMASK(7,4))
+
+	GENERAL_INFO_REG_SET_CMD_ID(h2c, CMD_ID_GENERAL_INFO_REG);
+	GENERAL_INFO_REG_SET_CLASS(h2c, CLASS_GENERAL_INFO_REG);
+	GENERAL_INFO_REG_SET_RFE_TYPE(h2c, 0); //info->rfe_type
+	GENERAL_INFO_REG_SET_RF_TYPE(h2c, 2); //rftype
+	GENERAL_INFO_REG_SET_RX_ANT_STATUS(h2c, 3); //info->rx_ant_status
+	GENERAL_INFO_REG_SET_TX_ANT_STATUS(h2c, 3); //info->tx_ant_status
+
+	return mac_send_h2c_reg(adapter, h2c);
+}
+
 u32 mac_hal_init(struct mac_adapter *adapter,
 		 struct mac_trx_info *trx_info,
 		 struct mac_fwdl_info *fwdl_info,
@@ -1106,6 +1178,11 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
+	ret = mac_send_general_info_reg(adapter);
+	if (ret != MACSUCCESS) {
+		PLTFM_MSG_ERR("[ERR] send general info reg failed: %d\n", ret);
+		return ret;
+	}
 
 #if 0 //NEO
 	ret = set_enable_bb_rf(adapter, MAC_AX_FUNC_EN);

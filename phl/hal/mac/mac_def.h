@@ -4609,6 +4609,8 @@ struct mac_adapter {
 	struct mac_fw_info fw_info;
 	struct mac_fifo_info fifo_info;
 	struct mac_efuse_param efuse_param;
+	/* H2C */
+	u8 last_hmebox_num;
 #if 0 // NEO
 	struct mac_ax_mac_pwr_info mac_pwr_info;
 	struct mac_ax_ft_status *ft_stat;

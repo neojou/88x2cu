@@ -1600,7 +1600,6 @@ fail:
 
 #endif //NEO
 
-
 u32 mac_send_general_info_h2c(struct mac_adapter *adapter)
 {
 	struct mac_fifo_info *fifo = &adapter->fifo_info;

@@ -2062,86 +2062,6 @@ static enum odm_cut_version _cut_version_drv2phydm(
 	return cut_phydm;
 }
 
-static int _send_general_info_by_reg(struct dvobj_priv *d,
-				     struct halmac_general_info *info)
-{
-	struct _ADAPTER *a;
-	struct hal_com_data *hal;
-	enum tag_HAL_Cut_Version_Definition cut_drv;
-	enum rf_type rftype;
-	enum odm_cut_version cut_phydm;
-	u8 h2c[RTW_HALMAC_H2C_MAX_SIZE] = {0};
-
-
-	a = dvobj_get_primary_adapter(d);
-	hal = GET_HAL_DATA(a);
-	rftype = _rf_type_halmac2drv(info->rf_type);
-
-#define CLASS_GENERAL_INFO_REG				0x02
-#define CMD_ID_GENERAL_INFO_REG				0x0C
-#define GENERAL_INFO_REG_SET_CMD_ID(buf, v)		SET_BITS_TO_LE_4BYTE(buf, 0, 5, v)
-#define GENERAL_INFO_REG_SET_CLASS(buf, v)		SET_BITS_TO_LE_4BYTE(buf, 5, 3, v)
-#define GENERAL_INFO_REG_SET_RFE_TYPE(buf, v)		SET_BITS_TO_LE_4BYTE(buf, 8, 8, v)
-#define GENERAL_INFO_REG_SET_RF_TYPE(buf, v)		SET_BITS_TO_LE_4BYTE(buf, 16, 8, v)
-#define GENERAL_INFO_REG_SET_CUT_VERSION(buf, v)	SET_BITS_TO_LE_4BYTE(buf, 24, 8, v)
-#define GENERAL_INFO_REG_SET_RX_ANT_STATUS(buf, v)	SET_BITS_TO_LE_1BYTE(buf+4, 0, 4, v)
-#define GENERAL_INFO_REG_SET_TX_ANT_STATUS(buf, v)	SET_BITS_TO_LE_1BYTE(buf+4, 4, 4, v)
-
-	GENERAL_INFO_REG_SET_CMD_ID(h2c, CMD_ID_GENERAL_INFO_REG);
-	GENERAL_INFO_REG_SET_CLASS(h2c, CLASS_GENERAL_INFO_REG);
-	GENERAL_INFO_REG_SET_RFE_TYPE(h2c, info->rfe_type);
-	GENERAL_INFO_REG_SET_RF_TYPE(h2c, rftype);
-	//GENERAL_INFO_REG_SET_CUT_VERSION(h2c, cut_phydm);
-	GENERAL_INFO_REG_SET_RX_ANT_STATUS(h2c, info->rx_ant_status);
-	GENERAL_INFO_REG_SET_TX_ANT_STATUS(h2c, info->tx_ant_status);
-
-	return rtw_halmac_send_h2c(d, h2c);
-}
-
-static int _send_general_info(struct dvobj_priv *d)
-{
-	struct _ADAPTER *adapter;
-	struct hal_com_data *hal;
-	struct halmac_adapter *halmac;
-	struct halmac_api *api;
-	struct halmac_general_info info;
-	enum halmac_ret_status status;
-	enum rf_type rf = RF_1T1R;
-	enum bb_path txpath = BB_PATH_A;
-	enum bb_path rxpath = BB_PATH_A;
-	int err;
-
-
-	adapter = dvobj_get_primary_adapter(d);
-	hal = GET_HAL_DATA(adapter);
-	halmac = dvobj_to_halmac(d);
-	if (!halmac)
-		return -1;
-	api = HALMAC_GET_API(halmac);
-
-	_rtw_memset(&info, 0, sizeof(info));
-	info.rfe_type = (u8)hal->rfe_type;
-	rtw_hal_get_trx_path(d, &rf, &txpath, &rxpath);
-	info.rf_type = _rf_type_drv2halmac(rf);
-	info.tx_ant_status = (u8)txpath;
-	info.rx_ant_status = (u8)rxpath;
-	info.ext_pa = 0;	/* 2.4G or 5G? format not known */
-	info.package_type = hal->PackageType;
-	info.mp_mode = adapter->registrypriv.mp_mode;
-
-
-	if (halmac->halmac_state.dlfw_state == HALMAC_DLFW_DONE)
-		halmac->halmac_state.dlfw_state = HALMAC_GEN_INFO_SENT;
-
-	err = _send_general_info_by_reg(d, &info);
-	if (err) {
-		RTW_ERR("%s: Fail to send general info by register!\n",
-			 __FUNCTION__);
-		return -1;
-	}
-
-	return 0;
-}
 
 void _rtw_hal_set_fw_rsvd_page(_adapter *adapter, bool finished, u8 *page_num);
 
@@ -2411,9 +2331,9 @@ resume_tx:
 		}
 
 		/* 10. Send General Info */
-		err = _send_general_info(d);
-		if (err)
-			return -1;
+
+		if (mac->halmac_state.dlfw_state == HALMAC_DLFW_DONE)
+			mac->halmac_state.dlfw_state = HALMAC_GEN_INFO_SENT;
 	}
 
 exit:
@@ -2556,11 +2476,8 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 	#endif
 
 	if (_TRUE == fw_ok) {
-		err = _send_general_info(d);
-		if (err) {
-			RTW_ERR("%s _send_general_info err=%d\n", __func__, err);
-			goto out;
-		}
+		if (halmac->halmac_state.dlfw_state == HALMAC_DLFW_DONE)
+			halmac->halmac_state.dlfw_state = HALMAC_GEN_INFO_SENT;
 	}
 
 	/* Init Phy parameter-MAC */
@@ -2873,6 +2790,7 @@ int rtw_halmac_dlfw_mem_from_file(struct dvobj_priv *d, u8 *fwpath, enum fw_mem 
 int rtw_halmac_dlfw(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 {
 	PADAPTER adapter;
+	struct halmac_adapter *mac;
 	enum halmac_ret_status status;
 	u32 ok;
 	int err, err_ret = -1;
@@ -2882,7 +2800,7 @@ int rtw_halmac_dlfw(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 		return -22;
 
 	adapter = dvobj_get_primary_adapter(d);
-
+	mac = dvobj_to_halmac(d);
 	/* re-download firmware */
 	if (rtw_is_hw_init_completed(adapter))
 		return download_fw(d, fw, fwsize, 1);
@@ -2903,9 +2821,8 @@ int rtw_halmac_dlfw(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 	if (err)
 		goto out;
 
-	err = _send_general_info(d);
-	if (err)
-		goto out;
+	if (mac->halmac_state.dlfw_state == HALMAC_DLFW_DONE)
+		mac->halmac_state.dlfw_state = HALMAC_GEN_INFO_SENT;
 
 	err_ret = 0;
 
