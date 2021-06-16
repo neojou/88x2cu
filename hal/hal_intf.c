@@ -1766,19 +1766,6 @@ s8 rtw_hal_get_txpwr_target_extra_bias(_adapter *adapter, enum rf_path rfpath
 
 /*
  * Description:
- *	Initialize MAC registers
- *
- * Return:
- *	_TRUE	success
- *	_FALSE	fail
- */
-u8 rtw_hal_init_mac_register(PADAPTER adapter)
-{
-	return adapter->hal_func.init_mac_register(adapter);
-}
-
-/*
- * Description:
  *	Initialize PHY(BB/RF) related functions
  *
  * Return:
@@ -1999,10 +1986,6 @@ u8 rtw_hal_ops_check(_adapter *padapter)
 	}
 #endif  /* #ifdef DBG_CONFIG_ERROR_DETECT */
 
-	if (NULL == padapter->hal_func.init_mac_register) {
-		rtw_hal_error_msg("init_mac_register");
-		ret = _FAIL;
-	}
 	if (NULL == padapter->hal_func.init_phy) {
 		rtw_hal_error_msg("init_phy");
 		ret = _FAIL;

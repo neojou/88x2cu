@@ -419,7 +419,6 @@ struct hal_ops {
 	void (*fw_correct_bcn)(PADAPTER padapter);
 #endif
 
-	u8(*init_mac_register)(PADAPTER);
 	u8(*init_phy)(PADAPTER);
 
 #ifdef CONFIG_PCI_HCI
@@ -843,7 +842,6 @@ s8 rtw_hal_get_txpwr_target_extra_bias(_adapter *adapter, enum rf_path rfpath
 
 u8 rtw_hal_ops_check(_adapter *padapter);
 
-u8 rtw_hal_init_mac_register(PADAPTER);
 u8 rtw_hal_init_phy(PADAPTER);
 s32 rtw_hal_fw_mem_dl(_adapter *padapter, enum fw_mem mem);
 

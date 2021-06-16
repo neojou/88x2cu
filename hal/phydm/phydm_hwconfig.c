@@ -143,21 +143,6 @@ odm_config_bb_with_header_file(struct dm_struct *dm,
 	return result;
 }
 
-enum hal_status
-odm_config_mac_with_header_file(struct dm_struct *dm)
-{
-	enum hal_status result = HAL_STATUS_SUCCESS;
-
-	PHYDM_DBG(dm, ODM_COMP_INIT, "===>%s (%s)\n", __func__,
-		  (dm->is_mp_chip) ? "MPChip" : "TestChip");
-	PHYDM_DBG(dm, ODM_COMP_INIT,
-		  "support_platform: 0x%X, support_interface: 0x%X, board_type: 0x%X\n",
-		  dm->support_platform, dm->support_interface, dm->board_type);
-
-	PHYDM_DBG(dm, ODM_COMP_INIT, "MAC para-package in HALMAC\n");
-	return result;
-}
-
 u32 odm_get_hw_img_version(struct dm_struct *dm)
 {
 	u32 version = 0;

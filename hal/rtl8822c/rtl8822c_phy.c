@@ -54,41 +54,6 @@ static void bb_rf_register_definition(PADAPTER adapter)
 	hal->PHYRegDef[RF_PATH_B].rfLSSIReadBackPi = rB_PIRead_Jaguar;
 }
 
-/*
- * Description:
- *	Initialize MAC registers
- *
- * Return:
- *	_TRUE	Success
- *	_FALSE	Fail
- */
-u8 rtl8822c_phy_init_mac_register(PADAPTER adapter)
-{
-	PHAL_DATA_TYPE hal;
-	u8 ret = _TRUE;
-	int res;
-	enum hal_status status;
-
-
-	hal = GET_HAL_DATA(adapter);
-
-	ret = _FALSE;
-#ifdef CONFIG_LOAD_PHY_PARA_FROM_FILE
-	res = phy_ConfigMACWithParaFile(adapter, PHY_FILE_MAC_REG);
-	if (_SUCCESS == res)
-		ret = _TRUE;
-#endif /* CONFIG_LOAD_PHY_PARA_FROM_FILE */
-	if (_FALSE == ret) {
-		status = odm_config_mac_with_header_file(&hal->odmpriv);
-		if (HAL_STATUS_SUCCESS == status)
-			ret = _TRUE;
-	}
-	if (_FALSE == ret)
-		RTW_INFO("%s: Write MAC Reg Fail!!", __FUNCTION__);
-
-	return ret;
-}
-
 static u8 _init_bb_reg(PADAPTER Adapter)
 {
 	PHAL_DATA_TYPE hal = GET_HAL_DATA(Adapter);

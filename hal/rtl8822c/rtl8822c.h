@@ -113,7 +113,6 @@ void rtl8822c_download_BTCoex_AP_mode_rsvd_page(PADAPTER);
 #endif /* CONFIG_BTC */
 
 /* rtl8822c_phy.c */
-u8 rtl8822c_phy_init_mac_register(PADAPTER);
 u8 rtl8822c_phy_init(PADAPTER);
 void rtl8822c_phy_init_dm_priv(PADAPTER);
 void rtl8822c_phy_deinit_dm_priv(PADAPTER);

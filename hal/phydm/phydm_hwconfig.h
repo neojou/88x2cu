@@ -61,9 +61,6 @@ enum hal_status
 odm_config_bb_with_header_file(struct dm_struct *dm,
 			       enum odm_bb_config_type config_type);
 
-enum hal_status
-odm_config_mac_with_header_file(struct dm_struct *dm);
-
 u32 odm_get_hw_img_version(struct dm_struct *dm);
 
 u32 query_phydm_trx_capability(struct dm_struct *dm);
