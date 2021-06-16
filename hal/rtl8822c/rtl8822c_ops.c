@@ -429,44 +429,6 @@ static void linked_status_check(PADAPTER p)
 
 static void set_opmode_monitor(PADAPTER adapter)
 {
-#ifdef CONFIG_WIFI_MONITOR
-	u8 tmp_8bit;
-	u32 tmp_32bit;
-	struct net_device *ndev = adapter->pnetdev;
-	struct mon_reg_backup *mon = &GET_HAL_DATA(adapter)->mon_backup;
-
-	mon->known_rcr = 1;
-	rtw_hal_get_hwreg(adapter, HW_VAR_RCR, (u8 *)& mon->rcr);
-
-	/* Receive all type */
-	tmp_32bit = BIT_AAP_8822C | BIT_APP_PHYSTS_8822C;
-
-	if (ndev->type == ARPHRD_IEEE80211_RADIOTAP) {
-		/* Append FCS */
-		tmp_32bit |= BIT_APP_FCS_8822C;
-	}
-
-	rtw_hal_set_hwreg(adapter, HW_VAR_RCR, (u8 *)& tmp_32bit);
-
-	if (1)
-		rtw_halmac_config_rx_info(adapter_to_dvobj(adapter),
-			HALMAC_DRV_INFO_PHY_SNIFFER);
-	else
-		rtw_halmac_config_rx_info(adapter_to_dvobj(adapter),
-			HALMAC_DRV_INFO_PHY_PLCP);
-
-	tmp_8bit = rtw_read8(adapter, REG_RX_DRVINFO_SZ_8822C);
-	rtw_write8(adapter, REG_RX_DRVINFO_SZ_8822C, (tmp_8bit | 0x80));
-
-	/* Receive all data frames */
-	mon->known_rxfilter = 1;
-	mon->rxfilter0 = rtw_read16(adapter, REG_RXFLTMAP0_8822C);
-	mon->rxfilter1 = rtw_read16(adapter, REG_RXFLTMAP1_8822C);
-	mon->rxfilter2 = rtw_read16(adapter, REG_RXFLTMAP2_8822C);
-	rtw_write16(adapter, REG_RXFLTMAP0_8822C, 0xFFFF);
-	rtw_write16(adapter, REG_RXFLTMAP1_8822C, 0xFFFF);
-	rtw_write16(adapter, REG_RXFLTMAP2_8822C, 0xFFFF);
-#endif /* CONFIG_WIFI_MONITOR */
 }
 #ifndef CONFIG_MI_WITH_MBSSID_CAM
 static void set_opmode_port0(PADAPTER adapter, u8 mode)
@@ -736,29 +698,6 @@ static void hw_var_set_opmode(PADAPTER adapter, u8 mode)
 	static u8 isMonitor = _FALSE;
 
 	if (isMonitor == _TRUE) {
-#ifdef CONFIG_WIFI_MONITOR
-		struct mon_reg_backup *backup = &GET_HAL_DATA(adapter)->mon_backup;
-
-		if (backup->known_rcr) {
-			backup->known_rcr = 0;
-			rtw_hal_set_hwreg(adapter, HW_VAR_RCR, (u8 *)&backup->rcr);
-
-			if (!!(backup->rcr &= BIT_APP_PHYSTS_8822C))
-				rtw_halmac_config_rx_info(adapter_to_dvobj(adapter),
-					HALMAC_DRV_INFO_PHY_STATUS);
-			else
-				rtw_halmac_config_rx_info(adapter_to_dvobj(adapter),
-					HALMAC_DRV_INFO_NONE);
-
-			rtw_hal_rcr_set_chk_bssid(adapter, MLME_ACTION_NONE);
-		}
-		if (backup->known_rxfilter) {
-			backup->known_rxfilter = 0;
-			rtw_write16(adapter, REG_RXFLTMAP0_8822C, backup->rxfilter0);
-			rtw_write16(adapter, REG_RXFLTMAP1_8822C, backup->rxfilter1);
-			rtw_write16(adapter, REG_RXFLTMAP2_8822C, backup->rxfilter2);
-		}
-#endif /* CONFIG_WIFI_MONITOR */
 		isMonitor = _FALSE;
 	}
 
@@ -2345,10 +2284,6 @@ u8 rtl8822c_gethaldefvar(PADAPTER adapter, HAL_DEF_VARIABLE variable, void *pval
 	bResult = _SUCCESS;
 
 	switch (variable) {
-/*
-	case HAL_DEF_UNDERCORATEDSMOOTHEDPWDB:
-		break;
-*/
 	case HAL_DEF_IS_SUPPORT_ANT_DIV:
 #ifdef CONFIG_ANTENNA_DIVERSITY
 		*(u8 *)pval = _TRUE;
@@ -2357,28 +2292,10 @@ u8 rtl8822c_gethaldefvar(PADAPTER adapter, HAL_DEF_VARIABLE variable, void *pval
 #endif
 		break;
 
-/*
-	case HAL_DEF_DRVINFO_SZ:
-		break;
-*/
 	case HAL_DEF_MAX_RECVBUF_SZ:
 		*((u32 *)pval) = MAX_RECVBUF_SZ;
 		break;
 
-	case HAL_DEF_RX_PACKET_OFFSET:
-		val32 = rtl8822c_get_rx_desc_size(adapter);
-		val8 = rtl8822c_get_rx_drv_info_size(adapter);
-		*((u32 *)pval) = val32 + val8;
-		break;
-/*
-	case HAL_DEF_RX_DMA_SZ_WOW:
-	case HAL_DEF_RX_DMA_SZ:
-	case HAL_DEF_RX_PAGE_SIZE:
-	case HAL_DEF_DBG_DUMP_RXPKT:
-	case HAL_DEF_RA_DECISION_RATE:
-	case HAL_DEF_RA_SGI:
-		break;
-*/
 	/* only for 8188E */
 	case HAL_DEF_PT_PWR_STATUS:
 		break;

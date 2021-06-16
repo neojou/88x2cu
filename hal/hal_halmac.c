@@ -974,45 +974,6 @@ int rtw_halmac_get_rx_agg_align_size(struct dvobj_priv *d, u8 *size)
 	return 0;
 }
 
-/*
- * Description:
- *	Get RX driver info size. RX driver info is a small memory space between
- *	scriptor and RX payload.
- *
- *	+-------------------------+
- *	| RX descriptor           |
- *	| usually 24 bytes        |
- *	+-------------------------+
- *	| RX driver info          |
- *	| depends on driver cfg   |
- *	+-------------------------+
- *	| RX paylad               |
- *	|                         |
- *	+-------------------------+
- *
- * Parameter:
- *	d	pointer to struct dvobj_priv of driver
- *	sz	rx driver info size in bytes.
- *
- * Return:
- *	0	Success
- *	other	Fail
- */
-int rtw_halmac_get_rx_drv_info_sz(struct dvobj_priv *d, u8 *sz)
-{
-	enum halmac_ret_status status;
-	struct halmac_adapter *halmac = dvobj_to_halmac(d);
-	struct halmac_api *api = HALMAC_GET_API(halmac);
-	u8 dw = 0;
-
-	status = api->halmac_get_hw_value(halmac, HALMAC_HW_DRV_INFO_SIZE, &dw);
-	if (status != HALMAC_RET_SUCCESS)
-		return -1;
-
-	*sz = dw * 8;
-	return 0;
-}
-
 /**
  * rtw_halmac_get_tx_desc_size() - TX descriptor size
  * @d:		struct dvobj_priv*

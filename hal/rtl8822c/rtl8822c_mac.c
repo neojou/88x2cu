@@ -132,25 +132,6 @@ s32 rtl8822c_fw_dl(PADAPTER adapter, u8 wowlan)
 	}
 }
 
-u8 rtl8822c_get_rx_drv_info_size(struct _ADAPTER *a)
-{
-	struct dvobj_priv *d;
-	u8 size = 80;	/* HALMAC_RX_DESC_DUMMY_SIZE_MAX_88XX */
-	int err = 0;
-
-
-	d = adapter_to_dvobj(a);
-
-	err = rtw_halmac_get_rx_drv_info_sz(d, &size);
-	if (err) {
-		RTW_WARN(FUNC_ADPT_FMT ": Fail to get DRV INFO size!!(err=%d)\n",
-			 FUNC_ADPT_ARG(a), err);
-		size = 80;
-	}
-
-	return size;
-}
-
 u32 rtl8822c_get_tx_desc_size(struct _ADAPTER *a)
 {
 	struct dvobj_priv *d;

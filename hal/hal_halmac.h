@@ -117,7 +117,6 @@ int rtw_halmac_get_rx_fifo_size(struct dvobj_priv *d, u32 *size);
 int rtw_halmac_get_rsvd_drv_pg_bndy(struct dvobj_priv *d, u16 *bndy);
 int rtw_halmac_get_tx_agg_align_size(struct dvobj_priv *d, u16 *size);
 int rtw_halmac_get_rx_agg_align_size(struct dvobj_priv *d, u8 *size);
-int rtw_halmac_get_rx_drv_info_sz(struct dvobj_priv *, u8 *sz);
 int rtw_halmac_get_tx_desc_size(struct dvobj_priv *d, u32 *size);
 int rtw_halmac_get_rx_desc_size(struct dvobj_priv *d, u32 *size);
 int rtw_halmac_get_tx_dma_ch_map(struct dvobj_priv *d, u8 *dma_ch_map, u8 map_size);

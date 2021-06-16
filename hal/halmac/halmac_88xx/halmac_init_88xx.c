@@ -94,7 +94,6 @@ init_adapter_param_88xx(struct halmac_adapter *adapter)
 	adapter->ch_sw_info.total_size = 0;
 	adapter->ch_sw_info.ch_num = 0;
 
-	adapter->drv_info_size = 0;
 	adapter->tx_desc_transfer = 0;
 
 	adapter->txff_alloc.tx_fifo_pg_num = 0;

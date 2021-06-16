@@ -58,22 +58,6 @@ cfg_drv_info_8822c(struct halmac_adapter *adapter,
 		info->hdr_chk_mask = 1;
 		info->fcs_chk_mask = 1;
 		break;
-	case HALMAC_DRV_INFO_PHY_SNIFFER:
-		drv_info_size = 5; /* phy status 4byte, sniffer info 1byte */
-		phy_status_en = 1;
-		sniffer_en = 1;
-		plcp_hdr_en = 0;
-		info->hdr_chk_mask = 0;
-		info->fcs_chk_mask = 0;
-		break;
-	case HALMAC_DRV_INFO_PHY_PLCP:
-		drv_info_size = 6; /* phy status 4byte, plcp header 2byte */
-		phy_status_en = 1;
-		sniffer_en = 0;
-		plcp_hdr_en = 1;
-		info->hdr_chk_mask = 0;
-		info->fcs_chk_mask = 0;
-		break;
 	default:
 		return HALMAC_RET_SW_CASE_NOT_SUPPORT;
 	}
@@ -85,8 +69,6 @@ cfg_drv_info_8822c(struct halmac_adapter *adapter,
 	api->halmac_set_hw_value(adapter, HALMAC_HW_RX_IGNORE, &cfg);
 
 	HALMAC_REG_W8(REG_RX_DRVINFO_SZ, drv_info_size);
-
-	adapter->drv_info_size = drv_info_size;
 
 	value32 = HALMAC_REG_R32(REG_RCR);
 	value32 = (value32 & (~BIT_APP_PHYSTS));

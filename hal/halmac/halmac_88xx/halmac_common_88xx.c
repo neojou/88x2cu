@@ -335,9 +335,6 @@ get_hw_value_88xx(struct halmac_adapter *adapter, enum halmac_hw_id hw_id,
 	case HALMAC_HW_RX_AGG_ALIGN_SIZE:
 		*(u8 *)value = 8;
 		break;
-	case HALMAC_HW_DRV_INFO_SIZE:
-		*(u8 *)value = adapter->drv_info_size;
-		break;
 	case HALMAC_HW_TXFF_ALLOCATION:
 		PLTFM_MEMCPY(value, &adapter->txff_alloc,
 			     sizeof(struct halmac_txff_allocation));

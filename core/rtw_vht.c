@@ -833,7 +833,7 @@ u32	rtw_build_vht_cap_ie(_adapter *padapter, u8 *pbuf)
 	* VHT Capabilities Information field : B0 to B31
 	*/
 	/* B0 B1 Maximum MPDU Length */
-	rtw_hal_get_def_var(padapter, HAL_DEF_RX_PACKET_OFFSET, &rx_packet_offset);
+	rx_packet_offset = 48 + 4;
 	rtw_hal_get_def_var(padapter, HAL_DEF_MAX_RECVBUF_SZ, &max_recvbuf_sz);
 
 	RTW_DBG("%s, Available RX buf size = %d bytes\n", __FUNCTION__, max_recvbuf_sz - rx_packet_offset);

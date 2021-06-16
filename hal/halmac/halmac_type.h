@@ -1705,7 +1705,6 @@ enum halmac_hw_id {
 	HALMAC_HW_IC_VERSION = 0x0A,
 	HALMAC_HW_TX_AGG_ALIGN_SIZE = 0x0C,
 	HALMAC_HW_RX_AGG_ALIGN_SIZE = 0x0D,
-	HALMAC_HW_DRV_INFO_SIZE = 0x0E,
 	HALMAC_HW_TXFF_ALLOCATION = 0x0F,
 	HALMAC_HW_RSVD_EFUSE_SIZE = 0x10,
 	HALMAC_HW_FW_HDR_SIZE = 0x11,
@@ -2151,7 +2150,6 @@ struct halmac_adapter {
 	struct halmac_txff_allocation txff_alloc;
 	u8 efuse_map_valid;
 	u8 efuse_seg_size;
-	u8 drv_info_size;
 	enum halmac_sdio_cmd53_4byte_mode sdio_cmd53_4byte;
 	struct halmac_sdio_hw_info sdio_hw_info;
 	u8 tx_desc_transfer;

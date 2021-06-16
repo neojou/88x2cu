@@ -60,7 +60,6 @@ u8 rtl8822c_rx_fcs_append_switch(PADAPTER, u8 enable);
 u8 rtl8822c_rx_fcs_appended(PADAPTER);
 u8 rtl8822c_rx_tsf_addr_filter_config(PADAPTER, u8 config);
 s32 rtl8822c_fw_dl(PADAPTER, u8 wowlan);
-u8 rtl8822c_get_rx_drv_info_size(struct _ADAPTER *a);
 u32 rtl8822c_get_tx_desc_size(struct _ADAPTER *a);
 u32 rtl8822c_get_rx_desc_size(struct _ADAPTER *a);
 
