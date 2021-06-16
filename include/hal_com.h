@@ -604,9 +604,6 @@ struct rtw_ndp_info {
 #ifdef CONFIG_PROC_DEBUG
 void rtw_dump_phy_cap(void *sel, _adapter *adapter);
 #endif
-#ifdef CONFIG_SUPPORT_FIFO_DUMP
-void rtw_dump_fifo(void *sel, _adapter *adapter, u8 fifo_sel, u32 fifo_addr, u32 fifo_size);
-#endif
 
 #ifdef CONFIG_FW_MULTI_PORT_SUPPORT
 s32 rtw_hal_set_default_port_id_cmd(_adapter *adapter, u8 mac_id);
