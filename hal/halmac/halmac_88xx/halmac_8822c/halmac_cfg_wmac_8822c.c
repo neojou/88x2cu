@@ -62,14 +62,6 @@ cfg_drv_info_8822c(struct halmac_adapter *adapter,
 		return HALMAC_RET_SW_CASE_NOT_SUPPORT;
 	}
 
-#if 0 //NEO
-	cfg.hdr_chk_en = info->hdr_chk_en;
-	cfg.fcs_chk_en = info->fcs_chk_en;
-	cfg.cck_rst_en = info->cck_rst_en;
-	cfg.fcs_chk_thr = info->fcs_chk_thr;
-	api->halmac_set_hw_value(adapter, HALMAC_HW_RX_IGNORE, &cfg);
-#endif 
-
 	HALMAC_REG_W8(REG_RX_DRVINFO_SZ, drv_info_size);
 
 	value32 = HALMAC_REG_R32(REG_RCR);
