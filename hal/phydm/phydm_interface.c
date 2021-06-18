@@ -36,28 +36,9 @@
 
 u8 odm_read_1byte(struct dm_struct *dm, u32 reg_addr)
 {
-#if (DM_ODM_SUPPORT_TYPE & (ODM_AP))
-	struct rtl8192cd_priv *priv = dm->priv;
-	return RTL_R8(reg_addr);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_CE) && defined(DM_ODM_CE_MAC80211)
-	struct rtl_priv *rtlpriv = (struct rtl_priv *)dm->adapter;
-
-	return rtl_read_byte(rtlpriv, reg_addr);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_CE) && defined(DM_ODM_CE_MAC80211_V2)
-	struct rtw_dev *rtwdev = dm->adapter;
-
-	return rtw_read8(rtwdev, reg_addr);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_CE)
+	/* ODM_CE only */
 	void *adapter = dm->adapter;
 	return rtw_read8(adapter, reg_addr);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_WIN)
-	void *adapter = dm->adapter;
-	return PlatformEFIORead1Byte(adapter, reg_addr);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_IOT)
-	void *adapter = dm->adapter;
-
-	return rtw_read8(adapter, reg_addr);
-#endif
 }
 
 u16 odm_read_2byte(struct dm_struct *dm, u32 reg_addr)
@@ -973,27 +954,6 @@ void phydm_get_hal_def_var_handler_interface(struct dm_struct *dm,
 }
 
 #endif
-
-void odm_set_tx_power_index_by_rate_section(struct dm_struct *dm,
-					    enum rf_path path, u8 ch,
-					    u8 section)
-{
-#if (DM_ODM_SUPPORT_TYPE & ODM_WIN)
-	void *adapter = dm->adapter;
-	PHY_SetTxPowerIndexByRateSection(adapter, path, ch, section);
-#elif (DM_ODM_SUPPORT_TYPE == ODM_CE) && defined(DM_ODM_CE_MAC80211)
-	void *adapter = dm->adapter;
-
-	phy_set_tx_power_index_by_rs(adapter, ch, path, section);
-#elif (DM_ODM_SUPPORT_TYPE == ODM_CE) && defined(DM_ODM_CE_MAC80211_V2)
-#elif (DM_ODM_SUPPORT_TYPE & ODM_CE)
-	phy_set_tx_power_index_by_rate_section(dm->adapter, path, ch, section);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_IOT)
-	void *adapter = dm->adapter;
-
-	PHY_SetTxPowerIndexByRateSection(adapter, path, ch, section);
-#endif
-}
 
 u8 odm_get_tx_power_index(struct dm_struct *dm, enum rf_path path, u8 rate,
 			  u8 bw, u8 ch)

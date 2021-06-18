@@ -246,10 +246,6 @@ void phydm_get_hal_def_var_handler_interface(struct dm_struct *dm,
 
 #endif
 
-void odm_set_tx_power_index_by_rate_section(struct dm_struct *dm,
-					    enum rf_path path, u8 channel,
-					    u8 rate_section);
-
 u8 odm_get_tx_power_index(struct dm_struct *dm, enum rf_path path, u8 tx_rate,
 			  u8 band_width, u8 channel);
 
