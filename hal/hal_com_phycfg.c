@@ -2748,46 +2748,6 @@ u8 phy_check_under_survey_ch(_adapter *adapter)
 	return ret;
 }
 
-void
-phy_set_tx_power_level_by_path(
-		PADAPTER	Adapter,
-		u8			channel,
-		u8			path
-)
-{
-	PHAL_DATA_TYPE	pHalData = GET_HAL_DATA(Adapter);
-	BOOLEAN bIsIn24G = (pHalData->current_band_type == BAND_ON_24G);
-	u8 under_survey_ch = phy_check_under_survey_ch(Adapter);
-
-
-	/* if ( pMgntInfo->RegNByteAccess == 0 ) */
-	{
-		if (bIsIn24G)
-			phy_set_tx_power_index_by_rate_section(Adapter, path, channel, CCK);
-
-		phy_set_tx_power_index_by_rate_section(Adapter, path, channel, OFDM);
-
-		if (!under_survey_ch) {
-			phy_set_tx_power_index_by_rate_section(Adapter, path, channel, HT_MCS0_MCS7);
-
-			if (IS_HARDWARE_TYPE_JAGUAR(Adapter) || IS_HARDWARE_TYPE_8814A(Adapter))
-				phy_set_tx_power_index_by_rate_section(Adapter, path, channel, VHT_1SSMCS0_1SSMCS9);
-
-			if (pHalData->tx_nss >= 2) {
-				phy_set_tx_power_index_by_rate_section(Adapter, path, channel, HT_MCS8_MCS15);
-
-				if (IS_HARDWARE_TYPE_JAGUAR(Adapter) || IS_HARDWARE_TYPE_8814A(Adapter))
-					phy_set_tx_power_index_by_rate_section(Adapter, path, channel, VHT_2SSMCS0_2SSMCS9);
-
-				if (IS_HARDWARE_TYPE_8814A(Adapter)) {
-					phy_set_tx_power_index_by_rate_section(Adapter, path, channel, HT_MCS16_MCS23);
-					phy_set_tx_power_index_by_rate_section(Adapter, path, channel, VHT_3SSMCS0_3SSMCS9);
-				}
-			}
-		}
-	}
-}
-
 #if CONFIG_TXPWR_LIMIT
 const char *const _txpwr_lmt_rs_str[] = {
 	"CCK",

@@ -319,7 +319,6 @@ _HAL_INTFS_FILES :=	hal/hal_intf.o \
 			hal/hal_dm_acs.o \
 			hal/hal_btcoex_wifionly.o \
 			hal/hal_mp.o \
-			hal/hal_mcc.o \
 			hal/hal_hci/hal_$(HCI_NAME).o \
 			hal/led/hal_led.o \
 			hal/led/hal_$(HCI_NAME)_led.o

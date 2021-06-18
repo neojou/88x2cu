@@ -105,13 +105,6 @@ s16 phy_get_txpwr_by_rate_single_max_mbm(_adapter *adapter, BAND_TYPE band, enum
 s16 phy_get_txpwr_by_rate_total_max_mbm(_adapter *adapter, BAND_TYPE band, bool cap, bool eirp);
 
 void
-phy_set_tx_power_level_by_path(
-		PADAPTER	Adapter,
-		u8			channel,
-		u8			path
-);
-
-void
 PHY_InitTxPowerByRate(
 		PADAPTER	pAdapter
 );
