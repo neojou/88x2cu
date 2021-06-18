@@ -1729,7 +1729,6 @@ enum halmac_hw_id {
 	HALMAC_HW_BANDWIDTH = 0x62,
 	HALMAC_HW_CHANNEL = 0x63,
 	HALMAC_HW_PRI_CHANNEL_IDX = 0x64,
-	HALMAC_HW_EN_BB_RF = 0x65,
 	HALMAC_HW_SDIO_TX_PAGE_THRESHOLD = 0x66,
 	HALMAC_HW_AMPDU_CONFIG = 0x67,
 	HALMAC_HW_RX_SHIFT = 0x68,
@@ -2183,8 +2182,6 @@ struct halmac_api {
 	enum halmac_ret_status
 	(*halmac_cfg_multicast_addr)(struct halmac_adapter *adapter,
 				     union halmac_wlan_addr *addr);
-	enum halmac_ret_status
-	(*halmac_pre_init_system_cfg)(struct halmac_adapter *adapter);
 	enum halmac_ret_status
 	(*halmac_init_system_cfg)(struct halmac_adapter *adapter);
 	enum halmac_ret_status

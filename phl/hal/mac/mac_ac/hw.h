@@ -914,6 +914,8 @@ u32 get_ss_wmm_tbl(struct mac_ax_adapter *adapter,
  * @}
  */
 
+#endif //NEO
+
 /**
  * @addtogroup Common
  * @{
@@ -929,11 +931,13 @@ u32 get_ss_wmm_tbl(struct mac_ax_adapter *adapter,
  * @return Please Place Description here.
  * @retval u32
  */
-u32 set_enable_bb_rf(struct mac_ax_adapter *adapter, u8 enable);
+u32 set_enable_bb_rf(struct mac_adapter *adapter, bool enable);
 /**
  * @}
  * @}
  */
+
+#if 0 //NEO
 
 /**
  * @addtogroup Common

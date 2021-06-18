@@ -150,7 +150,6 @@ int rtw_halmac_txfifo_wait_empty(struct dvobj_priv *d, u32 timeout);
 int rtw_halmac_dlfw(struct dvobj_priv *, u8 *fw, u32 fwsize);
 int rtw_halmac_dlfw_mem(struct dvobj_priv *d, u8 *fw, u32 fwsize, enum fw_mem mem);
 int rtw_halmac_dlfw_mem_from_file(struct dvobj_priv *d, u8 *fwpath, enum fw_mem mem);
-int rtw_halmac_phy_power_switch(struct dvobj_priv *, u8 enable);
 int rtw_halmac_send_h2c(struct dvobj_priv *, u8 *h2c);
 int rtw_halmac_c2h_handle(struct dvobj_priv *, u8 *c2h, u32 size);
 

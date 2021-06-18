@@ -2366,7 +2366,6 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 			halmac->halmac_state.dlfw_state = HALMAC_GEN_INFO_SENT;
 	}
 
-	/* halmac_set_hw_value(HALMAC_HW_EN_BB_RF) */
 	/* Init BB, RF */
 	ok = rtw_hal_init_phy(adapter);
 	if (_FALSE == ok) {
@@ -2698,40 +2697,6 @@ int rtw_halmac_dlfw(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 
 out:
 	return err_ret;
-}
-
-/*
- * Description:
- *	Power on/off BB/RF domain.
- *
- * Parameters:
- *	enable	_TRUE/_FALSE for power on/off
- *
- * Return:
- *	0	Success
- *	others	Fail
- */
-int rtw_halmac_phy_power_switch(struct dvobj_priv *d, u8 enable)
-{
-	PADAPTER adapter;
-	struct halmac_adapter *halmac;
-	struct halmac_api *api;
-	enum halmac_ret_status status;
-	u8 on;
-
-
-	adapter = dvobj_get_primary_adapter(d);
-	halmac = dvobj_to_halmac(d);
-	if (!halmac)
-		return -1;
-	api = HALMAC_GET_API(halmac);
-	on = (enable == _TRUE) ? 1 : 0;
-
-	status = api->halmac_set_hw_value(halmac, HALMAC_HW_EN_BB_RF, &on);
-	if (status != HALMAC_RET_SUCCESS)
-		return -1;
-
-	return 0;
 }
 
 static u8 _is_fw_read_cmd_down(PADAPTER adapter, u8 msgbox_num)

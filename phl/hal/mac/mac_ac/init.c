@@ -16,7 +16,7 @@
 #include <linux/bitfield.h>
 #include "init.h"
 //#include "security_cam.h"
-//#include "hw.h"
+#include "hw.h"
 
 
 #define RSVD_PG_DRV_NUM			16
@@ -1144,6 +1144,7 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 	struct mac_ops *mac_ops = adapter_to_mac_ops(adapter);
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 	struct mac_hw_info *hw_info = adapter->hw_info;
+	bool is_phy;
 	u32 ret;
 	u32 rom_addr;
 
@@ -1211,19 +1212,20 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 		return ret;
 	}
 
-	ret = mac_cfg_drv_info(adapter, true);
+	is_phy = true;
+	ret = mac_cfg_drv_info(adapter, is_phy);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR] cfg drv info failed: %d\n", ret);
 		return ret;
 	}
 
-#if 0 //NEO
-	ret = set_enable_bb_rf(adapter, MAC_AX_FUNC_EN);
+	ret = set_enable_bb_rf(adapter, true);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]set_enable_bb_rf %d\n", ret);
 		return ret;
 	}
 
+#if 0 //NEO
 	ret = ops->sys_init(adapter);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]sys_init %d\n", ret);

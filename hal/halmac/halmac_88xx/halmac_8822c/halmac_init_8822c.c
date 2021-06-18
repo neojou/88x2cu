@@ -374,7 +374,6 @@ mount_api_8822c(struct halmac_adapter *adapter)
 	api->halmac_cfg_drv_info = cfg_drv_info_8822c;
 	api->halmac_fill_txdesc_checksum = fill_txdesc_check_sum_8822c;
 	api->halmac_init_low_pwr = init_low_pwr_8822c;
-	api->halmac_pre_init_system_cfg = pre_init_system_cfg_8822c;
 
 	if (adapter->intf == HALMAC_INTERFACE_SDIO) {
 #if HALMAC_SDIO_SUPPORT
@@ -535,71 +534,6 @@ init_system_cfg_8822c(struct halmac_adapter *adapter)
 		HALMAC_REG_W32(REG_MCUFW_CTRL, tmp & (~BIT_BOOT_FSPI_EN));
 		value32 = HALMAC_REG_R32(REG_GPIO_MUXCFG) & (~BIT_FSPI_EN);
 		HALMAC_REG_W32(REG_GPIO_MUXCFG, value32);
-	}
-
-	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
-
-	return HALMAC_RET_SUCCESS;
-}
-
-
-/**
- * pre_init_system_cfg_8822c() - pre-init system config
- * @adapter : the adapter of halmac
- * Author : KaiYuan Chang/Ivan Lin
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-pre_init_system_cfg_8822c(struct halmac_adapter *adapter)
-{
-	u32 value32;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-	u8 enable_bb;
-
-	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
-
-	HALMAC_REG_W8(REG_RSV_CTRL, 0);
-
-	if (adapter->intf == HALMAC_INTERFACE_SDIO) {
-#if HALMAC_SDIO_SUPPORT
-		if (leave_sdio_suspend_88xx(adapter) != HALMAC_RET_SUCCESS)
-			return HALMAC_RET_SDIO_LEAVE_SUSPEND_FAIL;
-#endif
-	} else if (adapter->intf == HALMAC_INTERFACE_USB) {
-#if HALMAC_USB_SUPPORT
-		if (HALMAC_REG_R8(REG_SYS_CFG2 + 3) == 0x20)
-			HALMAC_REG_W8(0xFE5B, HALMAC_REG_R8(0xFE5B) | BIT(4));
-#endif
-	} else if (adapter->intf == HALMAC_INTERFACE_PCIE) {
-#if HALMAC_PCIE_SUPPORT
-		/* For PCIE power on fail issue */
-		HALMAC_REG_W8(REG_HCI_OPT_CTRL + 1,
-			      HALMAC_REG_R8(REG_HCI_OPT_CTRL + 1) | BIT(0));
-#endif
-	}
-
-	/* Config PIN Mux */
-	value32 = HALMAC_REG_R32(REG_PAD_CTRL1);
-	value32 = value32 & (~(BIT(28) | BIT(29)));
-	value32 = value32 | BIT(28) | BIT(29);
-	HALMAC_REG_W32(REG_PAD_CTRL1, value32);
-
-	value32 = HALMAC_REG_R32(REG_LED_CFG);
-	value32 = value32 & (~(BIT(25) | BIT(26)));
-	HALMAC_REG_W32(REG_LED_CFG, value32);
-
-	value32 = HALMAC_REG_R32(REG_GPIO_MUXCFG);
-	value32 = value32 & (~(BIT(2)));
-	value32 = value32 | BIT(2);
-	HALMAC_REG_W32(REG_GPIO_MUXCFG, value32);
-
-	enable_bb = 0;
-	set_hw_value_88xx(adapter, HALMAC_HW_EN_BB_RF, &enable_bb);
-
-	if (HALMAC_REG_R8(REG_SYS_CFG1 + 2) & BIT(4)) {
-		PLTFM_MSG_ERR("[ERR]test mode!!\n");
-		return HALMAC_RET_WLAN_MODE_FAIL;
 	}
 
 	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);

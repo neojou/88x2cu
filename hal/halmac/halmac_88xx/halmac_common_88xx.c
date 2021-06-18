@@ -440,21 +440,6 @@ set_hw_value_88xx(struct halmac_adapter *adapter, enum halmac_hw_id hw_id,
 	case HALMAC_HW_PRI_CHANNEL_IDX:
 		cfg_pri_ch_idx_88xx(adapter, *(enum halmac_pri_ch_idx *)value);
 		break;
-	case HALMAC_HW_EN_BB_RF:
-		status = enable_bb_rf_88xx(adapter, *(u8 *)value);
-		if (status != HALMAC_RET_SUCCESS)
-			return status;
-		break;
-#if HALMAC_SDIO_SUPPORT
-	case HALMAC_HW_SDIO_TX_PAGE_THRESHOLD:
-		if (adapter->intf == HALMAC_INTERFACE_SDIO) {
-			th_info = (struct halmac_tx_page_threshold_info *)value;
-			cfg_sdio_tx_page_threshold_88xx(adapter, th_info);
-		} else {
-			return HALMAC_RET_FAIL;
-		}
-		break;
-#endif
 	case HALMAC_HW_RX_SHIFT:
 		rx_shift_88xx(adapter, *(u8 *)value);
 		break;

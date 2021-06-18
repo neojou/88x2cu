@@ -15,7 +15,7 @@
 #define _RTL8822C_PHY_C_
 
 #include <hal_data.h>		/* HAL_DATA_TYPE */
-#include "../hal_halmac.h"	/* rtw_halmac_phy_power_switch() */
+#include "../hal_halmac.h"
 #include "rtl8822c.h"
 
 
@@ -266,10 +266,6 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 	phydm = adapter_to_phydm(adapter);
 
 	bb_rf_register_definition(adapter);
-
-	err = rtw_halmac_phy_power_switch(d, _TRUE);
-	if (err)
-		return _FALSE;
 
 	ret = config_phydm_parameter_init_8822c(phydm, ODM_PRE_SETTING);
 	if (FALSE == ret)

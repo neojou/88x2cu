@@ -147,154 +147,45 @@ u32 get_block_tx(struct mac_ax_adapter *adapter,
 	return MACSUCCESS;
 }
 
-u32 set_enable_bb_rf(struct mac_ax_adapter *adapter, u8 enable)
+#endif //NEO
+
+u32 set_enable_bb_rf(struct mac_adapter *adapter, bool enable)
 {
-	struct mac_ax_intf_ops *ops = adapter_to_intf_ops(adapter);
-	u32 value32;
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 	u8 value8;
+	u32 value32;
 	u32 ret;
-	u8 wl_rfc_s0, wl_rfc_s1;
 
-	if (enable == 1) {
-		value8 = MAC_REG_R8(R_AX_SYS_FUNC_EN);
-		value8 |= B_AX_FEN_BBRSTB | B_AX_FEN_BB_GLB_RSTN;
-		MAC_REG_W8(R_AX_SYS_FUNC_EN, value8);
+	if (enable) {
+		value8 = MAC_REG_R8(REG_SYS_FUNC_EN);
+		value8 |= BIT(0) | BIT(1);
+		MAC_REG_W8(REG_SYS_FUNC_EN, value8);
 
-		if (is_chip_id(adapter, MAC_AX_CHIP_ID_8852A)) {
-			value32 = MAC_REG_R32(R_AX_WLRF_CTRL);
-			value32 |= B_AX_WLRF1_CTRL_7 | B_AX_WLRF1_CTRL_1 |
-				   B_AX_WLRF_CTRL_7 | B_AX_WLRF_CTRL_1;
-			MAC_REG_W32(R_AX_WLRF_CTRL, value32);
+		value8 = MAC_REG_R8(REG_RF_CTRL);
+		value8 |= BIT(0) | BIT(1) | BIT(2);
+		MAC_REG_W8(REG_RF_CTRL, value8);
 
-			value8 = PHYREG_SET_ALL_CYCLE;
-			MAC_REG_W8(R_AX_PHYREG_SET, value8);
-		} else if (is_chip_id(adapter, MAC_AX_CHIP_ID_8852B)) {
-			/* RDC KS/BB suggest : write 1 then write 0 then write 1 */
-			value32 = MAC_REG_R32(R_AX_WLRF_CTRL);
-			value32 = (value32 | B_AX_AFC_AFEDIG);
-			MAC_REG_W32(R_AX_WLRF_CTRL, value32);
-			value32 = MAC_REG_R32(R_AX_WLRF_CTRL);
-			value32 = (value32 & ~B_AX_AFC_AFEDIG);
-			MAC_REG_W32(R_AX_WLRF_CTRL, value32);
-			value32 = MAC_REG_R32(R_AX_WLRF_CTRL);
-			value32 = (value32 | B_AX_AFC_AFEDIG);
-			MAC_REG_W32(R_AX_WLRF_CTRL, value32);
-
-			ret = mac_read_xtal_si(adapter, XTAL_SI_WL_RFC_S0, &wl_rfc_s0);
-			if (ret) {
-				PLTFM_MSG_ERR("Read XTAL_SI fail!\n");
-				return ret;
-			}
-			wl_rfc_s0 = (wl_rfc_s0 | 0x07);
-			ret = mac_write_xtal_si(adapter, XTAL_SI_WL_RFC_S0, wl_rfc_s0,
-						FULL_BIT_MASK);
-			if (ret) {
-				PLTFM_MSG_ERR("Write XTAL_SI fail!\n");
-				return ret;
-			}
-
-			ret = mac_read_xtal_si(adapter, XTAL_SI_WL_RFC_S1, &wl_rfc_s1);
-			if (ret) {
-				PLTFM_MSG_ERR("Read XTAL_SI fail!\n");
-				return ret;
-			}
-			wl_rfc_s1 = (wl_rfc_s1 | 0x07);
-			ret = mac_write_xtal_si(adapter, XTAL_SI_WL_RFC_S1, wl_rfc_s1,
-						FULL_BIT_MASK);
-			if (ret) {
-				PLTFM_MSG_ERR("Write XTAL_SI fail!\n");
-				return ret;
-			}
-
-			value8 = PHYREG_SET_XYN_CYCLE;
-			MAC_REG_W8(R_AX_PHYREG_SET, value8);
-		} else if (is_chip_id(adapter, MAC_AX_CHIP_ID_8852C)) {
-			/* RDC KS/BB suggest : write 1 then write 0 then write 1 */
-			value32 = MAC_REG_R32(R_AX_WLRF_CTRL);
-			value32 = (value32 | B_AX_AFC_AFEDIG);
-			MAC_REG_W32(R_AX_WLRF_CTRL, value32);
-			value32 = MAC_REG_R32(R_AX_WLRF_CTRL);
-			value32 = (value32 & ~B_AX_AFC_AFEDIG);
-			MAC_REG_W32(R_AX_WLRF_CTRL, value32);
-			value32 = MAC_REG_R32(R_AX_WLRF_CTRL);
-			value32 = (value32 | B_AX_AFC_AFEDIG);
-			MAC_REG_W32(R_AX_WLRF_CTRL, value32);
-
-			ret = mac_read_xtal_si(adapter, XTAL_SI_WL_RFC_S0, &wl_rfc_s0);
-			if (ret) {
-				PLTFM_MSG_ERR("Read XTAL_SI fail!\n");
-				return ret;
-			}
-			wl_rfc_s0 = (wl_rfc_s0 | 0x07);
-			ret = mac_write_xtal_si(adapter, XTAL_SI_WL_RFC_S0, wl_rfc_s0,
-						FULL_BIT_MASK);
-			if (ret) {
-				PLTFM_MSG_ERR("Write XTAL_SI fail!\n");
-				return ret;
-			}
-
-			ret = mac_read_xtal_si(adapter, XTAL_SI_WL_RFC_S1, &wl_rfc_s1);
-			if (ret) {
-				PLTFM_MSG_ERR("Read XTAL_SI fail!\n");
-				return ret;
-			}
-			wl_rfc_s1 = (wl_rfc_s1 | 0x07);
-			ret = mac_write_xtal_si(adapter, XTAL_SI_WL_RFC_S1, wl_rfc_s1,
-						FULL_BIT_MASK);
-			if (ret) {
-				PLTFM_MSG_ERR("Write XTAL_SI fail!\n");
-				return ret;
-			}
-		} else {
-			return MACCHIPID;
-		}
-		adapter->sm.bb0_func = MAC_AX_FUNC_ON;
+		value32 = MAC_REG_R32(REG_WLRF1);
+		value32 |= BIT(24) | BIT(25) | BIT(26);
+		MAC_REG_W32(REG_WLRF1, value32);
 	} else {
-		adapter->sm.bb0_func = MAC_AX_FUNC_OFF;
-		value8 = MAC_REG_R8(R_AX_SYS_FUNC_EN);
-		value8 &= (~(B_AX_FEN_BBRSTB | B_AX_FEN_BB_GLB_RSTN));
-		MAC_REG_W8(R_AX_SYS_FUNC_EN, value8);
+		value8 = MAC_REG_R8(REG_SYS_FUNC_EN);
+		value8 &= ~(BIT(0) | BIT(1));
+		MAC_REG_W8(REG_SYS_FUNC_EN, value8);
 
-		if (is_chip_id(adapter, MAC_AX_CHIP_ID_8852A)) {
-			value32 = MAC_REG_R32(R_AX_WLRF_CTRL);
-			value32 &= (~(B_AX_WLRF1_CTRL_7 | B_AX_WLRF1_CTRL_1 |
-				      B_AX_WLRF_CTRL_7 | B_AX_WLRF_CTRL_1));
-			MAC_REG_W32(R_AX_WLRF_CTRL, value32);
-		} else if (is_chip_id(adapter, MAC_AX_CHIP_ID_8852B)) {
-			ret = mac_read_xtal_si(adapter, XTAL_SI_WL_RFC_S0, &wl_rfc_s0);
-			if (ret) {
-				PLTFM_MSG_ERR("Read XTAL_SI fail!\n");
-				return ret;
-			}
-			wl_rfc_s0 = (wl_rfc_s0 & 0xF8);
-			ret = mac_write_xtal_si(adapter, XTAL_SI_WL_RFC_S0, wl_rfc_s0,
-						FULL_BIT_MASK);
-			if (ret) {
-				PLTFM_MSG_ERR("Write XTAL_SI fail!\n");
-				return ret;
-			}
+		value8 = MAC_REG_R8(REG_RF_CTRL);
+		value8 &= ~(BIT(0) | BIT(1) | BIT(2));
+		MAC_REG_W8(REG_RF_CTRL, value8);
 
-			ret = mac_read_xtal_si(adapter, XTAL_SI_WL_RFC_S1, &wl_rfc_s1);
-			if (ret) {
-				PLTFM_MSG_ERR("Read XTAL_SI fail!\n");
-				return ret;
-			}
-			wl_rfc_s1 = (wl_rfc_s1 & 0xF8);
-			ret = mac_write_xtal_si(adapter, XTAL_SI_WL_RFC_S1, wl_rfc_s1,
-						FULL_BIT_MASK);
-			if (ret) {
-				PLTFM_MSG_ERR("Write XTAL_SI fail!\n");
-				return ret;
-			}
-		} else if (is_chip_id(adapter, MAC_AX_CHIP_ID_8852C)) {
-			return MACCHIPID;
-		} else {
-			return MACCHIPID;
-		}
-	}
+		value32 = MAC_REG_R32(REG_WLRF1);
+		value32 &= ~(BIT(24) | BIT(25) | BIT(26));
+		MAC_REG_W32(REG_WLRF1, value32);
+	}	
 
 	return MACSUCCESS;
 }
+
+#if 0 //NEO
 
 static u32 set_append_fcs(struct mac_ax_adapter *adapter, u8 enable)
 {
