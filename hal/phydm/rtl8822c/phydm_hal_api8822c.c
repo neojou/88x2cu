@@ -1550,31 +1550,6 @@ void phydm_spur_eliminate_8822c(struct dm_struct *dm, u8 central_ch)
 }
 
 __odm_func__
-void phydm_set_dis_dpd_by_rate_8822c(struct dm_struct *dm, u16 bitmask)
-{
-	u32 value32;
-
-	/* bit(0) : ofdm 6m*/
-	/* bit(1) : ofdm 9m*/
-	/* bit(2) : ht mcs0*/
-	/* bit(3) : ht mcs1*/
-	/* bit(4) : ht mcs8*/
-	/* bit(5) : ht mcs9*/
-	/* bit(6) : vht 1ss mcs0*/
-	/* bit(7) : vht 1ss mcs1*/
-	/* bit(8) : vht 2ss mcs0*/
-	/* bit(9) : vht 2ss mcs1*/
-
-	//odm_set_bb_reg(dm, R_0xa70, 0x3ff, bitmask);
-	value32 = rtw_read32(dm->adapter, R_0xa70);
-	value32 &= ~(0x3ff);
-	value32 |= bitmask & 0x3ff;
-	rtw_write32(dm->adapter, R_0xa70, value32);
-
-	dm->dis_dpd_rate = bitmask;
-}
-
-__odm_func__
 boolean
 config_phydm_switch_channel_8822c(struct dm_struct *dm, u8 central_ch)
 {
@@ -1713,16 +1688,6 @@ config_phydm_switch_channel_8822c(struct dm_struct *dm, u8 central_ch)
 				phydm_rfe_8822c(dm, BB_PATH_AB);
 		}
 	}
-
-	if (iot_table->patch_id_011f0500) {
-		if (central_ch != 1 && dm->en_dis_dpd)
-			phydm_set_dis_dpd_by_rate_8822c(dm, 0x3ff);
-		else
-			phydm_set_dis_dpd_by_rate_8822c(dm, 0x0);
-	}
-	/*====================================================================*/
-	if (*dm->mp_mode)
-		phydm_spur_eliminate_8822c(dm, central_ch);
 
 	phydm_bb_reset_8822c(dm);
 
@@ -2134,12 +2099,17 @@ boolean
 config_phydm_parameter_init_8822c(struct dm_struct *dm,
 				  enum odm_parameter_init type)
 {
+	u32 value32;
+
 	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
 
 	phydm_cck_gi_bound_8822c(dm);
 
 	/* Disable low rate DPD*/
-	phydm_set_dis_dpd_by_rate_8822c(dm, 0x0);
+	value32 = rtw_read32(dm->adapter, R_0xa70);
+	value32 &= ~(0x3ff);
+	rtw_write32(dm->adapter, R_0xa70, value32);
+	dm->dis_dpd_rate = 0;
 
 	/* @Do not use PHYDM API to read/write because FW can not access */
 	/* @Turn on 3-wire*/
