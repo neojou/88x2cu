@@ -3908,12 +3908,6 @@ void phy_load_tx_power_ext_info(_adapter *adapter, u8 chk_file)
 #endif
 }
 
-inline void phy_reload_tx_power_ext_info(_adapter *adapter)
-{
-	phy_load_tx_power_ext_info(adapter, 1);
-	op_class_pref_apply_regulatory(adapter, REG_TXPWR_CHANGE);
-}
-
 inline void phy_reload_default_tx_power_ext_info(_adapter *adapter)
 {
 	phy_load_tx_power_ext_info(adapter, 0);
