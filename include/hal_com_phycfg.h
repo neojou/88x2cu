@@ -261,7 +261,6 @@ int phy_load_tx_power_by_rate(_adapter *adapter, u8 chk_file);
 int phy_load_tx_power_limit(_adapter *adapter, u8 chk_file);
 #endif
 void phy_load_tx_power_ext_info(_adapter *adapter, u8 chk_file);
-void phy_reload_default_tx_power_ext_info(_adapter *adapter);
 
 const struct map_t *hal_pg_txpwr_def_info(_adapter *adapter);
 
@@ -274,12 +273,6 @@ void dump_hal_txpwr_info_2g(void *sel, _adapter *adapter, u8 rfpath_num, u8 max_
 void dump_hal_txpwr_info_5g(void *sel, _adapter *adapter, u8 rfpath_num, u8 max_tx_cnt);
 
 void hal_load_txpwr_info(_adapter *adapter);
-#endif
-
-#ifdef CONFIG_PROC_DEBUG
-void dump_tx_power_ext_info(void *sel, _adapter *adapter);
-void dump_target_tx_power(void *sel, _adapter *adapter);
-void dump_tx_power_by_rate(void *sel, _adapter *adapter);
 #endif
 
 int rtw_get_phy_file_path(_adapter *adapter, const char *file_name);

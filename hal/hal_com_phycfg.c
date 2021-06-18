@@ -2628,8 +2628,6 @@ exit:
 s8 phy_get_txpwr_by_rate(_adapter *adapter
 	, BAND_TYPE band, enum rf_path rfpath, RATE_SECTION rs, enum MGN_RATE rate)
 {
-	if (phy_is_tx_power_by_rate_needed(adapter))
-		return _phy_get_txpwr_by_rate(adapter, band, rfpath, rate);
 	return phy_get_target_txpwr(adapter, band, rfpath, rs);
 }
 
@@ -3830,18 +3828,6 @@ bool phy_is_tx_power_limit_needed(_adapter *adapter)
 	return _FALSE;
 }
 
-bool phy_is_tx_power_by_rate_needed(_adapter *adapter)
-{
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
-	struct registry_priv *regsty = dvobj_to_regsty(adapter_to_dvobj(adapter));
-
-	if (regsty->RegEnableTxPowerByRate == 1
-		|| (regsty->RegEnableTxPowerByRate == 2 && hal_data->EEPROMRegulatory != 2))
-		return _TRUE;
-
-	return _FALSE;
-}
-
 int phy_load_tx_power_by_rate(_adapter *adapter, u8 chk_file)
 {
 	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
@@ -3894,165 +3880,8 @@ void phy_load_tx_power_ext_info(_adapter *adapter, u8 chk_file)
 
 	/* check registy target tx power */
 	regsty->target_tx_pwr_valid = rtw_regsty_chk_target_tx_power_valid(adapter);
-
-	/* power by rate */
-	if (phy_is_tx_power_by_rate_needed(adapter)
-		|| regsty->target_tx_pwr_valid != _TRUE /* need target tx power from by rate table */
-	)
-		phy_load_tx_power_by_rate(adapter, chk_file);
-
-	/* power limit */
-#if CONFIG_TXPWR_LIMIT
-	if (phy_is_tx_power_limit_needed(adapter))
-		phy_load_tx_power_limit(adapter, chk_file);
-#endif
 }
 
-inline void phy_reload_default_tx_power_ext_info(_adapter *adapter)
-{
-	phy_load_tx_power_ext_info(adapter, 0);
-	op_class_pref_apply_regulatory(adapter, REG_TXPWR_CHANGE);
-}
-
-#ifdef CONFIG_PROC_DEBUG
-void dump_tx_power_ext_info(void *sel, _adapter *adapter)
-{
-	struct registry_priv *regsty = adapter_to_regsty(adapter);
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
-
-	RTW_PRINT_SEL(sel, "txpwr_pg_mode: %s\n", txpwr_pg_mode_str(hal_data->txpwr_pg_mode));
-
-	if (regsty->target_tx_pwr_valid == _TRUE)
-		RTW_PRINT_SEL(sel, "target_tx_power: from registry\n");
-	else if (hal_data->txpwr_by_rate_loaded)
-		RTW_PRINT_SEL(sel, "target_tx_power: from power by rate\n");
-	else
-		RTW_PRINT_SEL(sel, "target_tx_power: unavailable\n");
-
-	RTW_PRINT_SEL(sel, "tx_power_by_rate: %s, %s, %s\n"
-		, phy_is_tx_power_by_rate_needed(adapter) ? "enabled" : "disabled"
-		, hal_data->txpwr_by_rate_loaded ? "loaded" : "unloaded"
-		, hal_data->txpwr_by_rate_from_file ? "file" : "default"
-	);
-
-	RTW_PRINT_SEL(sel, "tx_power_limit: %s, %s, %s\n"
-		, phy_is_tx_power_limit_needed(adapter) ? "enabled" : "disabled"
-		, hal_data->txpwr_limit_loaded ? "loaded" : "unloaded"
-		, hal_data->txpwr_limit_from_file ? "file" : "default"
-	);
-}
-
-void dump_target_tx_power(void *sel, _adapter *adapter)
-{
-	struct hal_spec_t *hal_spec = GET_HAL_SPEC(adapter);
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
-	struct registry_priv *regsty = adapter_to_regsty(adapter);
-	int path, tx_num, band, rs;
-	u8 target;
-
-	for (band = BAND_ON_24G; band <= BAND_ON_5G; band++) {
-		if (!hal_is_band_support(adapter, band))
-			continue;
-
-		for (path = 0; path < RF_PATH_MAX; path++) {
-			if (!HAL_SPEC_CHK_RF_PATH(hal_spec, band, path))
-				break;
-
-			RTW_PRINT_SEL(sel, "[%s][%c]%s\n", band_str(band), rf_path_char(path)
-				, (regsty->target_tx_pwr_valid == _FALSE && hal_data->txpwr_by_rate_undefined_band_path[band][path]) ? "(dup)" : "");
-
-			for (rs = 0; rs < RATE_SECTION_NUM; rs++) {
-				tx_num = rate_section_to_tx_num(rs);
-				if (tx_num + 1 > hal_data->tx_nss)
-					continue;
-
-				if (band == BAND_ON_5G && IS_CCK_RATE_SECTION(rs))
-					continue;
-
-				if (IS_VHT_RATE_SECTION(rs) && !IS_HARDWARE_TYPE_JAGUAR_ALL(adapter))
-					continue;
-
-				target = phy_get_target_txpwr(adapter, band, path, rs);
-
-				if (target % hal_spec->txgi_pdbm) {
-					_RTW_PRINT_SEL(sel, "%7s: %2d.%d\n", rate_section_str(rs)
-						, target / hal_spec->txgi_pdbm, (target % hal_spec->txgi_pdbm) * 100 / hal_spec->txgi_pdbm);
-				} else {
-					_RTW_PRINT_SEL(sel, "%7s: %5d\n", rate_section_str(rs)
-						, target / hal_spec->txgi_pdbm);
-				}
-			}
-		}
-	}
-
-	return;
-}
-
-void dump_tx_power_by_rate(void *sel, _adapter *adapter)
-{
-	struct hal_spec_t *hal_spec = GET_HAL_SPEC(adapter);
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
-	int path, tx_num, band, n, rs;
-	u8 rate_num, max_rate_num, base;
-	s8 by_rate;
-
-	for (band = BAND_ON_24G; band <= BAND_ON_5G; band++) {
-		if (!hal_is_band_support(adapter, band))
-			continue;
-
-		for (path = 0; path < RF_PATH_MAX; path++) {
-			if (!HAL_SPEC_CHK_RF_PATH(hal_spec, band, path))
-				break;
-
-			RTW_PRINT_SEL(sel, "[%s][%c]%s\n", band_str(band), rf_path_char(path)
-				, hal_data->txpwr_by_rate_undefined_band_path[band][path] ? "(dup)" : "");
-
-			for (rs = 0; rs < RATE_SECTION_NUM; rs++) {
-				tx_num = rate_section_to_tx_num(rs);
-				if (tx_num + 1 > hal_data->tx_nss)
-					continue;
-
-				if (band == BAND_ON_5G && IS_CCK_RATE_SECTION(rs))
-					continue;
-
-				if (IS_VHT_RATE_SECTION(rs) && !IS_HARDWARE_TYPE_JAGUAR_ALL(adapter))
-					continue;
-
-				if (IS_HARDWARE_TYPE_JAGUAR_ALL(adapter))
-					max_rate_num = 10;
-				else
-					max_rate_num = 8;
-				rate_num = rate_section_rate_num(rs);
-
-				RTW_PRINT_SEL(sel, "%7s: ", rate_section_str(rs));
-
-				/* dump power by rate in db */
-				for (n = rate_num - 1; n >= 0; n--) {
-					by_rate = phy_get_txpwr_by_rate(adapter, band, path, rs, rates_by_sections[rs].rates[n]);
-					if (by_rate % hal_spec->txgi_pdbm) {
-						_RTW_PRINT_SEL(sel, "%2d.%d ", by_rate / hal_spec->txgi_pdbm
-							, (by_rate % hal_spec->txgi_pdbm) * 100 / hal_spec->txgi_pdbm);
-					} else
-						_RTW_PRINT_SEL(sel, "%5d ", by_rate / hal_spec->txgi_pdbm);
-				}
-				for (n = 0; n < max_rate_num - rate_num; n++)
-					_RTW_PRINT_SEL(sel, "%5s ", "");
-
-				_RTW_PRINT_SEL(sel, "|");
-
-				/* dump power by rate in offset */
-				for (n = rate_num - 1; n >= 0; n--) {
-					by_rate = phy_get_txpwr_by_rate(adapter, band, path, rs, rates_by_sections[rs].rates[n]);
-					base = phy_get_target_txpwr(adapter, band, path, rs);
-					_RTW_PRINT_SEL(sel, "%3d ", by_rate - base);
-				}
-				RTW_PRINT_SEL(sel, "\n");
-
-			}
-		}
-	}
-}
-#endif
 /*
  * phy file path is stored in global char array rtw_phy_para_file_path
  * need to care about racing

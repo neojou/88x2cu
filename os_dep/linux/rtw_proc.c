@@ -2847,11 +2847,6 @@ static ssize_t proc_set_antenna_gain(struct file *file, const char __user *buffe
 
 static int proc_get_tx_power_ext_info(struct seq_file *m, void *v)
 {
-	struct net_device *dev = m->private;
-	_adapter *adapter = (_adapter *)rtw_netdev_priv(dev);
-
-	dump_tx_power_ext_info(m, adapter);
-
 	return 0;
 }
 
