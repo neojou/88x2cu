@@ -1552,6 +1552,8 @@ void phydm_spur_eliminate_8822c(struct dm_struct *dm, u8 central_ch)
 __odm_func__
 void phydm_set_dis_dpd_by_rate_8822c(struct dm_struct *dm, u16 bitmask)
 {
+	u32 value32;
+
 	/* bit(0) : ofdm 6m*/
 	/* bit(1) : ofdm 9m*/
 	/* bit(2) : ht mcs0*/
@@ -1563,7 +1565,12 @@ void phydm_set_dis_dpd_by_rate_8822c(struct dm_struct *dm, u16 bitmask)
 	/* bit(8) : vht 2ss mcs0*/
 	/* bit(9) : vht 2ss mcs1*/
 
-	odm_set_bb_reg(dm, R_0xa70, 0x3ff, bitmask);
+	//odm_set_bb_reg(dm, R_0xa70, 0x3ff, bitmask);
+	value32 = rtw_read32(dm->adapter, R_0xa70);
+	value32 &= ~(0x3ff);
+	value32 |= bitmask & 0x3ff;
+	rtw_write32(dm->adapter, R_0xa70, value32);
+
 	dm->dis_dpd_rate = bitmask;
 }
 
@@ -2131,14 +2138,8 @@ config_phydm_parameter_init_8822c(struct dm_struct *dm,
 
 	phydm_cck_gi_bound_8822c(dm);
 
-	if (*dm->mp_mode)
-		phydm_ch_smooth_setting_8822c(dm, true);
-
 	/* Disable low rate DPD*/
-	if (dm->en_dis_dpd)
-		phydm_set_dis_dpd_by_rate_8822c(dm, 0x3ff);
-	else
-		phydm_set_dis_dpd_by_rate_8822c(dm, 0x0);
+	phydm_set_dis_dpd_by_rate_8822c(dm, 0x0);
 
 	/* @Do not use PHYDM API to read/write because FW can not access */
 	/* @Turn on 3-wire*/
@@ -2161,10 +2162,6 @@ config_phydm_parameter_init_8822c(struct dm_struct *dm,
 	}
 
 	phydm_bb_reset_8822c(dm);
-	#ifdef CONFIG_TXAGC_DEBUG_8822C
-	/*phydm_txagc_tab_buff_init_8822c(dm);*/
-	#endif
-
 	return true;
 }
 
