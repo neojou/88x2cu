@@ -28,9 +28,6 @@ enum mac_clock_hw_def {
 	MAC_CLK_HW_DEF_20M = 2,
 };
 
-static enum halmac_ret_status
-board_rf_fine_tune_88xx(struct halmac_adapter *adapter);
-
 /**
  * cfg_mac_addr_88xx() - config mac address
  * @adapter : the adapter of halmac
@@ -627,7 +624,6 @@ enable_bb_rf_88xx(struct halmac_adapter *adapter, u8 enable)
 	enum halmac_ret_status status = HALMAC_RET_SUCCESS;
 
 	if (enable == 1) {
-		status = board_rf_fine_tune_88xx(adapter);
 		value8 = HALMAC_REG_R8(REG_SYS_FUNC_EN);
 		value8 = value8 | BIT(0) | BIT(1);
 		HALMAC_REG_W8(REG_SYS_FUNC_EN, value8);
@@ -654,16 +650,6 @@ enable_bb_rf_88xx(struct halmac_adapter *adapter, u8 enable)
 	}
 
 	return status;
-}
-
-static enum halmac_ret_status
-board_rf_fine_tune_88xx(struct halmac_adapter *adapter)
-{
-	u8 *map = NULL;
-	u32 size = adapter->hw_cfg_info.eeprom_size;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-
-	return HALMAC_RET_SUCCESS;
 }
 
 void
