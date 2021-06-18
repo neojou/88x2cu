@@ -2122,17 +2122,6 @@ u16 phydm_get_dis_dpd_by_rate_8822c(struct dm_struct *dm)
 	return dis_dpd_rate;
 }
 
-void phydm_cck_pd_init_8822c(struct dm_struct *dm)
-{
-#if (defined(CONFIG_RUN_IN_DRV))
-	struct phydm_iot_center	*iot_table = &dm->iot_table;
-
-	if (*dm->mp_mode && iot_table->patch_id_021f0800)
-		/*CS ratio:BW20/1R*/
-		odm_set_bb_reg(dm, R_0x1ad0, 0x1f, 0x12);
-#endif
-}
-
 __odm_func__
 boolean
 config_phydm_parameter_init_8822c(struct dm_struct *dm,
@@ -2141,7 +2130,6 @@ config_phydm_parameter_init_8822c(struct dm_struct *dm,
 	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
 
 	phydm_cck_gi_bound_8822c(dm);
-	phydm_cck_pd_init_8822c(dm);
 
 	if (*dm->mp_mode)
 		phydm_ch_smooth_setting_8822c(dm, true);

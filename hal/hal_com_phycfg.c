@@ -2225,6 +2225,7 @@ phy_set_tx_power_index_by_rate_section(
 
 	for (i = 0; i < rates_by_sections[rs].rate_num; ++i) {
 #if DBG_TX_POWER_IDX
+aa
 		struct txpwr_idx_comp tic;
 
 		powerIndex = rtw_hal_get_tx_power_index(pAdapter, RFPath
