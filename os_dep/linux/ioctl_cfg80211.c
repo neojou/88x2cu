@@ -4381,71 +4381,14 @@ static const char *nl80211_tx_power_setting_str(int type)
 #endif	/*	CONFIG_RTW_DEBUG	*/
 
 static int cfg80211_rtw_set_txpower(struct wiphy *wiphy,
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
 	struct wireless_dev *wdev,
-#endif
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 36)) || defined(COMPAT_KERNEL_RELEASE)
 	enum nl80211_tx_power_setting type, int mbm)
-#else
-	enum tx_power_setting type, int dbm)
-#endif
 {
-#if !((LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 36)) || defined(COMPAT_KERNEL_RELEASE))
-	int mbm = dbm * 100;
-#endif
-	struct rtw_wiphy_data *wiphy_data = rtw_wiphy_priv(wiphy);
-	_adapter *adapter = wiphy_to_adapter(wiphy);
-	int ret = -EOPNOTSUPP;
-
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
-	if (wdev) {
-		RTW_WARN(FUNC_WIPHY_FMT" wdev specific control is not supported\n", FUNC_WIPHY_ARG(wiphy));
-		goto exit;
-	}
-#endif
-
-	RTW_INFO(FUNC_WIPHY_FMT" type:%s(%u) mbm:%d\n", FUNC_WIPHY_ARG(wiphy)
-		, nl80211_tx_power_setting_str(type), type, mbm);
-
-	switch (type) {
-	case NL80211_TX_POWER_AUTOMATIC:
-		wiphy_data->txpwr_total_lmt_mbm = UNSPECIFIED_MBM;
-		wiphy_data->txpwr_total_target_mbm = UNSPECIFIED_MBM;
-		ret = 0;
-		break;
-	case NL80211_TX_POWER_LIMITED:
-		if (!phy_is_txpwr_user_mbm_valid(adapter, mbm)) {
-			RTW_WARN(FUNC_WIPHY_FMT" mbm:%d not support\n", FUNC_WIPHY_ARG(wiphy), mbm);
-			goto exit;
-		}
-		wiphy_data->txpwr_total_lmt_mbm = mbm;
-		wiphy_data->txpwr_total_target_mbm = UNSPECIFIED_MBM;
-		ret = 0;
-		break;
-	case NL80211_TX_POWER_FIXED:
-		if (!phy_is_txpwr_user_mbm_valid(adapter, mbm)) {
-			RTW_WARN(FUNC_WIPHY_FMT" mbm:%d not support\n", FUNC_WIPHY_ARG(wiphy), mbm);
-			goto exit;
-		}
-		wiphy_data->txpwr_total_lmt_mbm = UNSPECIFIED_MBM;
-		wiphy_data->txpwr_total_target_mbm = mbm;
-		ret = 0;
-		break;
-	default:
-		RTW_WARN(FUNC_WIPHY_FMT" unknown type:%d\n", FUNC_WIPHY_ARG(wiphy), type);
-	}
-
-	if (ret == 0)
-		rtw_run_in_thread_cmd_wait(adapter, ((void *)(rtw_hal_update_txpwr_level)), adapter, 2000);
-
-exit:
-	return ret;
+	return -EOPNOTSUPP;
 }
 
 static int cfg80211_rtw_get_txpower(struct wiphy *wiphy,
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0))
 	struct wireless_dev *wdev,
-#endif
 	int *dbm)
 {
 	struct dvobj_priv *dvobj = wiphy_to_dvobj(wiphy);
