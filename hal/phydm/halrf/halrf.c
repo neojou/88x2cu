@@ -1599,12 +1599,6 @@ halrf_config_rfk_with_header_file(void *dm_void, u32 config_type)
 	enum hal_status result = HAL_STATUS_SUCCESS;
 	if (config_type == CONFIG_BB_RF_CAL_INIT)
 		odm_read_and_config_mp_8822c_cal_init(dm);
-#if 1
-	if (dm->fw_offload_ability & PHYDM_PHY_PARAM_OFFLOAD) {
-		result = phydm_set_reg_by_fw(dm, PHYDM_HALMAC_CMD_END, 0, 0, 0, (enum rf_path)0, 0);
-		RF_DBG(dm, DBG_RF_IQK,"phy param offload end!result = %d", result);
-	}
-#endif
 	return result;
 }
 

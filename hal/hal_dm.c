@@ -198,20 +198,6 @@ void rtw_hal_lck_test(_adapter *adapter)
 }
 #endif
 
-#ifdef CONFIG_FW_OFFLOAD_PARAM_INIT
-void rtw_hal_update_param_init_fw_offload_cap(_adapter *adapter)
-{
-	struct dm_struct *p_dm_odm = adapter_to_phydm(adapter);
-
-	if (adapter->registrypriv.fw_param_init)
-		phydm_fwoffload_ability_init(p_dm_odm, PHYDM_PHY_PARAM_OFFLOAD);
-	else
-		phydm_fwoffload_ability_clear(p_dm_odm, PHYDM_PHY_PARAM_OFFLOAD);
-
-	RTW_INFO("Init-Parameter FW offload:%s\n", adapter->registrypriv.fw_param_init ? "enable" : "disable");
-}
-#endif
-
 void record_ra_info(void *p_dm_void, u8 macid, struct cmn_sta_info *p_sta, u64 ra_mask)
 {
 	struct dm_struct *p_dm = (struct dm_struct *)p_dm_void;
@@ -373,9 +359,6 @@ void Init_ODM_ComInfo(_adapter *adapter)
 	odm_cmn_info_init(pDM_Odm, ODM_CMNINFO_IQKPAOFF, 1);
 #endif
 	rtw_hal_update_iqk_fw_offload_cap(adapter);
-	#ifdef CONFIG_FW_OFFLOAD_PARAM_INIT
-	rtw_hal_update_param_init_fw_offload_cap(adapter);
-	#endif
 
 	/* Pointer reference */
 	/*Antenna diversity relative parameters*/

@@ -967,11 +967,6 @@ int rtw_en_tdls = 1;
 module_param(rtw_en_tdls, int, 0644);
 #endif
 
-#ifdef CONFIG_FW_OFFLOAD_PARAM_INIT
-int rtw_fw_param_init = 1;
-module_param(rtw_fw_param_init, int, 0644);
-#endif
-
 #ifdef CONFIG_TDMADIG
 int rtw_tdmadig_en = 1;
 /*
@@ -1522,9 +1517,6 @@ uint rtw_load_registry(_adapter *padapter)
 
 #ifdef CONFIG_ADVANCE_OTA
 	registry_par->adv_ota = rtw_advnace_ota;
-#endif
-#ifdef CONFIG_FW_OFFLOAD_PARAM_INIT
-	registry_par->fw_param_init = rtw_fw_param_init;
 #endif
 #ifdef CONFIG_AP_MODE
 	registry_par->bmc_tx_rate = rtw_bmc_tx_rate;

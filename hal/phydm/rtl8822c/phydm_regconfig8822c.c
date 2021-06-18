@@ -31,23 +31,7 @@
 void odm_config_rf_reg_8822c(struct dm_struct *dm, u32 addr, u32 data,
 			     enum rf_path rf_path, u32 reg_addr)
 {
-	if (dm->fw_offload_ability & PHYDM_PHY_PARAM_OFFLOAD) {
-		if (addr == 0xffe)
-			phydm_set_reg_by_fw(dm, PHYDM_HALMAC_CMD_DELAY_MS,
-					    reg_addr, data, RFREG_MASK, rf_path,
-					    50);
-		else if (addr == 0xfe)
-			phydm_set_reg_by_fw(dm, PHYDM_HALMAC_CMD_DELAY_US,
-					    reg_addr, data, RFREG_MASK, rf_path,
-					    100);
-		else {
-			phydm_set_reg_by_fw(dm, PHYDM_HALMAC_CMD_RF_W, reg_addr,
-					    data, RFREG_MASK, rf_path, 0);
-			phydm_set_reg_by_fw(dm, PHYDM_HALMAC_CMD_DELAY_US,
-					    reg_addr, data, RFREG_MASK, rf_path,
-					    1);
-		}
-	} else {
+	{
 		if (addr == 0xffe) {
 #ifdef CONFIG_LONG_DELAY_ISSUE
 			ODM_sleep_ms(50);
@@ -139,11 +123,7 @@ void odm_config_bb_agc_8822c(struct dm_struct *dm, u32 addr, u32 bitmask,
 	phydm_agc_lower_bound_8822c(dm, addr, data);
 	phydm_agc_store_8822c(dm, addr, data);
 
-	if (dm->fw_offload_ability & PHYDM_PHY_PARAM_OFFLOAD)
-		phydm_set_reg_by_fw(dm, PHYDM_HALMAC_CMD_BB_W32, addr, data,
-				    bitmask, (enum rf_path)0, 0);
-	else
-		odm_set_bb_reg(dm, addr, bitmask, data);
+	odm_set_bb_reg(dm, addr, bitmask, data);
 
 	PHYDM_DBG(dm, ODM_COMP_INIT, "===> config_bb: [AGC_TAB] %08X %08X\n",
 		  addr, data);
@@ -175,34 +155,7 @@ void odm_config_bb_phy_reg_pg_8822c(struct dm_struct *dm, u32 band, u32 rf_path,
 void odm_config_bb_phy_8822c(struct dm_struct *dm, u32 addr, u32 bitmask,
 			     u32 data)
 {
-	if (dm->fw_offload_ability & PHYDM_PHY_PARAM_OFFLOAD) {
-		u32 delay_time = 0;
-
-		if (addr >= 0xf9 && addr <= 0xfe) {
-			if (addr == 0xfe || addr == 0xfb)
-				delay_time = 50;
-			else if (addr == 0xfd || addr == 0xfa)
-				delay_time = 5;
-			else
-				delay_time = 1;
-
-			if (addr >= 0xfc && addr <= 0xfe)
-				phydm_set_reg_by_fw(dm,
-						    PHYDM_HALMAC_CMD_DELAY_MS,
-						    addr, data, bitmask,
-						    (enum rf_path)0,
-						    delay_time);
-			else
-				phydm_set_reg_by_fw(dm,
-						    PHYDM_HALMAC_CMD_DELAY_US,
-						    addr, data, bitmask,
-						    (enum rf_path)0,
-						    delay_time);
-		} else
-			phydm_set_reg_by_fw(dm, PHYDM_HALMAC_CMD_BB_W32,
-					    addr, data, bitmask,
-					    (enum rf_path)0, 0);
-	} else {
+	{
 		if (addr == 0xfe)
 #ifdef CONFIG_LONG_DELAY_ISSUE
 			ODM_sleep_ms(50);

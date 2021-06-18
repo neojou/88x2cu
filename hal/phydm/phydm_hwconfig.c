@@ -79,20 +79,6 @@ odm_config_rf_with_header_file(struct dm_struct *dm,
 			READ_AND_CONFIG_MP(8822c, _txpwr_lmt);
 	}
 
-	if (config_type == CONFIG_RF_RADIO) {
-		if (dm->fw_offload_ability & PHYDM_PHY_PARAM_OFFLOAD) {
-			result = phydm_set_reg_by_fw(dm,
-						     PHYDM_HALMAC_CMD_END,
-						     0,
-						     0,
-						     0,
-						     (enum rf_path)0,
-						     0);
-			PHYDM_DBG(dm, ODM_COMP_INIT,
-				  "rf param offload end!result = %d", result);
-		}
-	}
-
 	return result;
 }
 
@@ -120,25 +106,11 @@ odm_config_bb_with_header_file(struct dm_struct *dm,
 	enum hal_status result = HAL_STATUS_SUCCESS;
 
 	if (config_type == CONFIG_BB_PHY_REG)
-		READ_AND_CONFIG_MP(8822c, _phy_reg);
+		odm_read_and_config_mp_8822c_phy_reg(dm);
 	else if (config_type == CONFIG_BB_AGC_TAB)
 		READ_AND_CONFIG_MP(8822c, _agc_tab);
 	else if (config_type == CONFIG_BB_PHY_REG_PG)
 		READ_AND_CONFIG(8822c, _phy_reg_pg);
-
-	if (config_type == CONFIG_BB_PHY_REG ||
-	    config_type == CONFIG_BB_AGC_TAB)
-		if (dm->fw_offload_ability & PHYDM_PHY_PARAM_OFFLOAD) {
-			result = phydm_set_reg_by_fw(dm,
-						     PHYDM_HALMAC_CMD_END,
-						     0,
-						     0,
-						     0,
-						     (enum rf_path)0,
-						     0);
-			PHYDM_DBG(dm, ODM_COMP_INIT,
-				  "phy param offload end!result = %d", result);
-		}
 
 	return result;
 }

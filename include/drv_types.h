@@ -507,9 +507,6 @@ struct registry_priv {
 	u8	adv_ota;
 #endif
 
-#ifdef CONFIG_FW_OFFLOAD_PARAM_INIT
-	u8 fw_param_init;
-#endif
 #ifdef CONFIG_DYNAMIC_SOML
 	u8 dyn_soml_en;
 	u8 dyn_soml_train_num;

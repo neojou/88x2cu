@@ -312,20 +312,6 @@ phydm_set_reg_by_fw(struct dm_struct *dm, enum phydm_halmac_param config_type,
 		    u32 offset, u32 data, u32 mask, enum rf_path e_rf_path,
 		    u32 delay_time)
 {
-#if (DM_ODM_SUPPORT_TYPE & (ODM_WIN))
-	return HAL_MAC_Config_PHY_WriteNByte(dm,
-					     config_type,
-					     offset,
-					     data,
-					     mask,
-					     e_rf_path,
-					     delay_time);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_CE)
-#if (DM_ODM_SUPPORT_TYPE & ODM_CE) && defined(DM_ODM_CE_MAC80211)
-	PHYDM_DBG(dm, DBG_CMN, "Not support for CE MAC80211 driver!\n");
-#elif (DM_ODM_SUPPORT_TYPE & ODM_CE) && defined(DM_ODM_CE_MAC80211_V2)
-	return -ENOTSUPP;
-#else
 	return rtw_phydm_cfg_phy_para(dm,
 				      config_type,
 				      offset,
@@ -333,10 +319,6 @@ phydm_set_reg_by_fw(struct dm_struct *dm, enum phydm_halmac_param config_type,
 				      mask,
 				      e_rf_path,
 				      delay_time);
-#endif
-#elif (DM_ODM_SUPPORT_TYPE & ODM_IOT)
-	PHYDM_DBG(dm, DBG_CMN, "Not support for CE MAC80211 driver!\n");
-#endif
 }
 
 /*@
