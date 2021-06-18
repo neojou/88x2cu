@@ -2827,38 +2827,7 @@ static int proc_get_tpc_settings(struct seq_file *m, void *v)
 
 static ssize_t proc_set_tpc_settings(struct file *file, const char __user *buffer, size_t count, loff_t *pos, void *data)
 {
-	struct net_device *dev = data;
-	_adapter *adapter = (_adapter *)rtw_netdev_priv(dev);
-	struct rf_ctl_t *rfctl = adapter_to_rfctl(adapter);
-
-	char tmp[32] = {0};
-	u8 mode;
-	u16 m_constraint;
-
-	if (count > sizeof(tmp)) {
-		rtw_warn_on(1);
-		return -EFAULT;
-	}
-
-	if (buffer && !copy_from_user(tmp, buffer, count)) {
-
-		int num = sscanf(tmp, "%hhu %hu", &mode, &m_constraint);
-
-		if (num < 1)
-			return count;
-
-		if (mode >= TPC_MODE_INVALID)
-			return count;
-
-		if (mode == TPC_MODE_MANUAL && num >= 2)
-			rfctl->tpc_manual_constraint = rtw_min(m_constraint, TPC_MANUAL_CONSTRAINT_MAX);
-		rfctl->tpc_mode = mode;
-
-		if (rtw_get_hw_init_completed(adapter))
-			rtw_run_in_thread_cmd_wait(adapter, ((void *)(rtw_hal_update_txpwr_level)), adapter, 2000);
-	}
-
-	return count;
+	return -EFAULT;
 }
 
 static int proc_get_antenna_gain(struct seq_file *m, void *v)
