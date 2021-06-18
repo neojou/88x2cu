@@ -222,44 +222,6 @@ void phydm_common_info_self_init(struct dm_struct *dm)
 	odm_memory_set(dm, &dm->iot_table, 0, sizeof(struct phydm_iot_center));
 }
 
-void phydm_iot_patch_id_update(void *dm_void, u32 iot_idx, boolean en)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct phydm_iot_center	*iot_table = &dm->iot_table;
-
-	PHYDM_DBG(dm, DBG_CMN, "[IOT] 0x%x = %d\n", iot_idx, en);
-	switch (iot_idx) {
-	case 0x100f0401:
-		iot_table->patch_id_100f0401 = en;
-		PHYDM_DBG(dm, DBG_CMN, "[IOT] patch_id_100f0401 = %d\n",
-			  iot_table->patch_id_100f0401);
-		break;
-	case 0x10120200:
-		iot_table->patch_id_10120200 = en;
-		PHYDM_DBG(dm, DBG_CMN, "[IOT] patch_id_10120200 = %d\n",
-			  iot_table->patch_id_10120200);
-		break;
-	case 0x40010700:
-		iot_table->patch_id_40010700 = en;
-		PHYDM_DBG(dm, DBG_CMN, "[IOT] patch_id_40010700 = %d\n",
-			  iot_table->patch_id_40010700);
-		break;
-	case 0x021f0800:
-		iot_table->patch_id_021f0800 = en;
-		PHYDM_DBG(dm, DBG_CMN, "[IOT] patch_id_021f0800 = %d\n",
-			  iot_table->patch_id_021f0800);
-		break;
-	case 0x011f0500:
-		iot_table->patch_id_011f0500 = en;
-		PHYDM_DBG(dm, DBG_CMN, "[IOT] patch_id_011f0500 = %d\n",
-			  iot_table->patch_id_011f0500);
-		break;
-	default:
-		pr_debug("[%s] warning!\n", __func__);
-		break;
-	}
-}
-
 void phydm_cmn_sta_info_update(void *dm_void, u8 macid)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;

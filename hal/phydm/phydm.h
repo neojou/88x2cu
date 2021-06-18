@@ -1518,9 +1518,6 @@ phydm_get_structure(struct dm_struct *dm, u8 structure_type);
 void
 phydm_dyn_bw_indication(void *dm_void);
 
-void
-phydm_iot_patch_id_update(void *dm_void, u32 iot_idx, boolean en);
-
 #if (DM_ODM_SUPPORT_TYPE == ODM_CE)
 void
 odm_dtc(struct dm_struct *dm);
