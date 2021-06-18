@@ -2366,13 +2366,6 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 			halmac->halmac_state.dlfw_state = HALMAC_GEN_INFO_SENT;
 	}
 
-	/* halmac_cfg_drv_info */
-	err = rtw_halmac_config_rx_info(d, HALMAC_DRV_INFO_PHY_STATUS);
-	if (err) {
-		RTW_ERR("%s rtw_halmac_config_rx_info=%d\n", __func__, err);
-		goto out;
-	}
-
 	/* halmac_set_hw_value(HALMAC_HW_EN_BB_RF) */
 	/* Init BB, RF */
 	ok = rtw_hal_init_phy(adapter);
