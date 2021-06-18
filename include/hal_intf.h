@@ -828,7 +828,6 @@ s32 rtw_hal_fw_dl(_adapter *padapter, u8 wowlan);
 #endif
 
 void rtw_hal_set_tx_power_level(_adapter *adapter, u8 channel);
-void rtw_hal_update_txpwr_level(_adapter *adapter);
 void rtw_hal_set_txpwr_done(_adapter *adapter);
 void rtw_hal_set_tx_power_index(_adapter *adapter, u32 powerindex
 	, enum rf_path rfpath, u8 rate);

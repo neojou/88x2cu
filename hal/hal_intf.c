@@ -1723,14 +1723,6 @@ void rtw_hal_set_tx_power_level(_adapter *adapter, u8 channel)
 	hal_data->set_entire_txpwr = 0;
 }
 
-void rtw_hal_update_txpwr_level(_adapter *adapter)
-{
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
-
-	rtw_hal_set_tx_power_level(adapter, hal_data->current_channel);
-	rtw_rfctl_update_op_mode(adapter_to_rfctl(adapter), 0, 0);
-}
-
 void rtw_hal_set_txpwr_done(_adapter *adapter)
 {
 	if (adapter->hal_func.set_txpwr_done)
