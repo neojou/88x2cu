@@ -2224,18 +2224,8 @@ phy_set_tx_power_index_by_rate_section(
 		goto exit;
 
 	for (i = 0; i < rates_by_sections[rs].rate_num; ++i) {
-#if DBG_TX_POWER_IDX
-aa
-		struct txpwr_idx_comp tic;
-
-		powerIndex = rtw_hal_get_tx_power_index(pAdapter, RFPath
-			, rs, rates_by_sections[rs].rates[i], bw, band, Channel, 0, &tic);
-		dump_tx_power_index_inline(RTW_DBGDUMP, pAdapter, RFPath, bw, Channel
-			, rates_by_sections[rs].rates[i], powerIndex, &tic);
-#else
 		powerIndex = phy_get_tx_power_index_ex(pAdapter, RFPath
 			, rs, rates_by_sections[rs].rates[i], bw, band, Channel, 0);
-#endif
 		PHY_SetTxPowerIndex(pAdapter, powerIndex, RFPath, rates_by_sections[rs].rates[i]);
 	}
 

@@ -741,7 +741,7 @@ void rtl8822c_set_tx_power_index(PADAPTER adapter, u32 powerindex, enum rf_path 
 	rate = rate & 0xFC;
 	write_ret = config_phydm_write_txagc_8822c(phydm, hal->txagc_set_buf, rfpath, rate);
 
-	if (write_ret == true && !DBG_TX_POWER_IDX)
+	if (write_ret == true)
 		goto clear_buf;
 
 	RTW_INFO(FUNC_ADPT_FMT" (index:0x%08x, %c, rate:%s(0x%02x), disable api:%d) %s\n"
