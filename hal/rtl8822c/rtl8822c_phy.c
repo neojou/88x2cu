@@ -259,6 +259,7 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 	struct dm_struct *phydm;
 	int err;
 	u8 ok = _TRUE;
+	u32 value32;
 	BOOLEAN ret;
 
 
@@ -267,20 +268,54 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 
 	bb_rf_register_definition(adapter);
 
-	ret = config_phydm_parameter_init_8822c(phydm, ODM_PRE_SETTING);
-	if (FALSE == ret)
-		return _FALSE;
+	// odm pre setting: disable OFDM and CCK
+	value32 = rtw_read32(adapter, 0x1c3c);
+	value32 &= ~(0x3);
+	rtw_write32(adapter, 0x1c3c, value32);
 
 	ok = init_bb_reg(adapter);
 	if (_FALSE == ok)
 		return _FALSE;
+
 	ok = init_rf_reg(adapter);
 	if (_FALSE == ok)
 		return _FALSE;
 
-	ret = config_phydm_parameter_init_8822c(phydm, ODM_POST_SETTING);
-	if (FALSE == ret)
-		return _FALSE;
+	phydm_cck_gi_bound_8822c(phydm);
+
+	/* Disable low rate DPD*/
+	value32 = rtw_read32(adapter, 0xa70);
+	value32 &= ~(0x3ff);
+	rtw_write32(adapter, 0xa70, value32);
+	phydm->dis_dpd_rate = 0;
+
+	/* @Do not use PHYDM API to read/write because FW can not access */
+	/* @Turn on 3-wire*/
+	value32 = rtw_read32(adapter, 0x180c);
+	value32 |= 0x3;
+	value32 |= BIT(28);
+	rtw_write32(adapter, 0x180c, value32);
+
+	value32 = rtw_read32(adapter, 0x410c);
+	value32 |= 0x3;
+	value32 |= BIT(28);
+	rtw_write32(adapter, 0x410c, value32);
+
+	// odm post setting: enable OFDM and CCK
+	value32 = rtw_read32(adapter, 0x1c3c);
+	value32 |= 0x3;
+	rtw_write32(adapter, 0x1c3c, value32);
+
+	/* reset bb */
+	value32 = rtw_read32(adapter, 0x0);
+	value32 |= BIT(16);
+	rtw_write32(adapter, 0x410c, value32);
+	value32 = rtw_read32(adapter, 0x0);
+	value32 &= ~(BIT(16));
+	rtw_write32(adapter, 0x410c, value32);
+	value32 = rtw_read32(adapter, 0x0);
+	value32 |= BIT(16);
+	rtw_write32(adapter, 0x410c, value32);
 
 	return _TRUE;
 }

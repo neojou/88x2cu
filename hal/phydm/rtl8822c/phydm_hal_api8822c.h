@@ -137,9 +137,6 @@ u16 phydm_get_dis_dpd_by_rate_8822c(struct dm_struct *dm);
 
 void phydm_set_auto_nbi_8822c(struct dm_struct *dm, boolean en_auto_nbi);
 
-boolean config_phydm_parameter_init_8822c(struct dm_struct *dm,
-					  enum odm_parameter_init type);
-
 boolean phydm_chk_bb_state_idle_8822c(struct dm_struct *dm);
 
 u16 phydm_get_gpio_setting_by_rfe_ctrl_8822c(struct dm_struct *dm);

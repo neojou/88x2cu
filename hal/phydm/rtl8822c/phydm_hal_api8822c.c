@@ -2096,47 +2096,6 @@ u16 phydm_get_dis_dpd_by_rate_8822c(struct dm_struct *dm)
 
 __odm_func__
 boolean
-config_phydm_parameter_init_8822c(struct dm_struct *dm,
-				  enum odm_parameter_init type)
-{
-	u32 value32;
-
-	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
-
-	phydm_cck_gi_bound_8822c(dm);
-
-	/* Disable low rate DPD*/
-	value32 = rtw_read32(dm->adapter, R_0xa70);
-	value32 &= ~(0x3ff);
-	rtw_write32(dm->adapter, R_0xa70, value32);
-	dm->dis_dpd_rate = 0;
-
-	/* @Do not use PHYDM API to read/write because FW can not access */
-	/* @Turn on 3-wire*/
-	odm_set_bb_reg(dm, R_0x180c, 0x3, 0x3);
-	odm_set_bb_reg(dm, R_0x180c, BIT(28), 0x1);
-	odm_set_bb_reg(dm, R_0x410c, 0x3, 0x3);
-	odm_set_bb_reg(dm, R_0x410c, BIT(28), 0x1);
-
-	if (type == ODM_PRE_SETTING) {
-		odm_set_bb_reg(dm, R_0x1c3c, (BIT(0) | BIT(1)), 0x0);
-		PHYDM_DBG(dm, ODM_PHY_CONFIG,
-			  "Pre setting: disable OFDM and CCK block\n");
-	} else if (type == ODM_POST_SETTING) {
-		odm_set_bb_reg(dm, R_0x1c3c, (BIT(0) | BIT(1)), 0x3);
-		PHYDM_DBG(dm, ODM_PHY_CONFIG,
-			  "Post setting: enable OFDM and CCK block\n");
-	} else {
-		PHYDM_DBG(dm, ODM_PHY_CONFIG, "Wrong type!!\n");
-		return false;
-	}
-
-	phydm_bb_reset_8822c(dm);
-	return true;
-}
-
-__odm_func__
-boolean
 phydm_chk_bb_state_idle_8822c(struct dm_struct *dm)
 {
 	u32 dbgport = 0;
