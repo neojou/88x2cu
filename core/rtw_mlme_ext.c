@@ -15295,14 +15295,6 @@ u8 rtw_set_chplan_hdl(_adapter *padapter, unsigned char *pbuf)
 	rfctl->country_ent = param->country_ent;
 	rfctl->ChannelPlan = param->channel_plan;
 
-#if CONFIG_TXPWR_LIMIT
-	rtw_txpwr_init_regd(rfctl);
-#endif
-
-#if 0 // NEO change to G6's
-	rtw_rfctl_chplan_init(padapter);
-#endif // NEO
-
 	rtw_hal_set_odm_var(padapter, HAL_ODM_REGULATION, NULL, _TRUE);
 
 #ifdef CONFIG_IOCTL_CFG80211
@@ -15310,10 +15302,6 @@ u8 rtw_set_chplan_hdl(_adapter *padapter, unsigned char *pbuf)
 #endif
 
 	rtw_nlrtw_reg_change_event(padapter);
-
-	if (GET_HAL_DATA(padapter)->txpwr_limit_loaded
-		&& rtw_get_hw_init_completed(padapter))
-		rtw_hal_update_txpwr_level(padapter);
 
 	return	H2C_SUCCESS;
 }
