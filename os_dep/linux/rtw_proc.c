@@ -2842,32 +2842,7 @@ static int proc_get_antenna_gain(struct seq_file *m, void *v)
 
 static ssize_t proc_set_antenna_gain(struct file *file, const char __user *buffer, size_t count, loff_t *pos, void *data)
 {
-	struct net_device *dev = data;
-	_adapter *adapter = (_adapter *)rtw_netdev_priv(dev);
-	struct rf_ctl_t *rfctl = adapter_to_rfctl(adapter);
-
-	char tmp[32] = {0};
-	s16 gain;
-
-	if (count > sizeof(tmp)) {
-		rtw_warn_on(1);
-		return -EFAULT;
-	}
-
-	if (buffer && !copy_from_user(tmp, buffer, count)) {
-
-		int num = sscanf(tmp, "%hd", &gain);
-
-		if (num < 1)
-			return count;
-
-		rfctl->antenna_gain = gain;
-
-		if (rtw_get_hw_init_completed(adapter))
-			rtw_run_in_thread_cmd_wait(adapter, ((void *)(rtw_hal_update_txpwr_level)), adapter, 2000);
-	}
-
-	return count;
+	return -EFAULT;
 }
 
 static int proc_get_tx_power_ext_info(struct seq_file *m, void *v)
