@@ -308,7 +308,6 @@ void rtl8822c_phy_haldm_watchdog(PADAPTER adapter)
 	BOOLEAN bFwCurrentInPSMode = _FALSE;
 	u8 bFwPSAwake = _TRUE;
 	struct pwrctrl_priv *pwrpriv = adapter_to_pwrctl(adapter);
-	u8 in_lps = _FALSE;
 	PADAPTER current_lps_iface = NULL, iface = NULL;
 	struct dvobj_priv *dvobj = adapter_to_dvobj(adapter);
 	u8 i = 0;
@@ -317,19 +316,6 @@ void rtl8822c_phy_haldm_watchdog(PADAPTER adapter)
 	if (!rtw_is_hw_init_completed(adapter))
 		goto skip_dm;
 
-#ifdef CONFIG_LPS
-	bFwCurrentInPSMode = adapter_to_pwrctl(adapter)->bFwCurrentInPSMode;
-	rtw_hal_get_hwreg(adapter, HW_VAR_FWLPS_RF_ON, &bFwPSAwake);
-#endif /* CONFIG_LPS */
-
-#ifdef CONFIG_P2P_PS
-	/*
-	 * Fw is under p2p powersaving mode, driver should stop dynamic mechanism.
-	 */
-	if (adapter->wdinfo.p2p_ps_mode)
-		bFwPSAwake = _FALSE;
-#endif /* CONFIG_P2P_PS */
-
 	if ((rtw_is_hw_init_completed(adapter))
 	    && ((!bFwCurrentInPSMode) && bFwPSAwake)) {
 
@@ -337,55 +323,14 @@ void rtl8822c_phy_haldm_watchdog(PADAPTER adapter)
 		check_rxfifo_full(adapter);
 	}
 
-#ifdef CONFIG_LPS
-	if (pwrpriv->bLeisurePs && bFwCurrentInPSMode && pwrpriv->pwr_mode != PM_PS_MODE_ACTIVE) {
-		in_lps = _TRUE;
-
-		for (i = 0; i < dvobj->iface_nums; i++) {
-			iface = dvobj->padapters[i];
-			if (pwrpriv->current_lps_hw_port_id == rtw_hal_get_port(iface)) {
-				current_lps_iface = iface;
-				rtw_lps_rfon_ctrl(current_lps_iface, rf_on);
-				break;
-			}
-		}
-
-		if (!current_lps_iface) {
-			RTW_WARN("Can't find a adapter with LPS to enable RFON function !\n");
-			goto skip_dm;
-		}
-	}
-#endif
-
-#ifdef CONFIG_BEAMFORMING
-#ifdef RTW_BEAMFORMING_VERSION_2
-	if (check_fwstate(&adapter->mlmepriv, WIFI_STATION_STATE) &&
-			check_fwstate(&adapter->mlmepriv, WIFI_ASOC_STATE))
-		rtw_hal_beamforming_config_csirate(adapter);
-#endif
-#endif
-
 #ifdef CONFIG_DISABLE_ODM
 	goto skip_dm;
 #endif
 
-	rtw_phydm_watchdog(adapter, in_lps);
+	rtw_phydm_watchdog(adapter);
 
 skip_dm:
-
-#ifdef CONFIG_LPS
-	if (current_lps_iface)
-		rtw_lps_rfon_ctrl(current_lps_iface, rf_off);
-#endif
-	/*
-	 * Check GPIO to determine current RF on/off and Pbc status.
-	 * Check Hardware Radio ON/OFF or not
-	 */
-#ifdef CONFIG_SUPPORT_HW_WPS_PBC
-	dm_CheckPbcGPIO(adapter);
-#else /* !CONFIG_SUPPORT_HW_WPS_PBC */
 	return;
-#endif /* !CONFIG_SUPPORT_HW_WPS_PBC */
 }
 
 static u32 phy_calculatebitshift(u32 mask)

@@ -744,33 +744,6 @@ void phydm_watchdog_lps_32k(struct dm_struct *dm)
 	phydm_common_info_self_reset(dm);
 }
 
-void phydm_watchdog_lps(struct dm_struct *dm)
-{
-#if (DM_ODM_SUPPORT_TYPE & (ODM_WIN | ODM_CE | ODM_IOT))
-	PHYDM_DBG(dm, DBG_COMMON_FLOW, "%s ======>\n", __func__);
-
-	phydm_common_info_self_update(dm);
-	phydm_rssi_monitor_check(dm);
-	phydm_basic_dbg_message(dm);
-	phydm_false_alarm_counter_statistics(dm);
-	phydm_dig_by_rssi_lps(dm);
-	#ifdef PHYDM_SUPPORT_CCKPD
-	phydm_cck_pd_th(dm);
-	#endif
-	phydm_adaptivity(dm);
-	#ifdef CONFIG_BW_INDICATION
-	phydm_dyn_bw_indication(dm);
-	#endif
-	#if (DM_ODM_SUPPORT_TYPE & (ODM_CE))
-	#ifdef CONFIG_PHYDM_ANTENNA_DIVERSITY
-	/*@enable AntDiv in PS mode, request from SD4 Jeff*/
-	odm_antenna_diversity(dm);
-	#endif
-	#endif
-	phydm_common_info_self_reset(dm);
-#endif
-}
-
 void phydm_watchdog_mp(struct dm_struct *dm)
 {
 }

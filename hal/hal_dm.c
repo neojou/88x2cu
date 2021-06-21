@@ -1678,15 +1678,13 @@ void rtw_phydm_pwr_tracking_directly(_adapter *adapter)
 }
 #endif
 
-void rtw_phydm_watchdog(_adapter *adapter, bool in_lps)
+void rtw_phydm_watchdog(_adapter *adapter)
 {
 	u8	bLinked = _FALSE;
 	u8	bsta_state = _FALSE;
 	u8	bBtDisabled = _TRUE;
 	u8	rfk_forbidden = _FALSE;
-	#if ((RTL8822B_SUPPORT == 1) || (RTL8821C_SUPPORT == 1) || (RTL8814B_SUPPORT == 1) || (RTL8822C_SUPPORT == 1))
 	u8	segment_iqk = _FALSE;
-	#endif
 	u8	tx_unlinked_low_rate = 0xFF;
 	PHAL_DATA_TYPE	pHalData = GET_HAL_DATA(adapter);
 
@@ -1719,14 +1717,8 @@ void rtw_phydm_watchdog(_adapter *adapter, bool in_lps)
 	rfk_forbidden = (_rtw_phydm_rfk_condition_check(adapter, pHalData->bScanInProcess, bLinked) == _TRUE) ? _FALSE : _TRUE;
 	halrf_cmn_info_set(&pHalData->odmpriv, HALRF_CMNINFO_RFK_FORBIDDEN, rfk_forbidden);
 
-	#if ((RTL8822B_SUPPORT == 1) || (RTL8821C_SUPPORT == 1) || (RTL8814B_SUPPORT == 1) || (RTL8822C_SUPPORT == 1))
 	segment_iqk = _rtw_phydm_iqk_segment_chk(adapter, bLinked);
 	halrf_cmn_info_set(&pHalData->odmpriv, HALRF_CMNINFO_IQK_SEGMENT, segment_iqk);
-	#endif
-	#ifdef DBG_PHYDM_STATE_CHK
-	RTW_INFO("%s rfk_forbidden = %s, segment_iqk = %s\n",
-			__func__, (rfk_forbidden) ? "Y" : "N", (segment_iqk) ? "Y" : "N");
-	#endif
 
 	if (bLinked == _FALSE) {
 		tx_unlinked_low_rate = _rtw_phydm_pwr_tracking_rate_check(adapter);
@@ -1740,14 +1732,7 @@ void rtw_phydm_watchdog(_adapter *adapter, bool in_lps)
 		goto _exit;
 	}*/
 
-	#ifdef CONFIG_TDMADIG
-	rtw_phydm_tdmadig(adapter, TDMADIG_NON_INIT);
-	#endif/*CONFIG_TDMADIG*/
-
-	if (in_lps)
-		phydm_watchdog_lps(&pHalData->odmpriv);
-	else
-		phydm_watchdog(&pHalData->odmpriv);
+	phydm_watchdog(&pHalData->odmpriv);
 
 	#ifdef CONFIG_RTW_ACS
 	rtw_acs_update_current_info(adapter);

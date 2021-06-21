@@ -1435,9 +1435,6 @@ enum rt_status {
 #endif	/*@end of enum rt_status definition*/
 
 void
-phydm_watchdog_lps(struct dm_struct *dm);
-
-void
 phydm_watchdog_lps_32k(struct dm_struct *dm);
 
 void
