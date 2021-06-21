@@ -129,8 +129,6 @@ boolean phydm_1rcca_setting_8822c(struct dm_struct *dm, boolean en_1rcca);
 
 void phydm_invld_pkt_setting_8822c(struct dm_struct *dm, boolean en_invld_pkt);
 
-void phydm_cck_gi_bound_8822c(struct dm_struct *dm);
-
 void phydm_ch_smooth_setting_8822c(struct dm_struct *dm, boolean en_ch_smooth);
 
 u16 phydm_get_dis_dpd_by_rate_8822c(struct dm_struct *dm);

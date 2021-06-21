@@ -423,17 +423,6 @@ void phydm_parsing_cfo(void *dm_void, void *pktinfo_void, s8 *pcfotail,
 	}
 }
 
-#if (DM_ODM_SUPPORT_TYPE == ODM_WIN)
-void phy_Init_crystal_capacity(void *dm_void, u8 crystal_cap)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-
-	if (!phydm_set_crystal_cap_reg(dm, crystal_cap))
-		RT_TRACE_F(COMP_INIT, DBG_SERIOUS,
-			   ("Crystal is not initialized!\n"));
-}
-#endif
-
 void phydm_cfo_tracking_debug(void *dm_void, char input[][16], u32 *_used,
 			      char *output, u32 *_out_len)
 {

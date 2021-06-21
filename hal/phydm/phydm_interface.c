@@ -182,24 +182,7 @@ void odm_write_4byte(struct dm_struct *dm, u32 reg_addr, u32 data)
 
 void odm_set_mac_reg(struct dm_struct *dm, u32 reg_addr, u32 bit_mask, u32 data)
 {
-#if (DM_ODM_SUPPORT_TYPE & (ODM_AP))
-	phy_set_bb_reg(dm->priv, reg_addr, bit_mask, data);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_WIN)
-	void *adapter = dm->adapter;
-	PHY_SetBBReg(adapter, reg_addr, bit_mask, data);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_CE) && defined(DM_ODM_CE_MAC80211)
-	struct rtl_priv *rtlpriv = (struct rtl_priv *)dm->adapter;
-
-	rtl_set_bbreg(rtlpriv->hw, reg_addr, bit_mask, data);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_CE) && defined(DM_ODM_CE_MAC80211_V2)
-	struct rtw_dev *rtwdev = dm->adapter;
-
-	rtw_set_reg_with_mask(rtwdev, reg_addr, bit_mask, data);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_IOT)
 	phy_set_bb_reg(dm->adapter, reg_addr, bit_mask, data);
-#else
-	phy_set_bb_reg(dm->adapter, reg_addr, bit_mask, data);
-#endif
 
 	if (dm->en_reg_mntr_mac)
 		pr_debug("MAC:addr=0x%x, mask=0x%x, data=0x%x\n",

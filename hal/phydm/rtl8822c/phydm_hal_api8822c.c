@@ -2055,26 +2055,6 @@ void phydm_invld_pkt_setting_8822c(struct dm_struct *dm, boolean en_invld_pkt)
 }
 
 __odm_func__
-void phydm_cck_gi_bound_8822c(struct dm_struct *dm)
-{
-	struct phydm_physts *physts_table = &dm->dm_physts_table;
-	u8 cck_gi_u_bnd_msb = 0;
-	u8 cck_gi_u_bnd_lsb = 0;
-	u8 cck_gi_l_bnd_msb = 0;
-	u8 cck_gi_l_bnd_lsb = 0;
-
-	cck_gi_u_bnd_msb = (u8)odm_get_bb_reg(dm, R_0x1a98, 0xc000);
-	cck_gi_u_bnd_lsb = (u8)odm_get_bb_reg(dm, R_0x1aa8, 0xf0000);
-	cck_gi_l_bnd_msb = (u8)odm_get_bb_reg(dm, R_0x1a98, 0xc0);
-	cck_gi_l_bnd_lsb = (u8)odm_get_bb_reg(dm, R_0x1a70, 0x0f000000);
-
-	physts_table->cck_gi_u_bnd = (u8)((cck_gi_u_bnd_msb << 4) |
-				     (cck_gi_u_bnd_lsb));
-	physts_table->cck_gi_l_bnd = (u8)((cck_gi_l_bnd_msb << 4) |
-				     (cck_gi_l_bnd_lsb));
-}
-
-__odm_func__
 void phydm_ch_smooth_setting_8822c(struct dm_struct *dm, boolean en_ch_smooth)
 {
 	if (en_ch_smooth)

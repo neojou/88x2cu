@@ -18,52 +18,6 @@
 #include "../hal_halmac.h"
 #include "rtl8822c.h"
 
-static u8 init_bb_reg(PADAPTER adapter)
-{
-	u8 ret = _TRUE;
-	PHAL_DATA_TYPE hal = GET_HAL_DATA(adapter);
-
-
-	/*
-	 * Config BB and AGC
-	 */
-	odm_read_and_config_mp_8822c_phy_reg(&hal->odmpriv);
-	odm_read_and_config_mp_8822c_agc_tab(&hal->odmpriv);
-
-	if (rtw_phydm_set_crystal_cap(adapter, hal->crystal_cap) == _FALSE) {
-		RTW_ERR("Init crystal_cap failed\n");
-		rtw_warn_on(1);
-		ret = _FALSE;
-	}
-
-	return ret;
-}
-
-static u8 _init_rf_reg(PADAPTER adapter)
-{
-	u8 path;
-	enum rf_path phydm_path;
-	PHAL_DATA_TYPE hal = GET_HAL_DATA(adapter);
-	struct hal_spec_t *hal_spec = GET_HAL_SPEC(adapter);
-
-	odm_read_and_config_mp_8822c_cal_init(&hal->odmpriv);
-	odm_read_and_config_mp_8822c_radioa(&hal->odmpriv);
-	odm_read_and_config_mp_8822c_radiob(&hal->odmpriv);
-	odm_read_and_config_mp_8822c_txpowertrack(&hal->odmpriv);
-
-	return _TRUE;
-}
-
-static u8 init_rf_reg(PADAPTER adapter)
-{
-	u8 ret = _TRUE;
-
-
-	ret = _init_rf_reg(adapter);
-
-	return ret;
-}
-
 /*
  * Description:
  *	Initialize PHY(BB/RF) related functions
@@ -74,30 +28,74 @@ static u8 init_rf_reg(PADAPTER adapter)
  */
 u8 rtl8822c_phy_init(PADAPTER adapter)
 {
+	PHAL_DATA_TYPE hal = GET_HAL_DATA(adapter);
 	struct dvobj_priv *d;
 	struct dm_struct *phydm;
-	int err;
+	struct phydm_cfo_track_struct *cfo_track;
+	struct phydm_physts *physts_table;
 	u8 ok = _TRUE;
+	u8 crystal_cap;
+	u8 cck_gi_u_bnd_msb = 0;
+	u8 cck_gi_u_bnd_lsb = 0;
+	u8 cck_gi_l_bnd_msb = 0;
+	u8 cck_gi_l_bnd_lsb = 0;
 	u32 value32;
+	u32 reg_val = 0;
 	BOOLEAN ret;
+	int err;
 
 	d = adapter_to_dvobj(adapter);
 	phydm = adapter_to_phydm(adapter);
+	cfo_track = &phydm->dm_cfo_track;
+	physts_table = &phydm->dm_physts_table;
+	crystal_cap = hal->crystal_cap;
 
 	// odm pre setting: disable OFDM and CCK
 	value32 = rtw_read32(adapter, 0x1c3c);
 	value32 &= ~(0x3);
 	rtw_write32(adapter, 0x1c3c, value32);
 
-	ok = init_bb_reg(adapter);
-	if (_FALSE == ok)
-		return _FALSE;
+	/* config BB and AGC */
+	odm_read_and_config_mp_8822c_phy_reg(&hal->odmpriv);
+	odm_read_and_config_mp_8822c_agc_tab(&hal->odmpriv);
 
-	ok = init_rf_reg(adapter);
-	if (_FALSE == ok)
-		return _FALSE;
+	/* set crystal cap */
+	crystal_cap &= 0x7F;
+	reg_val = crystal_cap | (crystal_cap << 7);
 
-	phydm_cck_gi_bound_8822c(phydm);
+	cfo_track->crystal_cap = crystal_cap;
+
+	value32 = rtw_read32(adapter, 0x1040);
+	value32 &= ~(0x00FFFC00);
+	value32 |= reg_val << 10;
+	rtw_write32(adapter, 0x1040, value32);
+
+	odm_read_and_config_mp_8822c_cal_init(&hal->odmpriv);
+	odm_read_and_config_mp_8822c_radioa(&hal->odmpriv);
+	odm_read_and_config_mp_8822c_radiob(&hal->odmpriv);
+	odm_read_and_config_mp_8822c_txpowertrack(&hal->odmpriv);
+
+	/* CCK GI bound */
+	value32 = rtw_read32(adapter, 0x1a98);
+	cck_gi_u_bnd_msb = value32 >> 14;
+	cck_gi_u_bnd_msb &= 0x3;
+
+	value32 = rtw_read32(adapter, 0x1aa8);
+	cck_gi_u_bnd_lsb = value32 >> 16;
+	cck_gi_u_bnd_lsb &= 0xf;
+
+	value32 = rtw_read32(adapter, 0x1a98);
+	cck_gi_l_bnd_lsb = value32 >> 6;
+	cck_gi_l_bnd_lsb &= 0x3;
+
+	value32 = rtw_read32(adapter, 0x1a70);
+	cck_gi_l_bnd_lsb = value32 >> 24;
+	cck_gi_l_bnd_lsb &= 0xf;
+
+	physts_table->cck_gi_u_bnd = (u8)((cck_gi_u_bnd_msb << 4) |
+				     (cck_gi_u_bnd_lsb));
+	physts_table->cck_gi_l_bnd = (u8)((cck_gi_l_bnd_msb << 4) |
+				     (cck_gi_l_bnd_lsb));
 
 	/* Disable low rate DPD*/
 	value32 = rtw_read32(adapter, 0xa70);
@@ -135,110 +133,6 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 
 	return _TRUE;
 }
-
-#ifdef CONFIG_SUPPORT_HW_WPS_PBC
-static void dm_CheckPbcGPIO(PADAPTER adapter)
-{
-	u8 tmp1byte;
-	u8 bPbcPressed = _FALSE;
-
-	if (!adapter->registrypriv.hw_wps_pbc)
-		return;
-
-#ifdef CONFIG_USB_HCI
-	tmp1byte = rtw_read8(adapter, GPIO_IO_SEL);
-	tmp1byte |= (HAL_8192C_HW_GPIO_WPS_BIT);
-	rtw_write8(adapter, GPIO_IO_SEL, tmp1byte); /* enable GPIO[2] as output mode */
-
-	tmp1byte &= ~(HAL_8192C_HW_GPIO_WPS_BIT);
-	rtw_write8(adapter, GPIO_IN, tmp1byte); /* reset the floating voltage level */
-
-	tmp1byte = rtw_read8(adapter, GPIO_IO_SEL);
-	tmp1byte &= ~(HAL_8192C_HW_GPIO_WPS_BIT);
-	rtw_write8(adapter, GPIO_IO_SEL, tmp1byte); /* enable GPIO[2] as input mode */
-
-	tmp1byte = rtw_read8(adapter, GPIO_IN);
-	if (tmp1byte == 0xff)
-		return;
-
-	if (tmp1byte & HAL_8192C_HW_GPIO_WPS_BIT)
-		bPbcPressed = _TRUE;
-#else
-	tmp1byte = rtw_read8(adapter, GPIO_IN);
-
-	if ((tmp1byte == 0xff) || adapter->init_adpt_in_progress)
-		return;
-
-	if ((tmp1byte & HAL_8192C_HW_GPIO_WPS_BIT) == 0)
-		bPbcPressed = _TRUE;
-#endif
-
-	if (_TRUE == bPbcPressed) {
-		/*
-		 * Here we only set bPbcPressed to true
-		 * After trigger PBC, the variable will be set to false
-		 */
-		RTW_INFO("CheckPbcGPIO - PBC is pressed\n");
-		rtw_request_wps_pbc_event(adapter);
-	}
-}
-#endif /* CONFIG_SUPPORT_HW_WPS_PBC */
-
-
-#ifdef CONFIG_PCI_HCI
-/*
- * Description:
- *	Perform interrupt migration dynamically to reduce CPU utilization.
- *
- * Assumption:
- *	1. Do not enable migration under WIFI test.
- */
-void dm_InterruptMigration(PADAPTER adapter)
-{
-	PHAL_DATA_TYPE hal = GET_HAL_DATA(adapter);
-	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
-	BOOLEAN bCurrentIntMt, bCurrentACIntDisable;
-	BOOLEAN IntMtToSet = _FALSE;
-	BOOLEAN ACIntToSet = _FALSE;
-
-
-	/* Retrieve current interrupt migration and Tx four ACs IMR settings first. */
-	bCurrentIntMt = hal->bInterruptMigration;
-	bCurrentACIntDisable = hal->bDisableTxInt;
-
-	/*
-	 * <Roger_Notes> Currently we use busy traffic for reference instead of RxIntOK counts to prevent non-linear Rx statistics
-	 * when interrupt migration is set before. 2010.03.05.
-	 */
-	if (!adapter->registrypriv.wifi_spec
-	    && (check_fwstate(pmlmepriv, WIFI_ASOC_STATE) == _TRUE)
-	    && pmlmepriv->LinkDetectInfo.bHigherBusyTraffic) {
-		IntMtToSet = _TRUE;
-
-		/* To check whether we should disable Tx interrupt or not. */
-		if (pmlmepriv->LinkDetectInfo.bHigherBusyRxTraffic)
-			ACIntToSet = _TRUE;
-	}
-
-	/* Update current settings. */
-	if (bCurrentIntMt != IntMtToSet) {
-		RTW_INFO("%s: Update interrupt migration(%d)\n", __FUNCTION__, IntMtToSet);
-		if (IntMtToSet) {
-			/*
-			 * <Roger_Notes> Set interrupt migration timer and corresponging Tx/Rx counter.
-			 * timer 25ns*0xfa0=100us for 0xf packets.
-			 * 2010.03.05.
-			 */
-			rtw_write32(adapter, REG_INT_MIG, 0xff000fa0); /* 0x306:Rx, 0x307:Tx */
-			hal->bInterruptMigration = IntMtToSet;
-		} else {
-			/* Reset all interrupt migration settings. */
-			rtw_write32(adapter, REG_INT_MIG, 0);
-			hal->bInterruptMigration = IntMtToSet;
-		}
-	}
-}
-#endif /* CONFIG_PCI_HCI */
 
 /*
  * ============================================================

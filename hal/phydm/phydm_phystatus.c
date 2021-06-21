@@ -2347,10 +2347,6 @@ boolean odm_phy_status_query(struct dm_struct *dm,
 			     u8 *phy_sts,
 			     struct phydm_perpkt_info_struct *pktinfo)
 {
-#ifdef PHYDM_PHYSTAUS_AUTO_SWITCH
-	struct pkt_process_info *pkt_proc = &dm->pkt_proc_struct;
-	boolean auto_swch_en = dm->pkt_proc_struct.physts_auto_swch_en;
-#endif
 	u8 rate = pktinfo->data_rate;
 	u8 page = (*phy_sts & 0xf);
 
@@ -2367,13 +2363,6 @@ boolean odm_phy_status_query(struct dm_struct *dm,
 	phydm_reset_phy_info(dm, phy_info);
 
 	#ifdef PHYSTS_3RD_TYPE_SUPPORT
-	#ifdef PHYDM_PHYSTAUS_AUTO_SWITCH
-	if (phydm_physts_auto_switch_jgr3(dm, phy_sts, pktinfo)) {
-		PHYDM_DBG(dm, DBG_PHY_STATUS, "SKIP parsing\n");
-		phy_info->physts_rpt_valid = false;
-		return false;
-	}
-	#endif
 	phydm_rx_physts_jgr3(dm, phy_sts, pktinfo, phy_info);
 	phydm_process_dm_rssi_jgr3(dm, phy_info, pktinfo);
 	#endif
@@ -2397,17 +2386,8 @@ boolean odm_phy_status_query(struct dm_struct *dm,
 		else if (phy_info->band_width == CHANNEL_WIDTH_80)
 			dm->rxsc_80 = (s8)phy_info->rxsc;
 
-		#ifdef PHYDM_PHYSTAUS_AUTO_SWITCH
-		if (auto_swch_en && page == 4 && pktinfo->rate_ss > 1)
-			phydm_avg_condi_num(dm, phy_info, pktinfo);
-
-		if (!auto_swch_en ||
-		    (pkt_proc->is_1st_mpdu || PHYDM_IS_LEGACY_RATE(rate)))
-		#endif
-		{
-			phydm_avg_rssi_evm_snr(dm, phy_info, pktinfo);
-			phydm_rx_statistic_cal(dm, phy_info, phy_sts, pktinfo);
-		}
+		phydm_avg_rssi_evm_snr(dm, phy_info, pktinfo);
+		phydm_rx_statistic_cal(dm, phy_info, phy_sts, pktinfo);
 	}
 
 	phy_info->physts_rpt_valid = true;
