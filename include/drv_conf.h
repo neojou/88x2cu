@@ -703,12 +703,6 @@ defined(CONFIG_RTL8723F) /*|| defined(CONFIG_RTL8814A)*/
 	#endif
 #endif /*CONFIG_RTW_80211K*/
 
-#ifdef DBG_CONFIG_ERROR_RESET
-#ifndef CONFIG_IPS
-#define CONFIG_IPS
-#endif
-#endif
-
 /* IPS */
 #ifndef RTW_IPS_MODE
 	#if defined(CONFIG_IPS)

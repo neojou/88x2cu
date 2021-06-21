@@ -1141,7 +1141,6 @@ u8 devobj_data_init(struct dvobj_priv *dvobj)
 	RTW_ENABLE_FUNC(dvobj, DF_TX_BIT);
 #endif // NEO
 
-exit:
 	return ret;
 }
 
@@ -2197,78 +2196,6 @@ int netdev_open(struct net_device *pnetdev)
 	return ret;
 }
 
-#ifdef CONFIG_IPS
-int  ips_netdrv_open(_adapter *padapter)
-{
-	int status = _SUCCESS;
-	/* struct pwrctrl_priv	*pwrpriv = adapter_to_pwrctl(padapter); */
-
-	padapter->net_closed = _FALSE;
-
-	RTW_INFO("===> %s.........\n", __FUNCTION__);
-
-
-	rtw_clr_drv_stopped(padapter);
-	if (!rtw_is_hw_init_completed(padapter)) {
-		status = rtk_hal_init(padapter);
-		if (status == _FAIL) {
-			goto netdev_open_error;
-		}
-		rtw_mi_hal_iface_init(padapter);
-	}
-
-#ifndef CONFIG_IPS_CHECK_IN_WD
-	rtw_set_pwr_state_check_timer(adapter_to_pwrctl(padapter));
-#endif
-	_set_timer(&adapter_to_dvobj(padapter)->dynamic_chk_timer, 2000);
-
-	return _SUCCESS;
-
-netdev_open_error:
-	RTW_INFO("-ips_netdrv_open - drv_open failure, netif_up=%d\n", padapter->netif_up);
-
-	return _FAIL;
-}
-
-int rtw_ips_pwr_up(_adapter *padapter)
-{
-	int result;
-#if defined(CONFIG_SWLPS_IN_IPS) || defined(CONFIG_FWLPS_IN_IPS)
-#ifdef DBG_CONFIG_ERROR_DETECT
-	PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
-	struct sreset_priv *psrtpriv = &pHalData->srestpriv;
-#endif/* #ifdef DBG_CONFIG_ERROR_DETECT */
-#endif /* defined(CONFIG_SWLPS_IN_IPS) || defined(CONFIG_FWLPS_IN_IPS) */
-	systime start_time = rtw_get_current_time();
-	RTW_INFO("===>  rtw_ips_pwr_up..............\n");
-
-#if defined(CONFIG_SWLPS_IN_IPS) || defined(CONFIG_FWLPS_IN_IPS)
-#ifdef DBG_CONFIG_ERROR_DETECT
-	if (psrtpriv->silent_reset_inprogress == _TRUE)
-#endif/* #ifdef DBG_CONFIG_ERROR_DETECT */
-#endif /* defined(CONFIG_SWLPS_IN_IPS) || defined(CONFIG_FWLPS_IN_IPS) */
-		rtw_reset_drv_sw(padapter);
-
-	result = ips_netdrv_open(padapter);
-
-	rtw_led_control(padapter, LED_CTL_NO_LINK);
-
-	RTW_INFO("<===  rtw_ips_pwr_up.............. in %dms\n", rtw_get_passing_time_ms(start_time));
-	return result;
-
-}
-
-void rtw_ips_pwr_down(_adapter *padapter)
-{
-	systime start_time = rtw_get_current_time();
-	RTW_INFO("===> rtw_ips_pwr_down...................\n");
-
-	padapter->net_closed = _TRUE;
-
-	rtw_ips_dev_unload(padapter);
-	RTW_INFO("<=== rtw_ips_pwr_down..................... in %dms\n", rtw_get_passing_time_ms(start_time));
-}
-#endif
 void rtw_ips_dev_unload(_adapter *padapter)
 {
 #if defined(CONFIG_SWLPS_IN_IPS) || defined(CONFIG_FWLPS_IN_IPS)
