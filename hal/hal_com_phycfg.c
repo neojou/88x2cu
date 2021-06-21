@@ -3828,52 +3828,6 @@ bool phy_is_tx_power_limit_needed(_adapter *adapter)
 	return _FALSE;
 }
 
-int phy_load_tx_power_by_rate(_adapter *adapter, u8 chk_file)
-{
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
-	int ret = _FAIL;
-
-	hal_data->txpwr_by_rate_loaded = 0;
-	PHY_InitTxPowerByRate(adapter);
-
-	/* tx power limit is based on tx power by rate */
-	hal_data->txpwr_limit_loaded = 0;
-
-#ifdef CONFIG_LOAD_PHY_PARA_FROM_FILE
-	if (chk_file
-		&& phy_ConfigBBWithPgParaFile(adapter, PHY_FILE_PHY_REG_PG) == _SUCCESS
-	) {
-		hal_data->txpwr_by_rate_from_file = 1;
-		goto post_hdl;
-	}
-#endif
-
-#ifdef CONFIG_EMBEDDED_FWIMG
-	if (HAL_STATUS_SUCCESS == odm_config_bb_with_header_file(&hal_data->odmpriv, CONFIG_BB_PHY_REG_PG)) {
-		RTW_INFO("default power by rate loaded\n");
-		hal_data->txpwr_by_rate_from_file = 0;
-		goto post_hdl;
-	}
-#endif
-
-	RTW_ERR("%s():Read Tx power by rate fail\n", __func__);
-	goto exit;
-
-post_hdl:
-	if (hal_data->odmpriv.phy_reg_pg_value_type != PHY_REG_PG_EXACT_VALUE) {
-		rtw_warn_on(1);
-		goto exit;
-	}
-
-	PHY_TxPowerByRateConfiguration(adapter);
-	hal_data->txpwr_by_rate_loaded = 1;
-
-	ret = _SUCCESS;
-
-exit:
-	return ret;
-}
-
 void phy_load_tx_power_ext_info(_adapter *adapter, u8 chk_file)
 {
 	struct registry_priv *regsty = adapter_to_regsty(adapter);

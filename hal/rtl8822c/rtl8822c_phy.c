@@ -57,74 +57,13 @@ static void bb_rf_register_definition(PADAPTER adapter)
 static u8 _init_bb_reg(PADAPTER Adapter)
 {
 	PHAL_DATA_TYPE hal = GET_HAL_DATA(Adapter);
-	u8 ret = _TRUE;
-	int res;
-	enum hal_status status;
 
-	/*
-	 * 1. Read PHY_REG.TXT BB INIT!!
-	 */
-	ret = _FALSE;
-#ifdef CONFIG_LOAD_PHY_PARA_FROM_FILE
-	res = phy_ConfigBBWithParaFile(Adapter, PHY_FILE_PHY_REG, CONFIG_BB_PHY_REG);
-	if (_SUCCESS == res)
-		ret = _TRUE;
-#endif
-	if (_FALSE == ret) {
-		status = odm_config_bb_with_header_file(&hal->odmpriv, CONFIG_BB_PHY_REG);
-		if (HAL_STATUS_SUCCESS == status)
-			ret = _TRUE;
-	}
-	if (_FALSE == ret) {
-		RTW_INFO("%s: Write BB Reg Fail!!", __FUNCTION__);
-		goto exit;
-	}
+	odm_read_and_config_mp_8822c_phy_reg(&hal->odmpriv);
 
-#if 0 /* No parameter with MP using currently by BB@Stanley. */
-/*#ifdef CONFIG_MP_INCLUDED*/
-	if (Adapter->registrypriv.mp_mode == 1) {
-		/*
-		 * 1.1 Read PHY_REG_MP.TXT BB INIT!!
-		 */
-		ret = _FALSE;
-#ifdef CONFIG_LOAD_PHY_PARA_FROM_FILE
-		res = phy_ConfigBBWithMpParaFile(Adapter, PHY_FILE_PHY_REG_MP);
-		if (_SUCCESS == res)
-			ret = _TRUE;
-#endif
-		if (_FALSE == ret) {
-			status = odm_config_bb_with_header_file(&hal->odmpriv, CONFIG_BB_PHY_REG_MP);
-			if (HAL_STATUS_SUCCESS == status)
-				ret = _TRUE;
-		}
-		if (_FALSE == ret) {
-			RTW_INFO("%s: Write BB Reg MP Fail!!", __FUNCTION__);
-			goto exit;
-		}
-	}
-#endif /* CONFIG_MP_INCLUDED */
-
-	/*
-	 * 2. Read BB AGC table Initialization
-	 */
-	ret = _FALSE;
-#ifdef CONFIG_LOAD_PHY_PARA_FROM_FILE
-	res = phy_ConfigBBWithParaFile(Adapter, PHY_FILE_AGC_TAB, CONFIG_BB_AGC_TAB);
-	if (_SUCCESS == res)
-		ret = _TRUE;
-#endif
-	if (_FALSE == ret) {
-		status = odm_config_bb_with_header_file(&hal->odmpriv, CONFIG_BB_AGC_TAB);
-		if (HAL_STATUS_SUCCESS == status)
-			ret = _TRUE;
-	}
-	if (_FALSE == ret) {
-		RTW_INFO("%s: Write AGC Table Fail!\n", __FUNCTION__);
-		goto exit;
-	}
+	odm_read_and_config_mp_8822c_agc_tab(&hal->odmpriv);
 
 exit:
-	return ret;
+	return _TRUE; 
 }
 
 static u8 init_bb_reg(PADAPTER adapter)

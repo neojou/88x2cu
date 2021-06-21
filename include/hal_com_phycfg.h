@@ -256,7 +256,6 @@ void dump_txpwr_total_dbm(void *sel, _adapter *adapter
 
 bool phy_is_tx_power_limit_needed(_adapter *adapter);
 bool phy_is_tx_power_by_rate_needed(_adapter *adapter);
-int phy_load_tx_power_by_rate(_adapter *adapter, u8 chk_file);
 #if CONFIG_TXPWR_LIMIT
 int phy_load_tx_power_limit(_adapter *adapter, u8 chk_file);
 #endif
