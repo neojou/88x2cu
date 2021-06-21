@@ -18,42 +18,6 @@
 #include "../hal_halmac.h"
 #include "rtl8822c.h"
 
-
-/*
- * Description:
- *	Initialize Register definition offset for Radio Path A/B/C/D
- *	The initialization value is constant and it should never be changes
- */
-static void bb_rf_register_definition(PADAPTER adapter)
-{
-	PHAL_DATA_TYPE hal = GET_HAL_DATA(adapter);
-
-
-	/* RF Interface Sowrtware Control */
-	hal->PHYRegDef[RF_PATH_A].rfintfs = rFPGA0_XAB_RFInterfaceSW;
-	hal->PHYRegDef[RF_PATH_B].rfintfs = rFPGA0_XAB_RFInterfaceSW;
-
-	/* RF Interface Output (and Enable) */
-	hal->PHYRegDef[RF_PATH_A].rfintfo = rFPGA0_XA_RFInterfaceOE;
-	hal->PHYRegDef[RF_PATH_B].rfintfo = rFPGA0_XB_RFInterfaceOE;
-
-	/* RF Interface (Output and) Enable */
-	hal->PHYRegDef[RF_PATH_A].rfintfe = rFPGA0_XA_RFInterfaceOE;
-	hal->PHYRegDef[RF_PATH_B].rfintfe = rFPGA0_XB_RFInterfaceOE;
-
-	hal->PHYRegDef[RF_PATH_A].rf3wireOffset = rA_LSSIWrite_Jaguar;
-	hal->PHYRegDef[RF_PATH_B].rf3wireOffset = rB_LSSIWrite_Jaguar;
-
-	hal->PHYRegDef[RF_PATH_A].rfHSSIPara2 = rHSSIRead_Jaguar;
-	hal->PHYRegDef[RF_PATH_B].rfHSSIPara2 = rHSSIRead_Jaguar;
-
-	/* Tranceiver Readback LSSI/HSPI mode */
-	hal->PHYRegDef[RF_PATH_A].rfLSSIReadBack = rA_SIRead_Jaguar;
-	hal->PHYRegDef[RF_PATH_B].rfLSSIReadBack = rB_SIRead_Jaguar;
-	hal->PHYRegDef[RF_PATH_A].rfLSSIReadBackPi = rA_PIRead_Jaguar;
-	hal->PHYRegDef[RF_PATH_B].rfLSSIReadBackPi = rB_PIRead_Jaguar;
-}
-
 static u8 _init_bb_reg(PADAPTER Adapter)
 {
 	PHAL_DATA_TYPE hal = GET_HAL_DATA(Adapter);
@@ -126,11 +90,8 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 	u32 value32;
 	BOOLEAN ret;
 
-
 	d = adapter_to_dvobj(adapter);
 	phydm = adapter_to_phydm(adapter);
-
-	bb_rf_register_definition(adapter);
 
 	// odm pre setting: disable OFDM and CCK
 	value32 = rtw_read32(adapter, 0x1c3c);

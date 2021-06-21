@@ -518,7 +518,6 @@ typedef struct hal_com_data {
 	u32	ac_param_be; /* Original parameter for BE, use for EDCA turbo.	*/
 	u8	is_turbo_edca;
 	u8	prv_traffic_idx;
-	BB_REGISTER_DEFINITION_T	PHYRegDef[MAX_RF_PATH];	/* Radio A/B/C/D */
 
 	u32	RfRegChnlVal[MAX_RF_PATH];
 
