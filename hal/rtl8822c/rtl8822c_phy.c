@@ -18,16 +18,6 @@
 #include "../hal_halmac.h"
 #include "rtl8822c.h"
 
-static u8 _init_bb_reg(PADAPTER Adapter)
-{
-	PHAL_DATA_TYPE hal = GET_HAL_DATA(Adapter);
-
-	odm_read_and_config_mp_8822c_phy_reg(&hal->odmpriv);
-	odm_read_and_config_mp_8822c_agc_tab(&hal->odmpriv);
-
-	return _TRUE; 
-}
-
 static u8 init_bb_reg(PADAPTER adapter)
 {
 	u8 ret = _TRUE;
@@ -37,7 +27,8 @@ static u8 init_bb_reg(PADAPTER adapter)
 	/*
 	 * Config BB and AGC
 	 */
-	ret = _init_bb_reg(adapter);
+	odm_read_and_config_mp_8822c_phy_reg(&hal->odmpriv);
+	odm_read_and_config_mp_8822c_agc_tab(&hal->odmpriv);
 
 	if (rtw_phydm_set_crystal_cap(adapter, hal->crystal_cap) == _FALSE) {
 		RTW_ERR("Init crystal_cap failed\n");
