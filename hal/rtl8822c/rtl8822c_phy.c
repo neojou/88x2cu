@@ -49,6 +49,7 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 	cfo_track = &phydm->dm_cfo_track;
 	physts_table = &phydm->dm_physts_table;
 	crystal_cap = hal->crystal_cap;
+	pr_info("%s NEO crystal_cap=0x%x\n", __func__, crystal_cap);
 
 	// odm pre setting: disable OFDM and CCK
 	value32 = rtw_read32(adapter, 0x1c3c);
@@ -123,13 +124,11 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 	/* reset bb */
 	value32 = rtw_read32(adapter, 0x0);
 	value32 |= BIT(16);
-	rtw_write32(adapter, 0x410c, value32);
-	value32 = rtw_read32(adapter, 0x0);
+	rtw_write32(adapter, 0x0, value32);
 	value32 &= ~(BIT(16));
-	rtw_write32(adapter, 0x410c, value32);
-	value32 = rtw_read32(adapter, 0x0);
+	rtw_write32(adapter, 0x0, value32);
 	value32 |= BIT(16);
-	rtw_write32(adapter, 0x410c, value32);
+	rtw_write32(adapter, 0x0, value32);
 
 	return _TRUE;
 }

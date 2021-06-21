@@ -18,6 +18,12 @@
 //#include "security_cam.h"
 #include "hw.h"
 
+#include "array_phy_reg.h"
+#include "array_agc_table.h"
+#include "array_cal_init.h"
+#include "array_radioa.h"
+#include "array_radiob.h"
+
 
 #define RSVD_PG_DRV_NUM			16
 #define RSVD_PG_H2C_EXTRAINFO_NUM	24
@@ -1136,6 +1142,334 @@ u32 mac_cfg_drv_info(struct mac_adapter *adapter, bool is_phy)
 	return MACSUCCESS;
 }
 
+static void mac_odm_pre_setting(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 value32;
+
+	// odm pre setting: disable OFDM and CCK
+	value32 = MAC_REG_R32(0x1c3c);
+	value32 &= ~(0x3);
+	MAC_REG_W32(0x1c3c, value32);
+}
+
+static void mac_odm_post_setting(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 value32;
+
+	/* Disable low rate DPD*/
+	value32 = MAC_REG_R32(0xa70);
+	value32 &= ~(0x3ff);
+	MAC_REG_W32(0xa70, value32);
+
+	/* @Do not use PHYDM API to read/write because FW can not access */
+	/* @Turn on 3-wire*/
+	value32 = MAC_REG_R32(0x180c);
+	value32 |= 0x3;
+	value32 |= BIT(28);
+	MAC_REG_W32(0x180c, value32);
+
+	value32 = MAC_REG_R32(0x410c);
+	value32 |= 0x3;
+	value32 |= BIT(28);
+	MAC_REG_W32(0x410c, value32);
+
+	// odm post setting: enable OFDM and CCK
+	value32 = MAC_REG_R32(0x1c3c);
+	value32 |= 0x3;
+	MAC_REG_W32(0x1c3c, value32);
+}
+
+#define CUT_DONT_CARE	0xf
+#define RFE_DONT_CARE	0xff
+
+static boolean
+halbb_sel_headline(struct mac_adapter *adapter, u32 *array, u32 array_len,
+		   u8 *headline_size, u8 *headline_idx)
+{
+	boolean case_match = false;
+	u32 cut_drv = 2;
+	u32 rfe_drv =  0; //rfe_type;
+	u32 cut_para = 0, rfe_para = 0;
+	u32 compare_target = 0;
+	u32 cut_max = 0;
+	u32 i = 0;
+
+	*headline_idx = 0;
+	*headline_size = 0;
+
+	while ((i + 1) < array_len) {
+		if ((array[i] >> 28) != 0xf) {
+			*headline_size = (u8)i;
+			break;
+		}
+		i += 2;
+	}
+
+	if (i == 0)
+		return true;
+
+	compare_target = ((cut_drv & 0x0f) << 24) | (rfe_drv & 0xff);
+	for (i = 0; i < *headline_size; i += 2) {
+		if ((array[i] & 0x0f0000ff) == compare_target) {
+			*headline_idx = (u8)(i >> 1);
+			return true;
+		}
+	}
+
+	compare_target = (CUT_DONT_CARE << 24) | (rfe_drv & 0xff);
+	for (i = 0; i < *headline_size; i += 2) {
+		if ((array[i] & 0x0f0000ff) == compare_target) {
+			*headline_idx = (u8)(i >> 1);
+			return true;
+		}
+	}
+
+	for (i = 0; i < *headline_size; i += 2) {
+		rfe_para = array[i] & 0xff;
+		cut_para = (array[i] & 0x0f000000) >> 24;
+		if (rfe_para == rfe_drv) {
+			if (cut_para >= cut_max) {
+				cut_max = cut_para;
+				*headline_idx = (u8)(i >> 1);
+				case_match = true;
+			}
+		}
+	}
+	if (case_match) {
+		return true;
+	}
+
+	for (i = 0; i < *headline_size; i += 2) {
+		rfe_para = array[i] & 0xff;
+		cut_para = (array[i] & 0x0f000000) >> 24;
+		if (rfe_para == RFE_DONT_CARE) {
+			if (cut_para >= cut_max) {
+				cut_max = cut_para;
+				*headline_idx = (u8)(i >> 1);
+				case_match = true;
+			}
+		}
+	}
+	if (case_match) {
+		return true;
+	}
+
+	return false;
+}
+
+static void odm_config_bb_phy(struct mac_adapter *adapter, u32 addr, u32 data)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+
+	if (addr == 0xfe)
+		msleep(50);
+	else if (addr == 0xfd)
+		mdelay(5);
+	else if (addr == 0xfc)
+		mdelay(1);
+	else if (addr == 0xfb)
+		udelay(50);
+	else if (addr == 0xfa)
+		udelay(5);
+	else if (addr == 0xf9)
+		udelay(1);
+	else
+		MAC_REG_W32(addr, data);
+}
+
+#define PARA_IF		0x8
+#define PARA_ELSE_IF	0x9
+#define PARA_ELSE	0xa
+#define PARA_END	0xb
+#define PARA_CHK	0x4
+
+static void phy_reg_setting(struct mac_adapter *adapter, u32 *array, u32 array_len)
+{
+	boolean is_matched, find_target;
+	u32 cfg_target = 0, cfg_para = 0;
+	u32 i = 0;
+	u32 v1 = 0, v2 = 0;
+	u8 h_size = 0;
+	u8 h_idx = 0;
+
+	array_len = sizeof(array_phy_reg) / sizeof(u32);
+
+	if (!halbb_sel_headline(adapter, array, array_len, &h_size, &h_idx)) {
+		return;
+	}
+
+	if (h_size != 0) {
+		cfg_target = array[h_idx << 1] & 0x0fffffff;
+	}
+
+	i += h_size;
+
+	is_matched = true;
+	find_target = false;
+	while ((i + 1) < array_len) {
+		v1 = array[i];
+		v2 = array[i + 1];
+		i += 2;
+
+		switch (v1 >> 28) {
+		case PARA_IF:
+		case PARA_ELSE_IF:
+			cfg_para = v1 & 0x0fffffff;
+			break;
+		case PARA_ELSE:
+			is_matched = false;
+			if (!find_target) {
+				return;
+			}
+			break;
+		case PARA_END:
+			is_matched = true;
+			find_target = false;
+			break;
+		case PARA_CHK:
+			if (find_target) {
+				is_matched = false;
+				break;
+			}
+
+			if (cfg_para == cfg_target) {
+				is_matched = true;
+				find_target = true;
+			} else {
+				is_matched = false;
+				find_target = false;
+			}
+			break;
+		default:
+			if (is_matched)
+				odm_config_bb_phy(adapter, v1, v2);
+			break;
+		}
+	}
+}
+
+static void mac_odm_set_crystal_cap(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 value32;
+
+	value32 = MAC_REG_R32(0x1040);
+	value32 &= ~(0x00FFFC00);
+	MAC_REG_W32(0x1040, value32);
+}
+
+static void mac_odm_reset_bb(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 value32;
+
+	value32 = MAC_REG_R32(0x0);
+	value32 |= BIT(16);
+	MAC_REG_W32(0x0, value32);
+	value32 &= ~(BIT(16));
+	MAC_REG_W32(0x0, value32);
+	value32 |= BIT(16);
+	MAC_REG_W32(0x0, value32);
+}
+
+static void mac_odm_phy_reg_init(struct mac_adapter *adapter)
+{
+	u32 *array;
+	u32 array_len;
+
+	array = (u32 *)array_phy_reg;
+	array_len = sizeof(array_phy_reg) / sizeof(u32);
+	phy_reg_setting(adapter, array, array_len);
+}
+
+static void mac_odm_agc_init(struct mac_adapter *adapter)
+{
+	u32 *array;
+	u32 array_len;
+
+	array = (u32 *)array_agc_table;
+	array_len = sizeof(array_agc_table) / sizeof(u32);
+	phy_reg_setting(adapter, array, array_len);
+}
+
+static void mac_odm_radioa_init(struct mac_adapter *adapter)
+{
+	u32 *array;
+	u32 array_len;
+
+	array = (u32 *)array_radioa;
+	array_len = sizeof(array_radioa) / sizeof(u32);
+	phy_reg_setting(adapter, array, array_len);
+}
+
+static void mac_odm_radiob_init(struct mac_adapter *adapter)
+{
+	u32 *array;
+	u32 array_len;
+
+	array = (u32 *)array_radiob;
+	array_len = sizeof(array_radiob) / sizeof(u32);
+	phy_reg_setting(adapter, array, array_len);
+}
+
+static void mac_odm_table_init(struct mac_adapter *adapter, u32 *array, u32 array_len)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 i;
+	u32 addr, val;
+	u32 value32;
+
+	while ((i + 1) < array_len) {
+		addr = array[i];
+		val = array[i + 1];
+		MAC_REG_W32(addr, val);
+		i += 2;
+	}
+}
+
+static void mac_odm_cal_init(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 value32;
+	u32 *array;
+	u32 array_len;
+
+	value32 = MAC_REG_R32(0x1cd0);
+	value32 &= ~(0xF0000000);
+	value32 |= 0x70000000;
+	MAC_REG_W32(0x1cd0, value32);
+
+	array = (u32 *)array_cal_init;
+	array_len = sizeof(array_cal_init) / sizeof(u32);
+	mac_odm_table_init(adapter, array, array_len);
+}
+
+static u32 phy_init(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u8 crystal_cap = 0;
+	u32 value32;
+	u32 ret = MACSUCCESS;
+
+#if 0
+	mac_odm_pre_setting(adapter);
+
+	mac_odm_phy_reg_init(adapter);
+	mac_odm_agc_init(adapter);
+	mac_odm_set_crystal_cap(adapter);
+	mac_odm_cal_init(adapter);
+	//mac_odm_radioa_init(adapter);
+	//mac_odm_radiob_init(adapter);
+	//mac_odm_txpowertrack_init(adapter);
+
+	mac_odm_post_setting(adapter);
+	mac_odm_reset_bb(adapter);
+#endif
+	return ret;
+}
+
 u32 mac_hal_init(struct mac_adapter *adapter,
 		 struct mac_trx_info *trx_info,
 		 struct mac_fwdl_info *fwdl_info,
@@ -1222,6 +1556,12 @@ u32 mac_hal_init(struct mac_adapter *adapter,
 	ret = set_enable_bb_rf(adapter, true);
 	if (ret != MACSUCCESS) {
 		PLTFM_MSG_ERR("[ERR]set_enable_bb_rf %d\n", ret);
+		return ret;
+	}
+
+	ret = phy_init(adapter);
+	if (ret != MACSUCCESS) {
+		PLTFM_MSG_ERR("[ERR]phy_init %d\n", ret);
 		return ret;
 	}
 

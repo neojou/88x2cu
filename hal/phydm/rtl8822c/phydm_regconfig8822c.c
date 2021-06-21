@@ -133,19 +133,10 @@ void odm_config_bb_phy_reg_pg_8822c(struct dm_struct *dm, u32 band, u32 rf_path,
 				    u32 tx_num, u32 addr, u32 bitmask, u32 data)
 {
 	if (addr == 0xfe || addr == 0xffe) {
-#ifdef CONFIG_LONG_DELAY_ISSUE
 		ODM_sleep_ms(50);
-#else
-		ODM_delay_ms(50);
-#endif
 	} else {
-#if (DM_ODM_SUPPORT_TYPE & ODM_CE)
 		phy_store_tx_power_by_rate(dm->adapter, band, rf_path, tx_num,
 					   addr, bitmask, data);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_WIN)
-		PHY_StoreTxPowerByRate(dm->adapter, band, rf_path, tx_num, addr,
-				       bitmask, data);
-#endif
 	}
 	PHYDM_DBG(dm, ODM_COMP_INIT,
 		  "===> config_bb: [PHY_REG] %08X %08X %08X\n", addr, bitmask,
@@ -157,11 +148,7 @@ void odm_config_bb_phy_8822c(struct dm_struct *dm, u32 addr, u32 bitmask,
 {
 	{
 		if (addr == 0xfe)
-#ifdef CONFIG_LONG_DELAY_ISSUE
 			ODM_sleep_ms(50);
-#else
-			ODM_delay_ms(50);
-#endif
 		else if (addr == 0xfd)
 			ODM_delay_ms(5);
 		else if (addr == 0xfc)

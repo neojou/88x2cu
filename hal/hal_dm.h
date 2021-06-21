@@ -100,7 +100,6 @@ u32 rtw_phydm_get_phy_cnt(_adapter *adapter, enum phy_cnt cnt);
 void rtw_phydm_iqk_trigger(_adapter *adapter);
 #endif
 void rtw_phydm_read_efuse(_adapter *adapter);
-bool rtw_phydm_set_crystal_cap(_adapter *adapter, u8 crystal_cap);
 
 #ifdef CONFIG_LPS_PG
 void rtw_phydm_lps_pg_hdl(_adapter *adapter, struct sta_info *sta, bool in_lpspg);

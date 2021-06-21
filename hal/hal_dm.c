@@ -1470,17 +1470,6 @@ void rtw_phydm_init(_adapter *adapter)
 #endif
 }
 
-bool rtw_phydm_set_crystal_cap(_adapter *adapter, u8 crystal_cap)
-{
-	PHAL_DATA_TYPE	hal_data = GET_HAL_DATA(adapter);
-	struct dm_struct	*phydm = &(hal_data->odmpriv);
-
-	return phydm_set_crystal_cap_reg(phydm, crystal_cap);
-}
-
-/*#define DBG_PHYDM_STATE_CHK*/
-
-
 static u8 _rtw_phydm_rfk_condition_check(_adapter *adapter, u8 is_scaning, u8 ifs_linked)
 {
 	u8 rfk_allowed = _TRUE;
