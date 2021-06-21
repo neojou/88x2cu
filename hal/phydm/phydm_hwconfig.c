@@ -99,22 +99,6 @@ odm_config_rf_with_tx_pwr_track_header_file(struct dm_struct *dm)
 	return HAL_STATUS_SUCCESS;
 }
 
-enum hal_status
-odm_config_bb_with_header_file(struct dm_struct *dm,
-			       enum odm_bb_config_type config_type)
-{
-	enum hal_status result = HAL_STATUS_SUCCESS;
-
-	if (config_type == CONFIG_BB_PHY_REG)
-		odm_read_and_config_mp_8822c_phy_reg(dm);
-	else if (config_type == CONFIG_BB_AGC_TAB)
-		READ_AND_CONFIG_MP(8822c, _agc_tab);
-	else if (config_type == CONFIG_BB_PHY_REG_PG)
-		READ_AND_CONFIG(8822c, _phy_reg_pg);
-
-	return result;
-}
-
 u32 odm_get_hw_img_version(struct dm_struct *dm)
 {
 	u32 version = 0;
