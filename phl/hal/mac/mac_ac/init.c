@@ -1259,7 +1259,7 @@ halbb_sel_headline(struct mac_adapter *adapter, u32 *array, u32 array_len,
 	return false;
 }
 
-static void odm_config_bb_phy(struct mac_adapter *adapter, u32 addr, u32 data)
+static void odm_config_bb_reg(struct mac_adapter *adapter, u32 addr, u32 data)
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 
@@ -1279,13 +1279,68 @@ static void odm_config_bb_phy(struct mac_adapter *adapter, u32 addr, u32 data)
 		MAC_REG_W32(addr, data);
 }
 
+static void rf_write_reg_direct(struct mac_adapter *adapter, u32 addr, u32 data, u8 path)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 direct_addr = 0;
+	u32 offset_write_rf[2] = {0x3c00, 0x4c00};
+
+	addr &= 0xff;
+	direct_addr = offset_write_rf[path] + (addr << 2);
+
+	MAC_REG_W32(direct_addr, data & 0xFFFFF);
+	udelay(1);
+}
+
+static void rf_write_reg(struct mac_adapter *adapter, u32 addr, u32 data, u8 path)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 offset_write_rf[2] = {0x1808, 0x4108};
+
+	if (addr) {
+		rf_write_reg_direct(adapter, addr, data, path);
+		return;
+	}
+
+	MAC_REG_W32(offset_write_rf[path], data & 0xFFFFF);
+}
+
+static void odm_config_rf_reg_radioa(struct mac_adapter *adapter, u32 addr, u32 data)
+{
+	if (addr == 0xffe) {
+		msleep(50);
+	} else if (addr == 0xfe) {
+		udelay(100);
+	} else if (addr == 0xffff) {
+		udelay(1);
+	} else {
+		rf_write_reg(adapter, addr, data, 0);
+		udelay(1);
+	}
+}
+
+static void odm_config_rf_reg_radiob(struct mac_adapter *adapter, u32 addr, u32 data)
+{
+	if (addr == 0xffe) {
+		msleep(50);
+	} else if (addr == 0xfe) {
+		udelay(100);
+	} else if (addr == 0xffff) {
+		udelay(1);
+	} else {
+		rf_write_reg(adapter, addr, data, 1);
+		udelay(1);
+	}
+}
+
 #define PARA_IF		0x8
 #define PARA_ELSE_IF	0x9
 #define PARA_ELSE	0xa
 #define PARA_END	0xb
 #define PARA_CHK	0x4
 
-static void phy_reg_setting(struct mac_adapter *adapter, u32 *array, u32 array_len)
+static void phy_reg_setting(struct mac_adapter *adapter, u32 *array, u32 array_len,
+			    void (*func)(struct mac_adapter *, u32, u32))
 {
 	boolean is_matched, find_target;
 	u32 cfg_target = 0, cfg_para = 0;
@@ -1344,7 +1399,7 @@ static void phy_reg_setting(struct mac_adapter *adapter, u32 *array, u32 array_l
 			break;
 		default:
 			if (is_matched)
-				odm_config_bb_phy(adapter, v1, v2);
+				func(adapter, v1, v2);
 			break;
 		}
 	}
@@ -1381,7 +1436,7 @@ static void mac_odm_phy_reg_init(struct mac_adapter *adapter)
 
 	array = (u32 *)array_phy_reg;
 	array_len = sizeof(array_phy_reg) / sizeof(u32);
-	phy_reg_setting(adapter, array, array_len);
+	phy_reg_setting(adapter, array, array_len, odm_config_bb_reg);
 }
 
 static void mac_odm_agc_init(struct mac_adapter *adapter)
@@ -1391,7 +1446,7 @@ static void mac_odm_agc_init(struct mac_adapter *adapter)
 
 	array = (u32 *)array_agc_table;
 	array_len = sizeof(array_agc_table) / sizeof(u32);
-	phy_reg_setting(adapter, array, array_len);
+	phy_reg_setting(adapter, array, array_len, odm_config_bb_reg);
 }
 
 static void mac_odm_radioa_init(struct mac_adapter *adapter)
@@ -1401,7 +1456,7 @@ static void mac_odm_radioa_init(struct mac_adapter *adapter)
 
 	array = (u32 *)array_radioa;
 	array_len = sizeof(array_radioa) / sizeof(u32);
-	phy_reg_setting(adapter, array, array_len);
+	phy_reg_setting(adapter, array, array_len, odm_config_rf_reg_radioa);
 }
 
 static void mac_odm_radiob_init(struct mac_adapter *adapter)
@@ -1411,7 +1466,7 @@ static void mac_odm_radiob_init(struct mac_adapter *adapter)
 
 	array = (u32 *)array_radiob;
 	array_len = sizeof(array_radiob) / sizeof(u32);
-	phy_reg_setting(adapter, array, array_len);
+	phy_reg_setting(adapter, array, array_len, odm_config_rf_reg_radiob);
 }
 
 static void mac_odm_table_init(struct mac_adapter *adapter, u32 *array, u32 array_len)
@@ -1453,20 +1508,18 @@ static u32 phy_init(struct mac_adapter *adapter)
 	u32 value32;
 	u32 ret = MACSUCCESS;
 
-#if 0
 	mac_odm_pre_setting(adapter);
 
 	mac_odm_phy_reg_init(adapter);
 	mac_odm_agc_init(adapter);
 	mac_odm_set_crystal_cap(adapter);
 	mac_odm_cal_init(adapter);
-	//mac_odm_radioa_init(adapter);
-	//mac_odm_radiob_init(adapter);
-	//mac_odm_txpowertrack_init(adapter);
+	mac_odm_radioa_init(adapter);
+	mac_odm_radiob_init(adapter);
 
 	mac_odm_post_setting(adapter);
 	mac_odm_reset_bb(adapter);
-#endif
+
 	return ret;
 }
 

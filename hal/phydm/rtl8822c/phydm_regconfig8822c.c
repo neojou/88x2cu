@@ -124,9 +124,6 @@ void odm_config_bb_agc_8822c(struct dm_struct *dm, u32 addr, u32 bitmask,
 	phydm_agc_store_8822c(dm, addr, data);
 
 	odm_set_bb_reg(dm, addr, bitmask, data);
-
-	PHYDM_DBG(dm, ODM_COMP_INIT, "===> config_bb: [AGC_TAB] %08X %08X\n",
-		  addr, data);
 }
 
 void odm_config_bb_phy_reg_pg_8822c(struct dm_struct *dm, u32 band, u32 rf_path,

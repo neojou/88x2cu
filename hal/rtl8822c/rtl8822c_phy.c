@@ -48,8 +48,6 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 	phydm = adapter_to_phydm(adapter);
 	cfo_track = &phydm->dm_cfo_track;
 	physts_table = &phydm->dm_physts_table;
-	crystal_cap = hal->crystal_cap;
-	pr_info("%s NEO crystal_cap=0x%x\n", __func__, crystal_cap);
 
 	// odm pre setting: disable OFDM and CCK
 	value32 = rtw_read32(adapter, 0x1c3c);
@@ -60,21 +58,15 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 	odm_read_and_config_mp_8822c_phy_reg(&hal->odmpriv);
 	odm_read_and_config_mp_8822c_agc_tab(&hal->odmpriv);
 
-	/* set crystal cap */
-	crystal_cap &= 0x7F;
-	reg_val = crystal_cap | (crystal_cap << 7);
-
-	cfo_track->crystal_cap = crystal_cap;
-
-	value32 = rtw_read32(adapter, 0x1040);
-	value32 &= ~(0x00FFFC00);
-	value32 |= reg_val << 10;
-	rtw_write32(adapter, 0x1040, value32);
-
 	odm_read_and_config_mp_8822c_cal_init(&hal->odmpriv);
 	odm_read_and_config_mp_8822c_radioa(&hal->odmpriv);
 	odm_read_and_config_mp_8822c_radiob(&hal->odmpriv);
 	odm_read_and_config_mp_8822c_txpowertrack(&hal->odmpriv);
+
+	value32 = rtw_read32(adapter, 0x1040);
+	value32 &= ~(0x00FFFC00);
+	rtw_write32(adapter, 0x1040, value32);
+	cfo_track->crystal_cap = 0;
 
 	/* CCK GI bound */
 	value32 = rtw_read32(adapter, 0x1a98);
@@ -102,8 +94,8 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 	value32 = rtw_read32(adapter, 0xa70);
 	value32 &= ~(0x3ff);
 	rtw_write32(adapter, 0xa70, value32);
-	phydm->dis_dpd_rate = 0;
-
+ 	phydm->dis_dpd_rate = 0;
+ 
 	/* @Do not use PHYDM API to read/write because FW can not access */
 	/* @Turn on 3-wire*/
 	value32 = rtw_read32(adapter, 0x180c);
@@ -132,6 +124,7 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 
 	return _TRUE;
 }
+
 
 /*
  * ============================================================

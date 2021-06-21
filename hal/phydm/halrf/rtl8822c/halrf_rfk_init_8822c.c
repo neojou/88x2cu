@@ -2497,7 +2497,6 @@ u32 array_mp_8822c_cal_init[] = {
 
 void odm_read_and_config_mp_8822c_cal_init(void *dm_void)
 {
-#if 1
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	struct dm_dpk_info *dpk_info = &dm->dpk_info;
 
@@ -2522,7 +2521,6 @@ void odm_read_and_config_mp_8822c_cal_init(void *dm_void)
 	dpk_info->is_dpk_pwr_on = 1;
 	dpk_info->is_dpk_enable = 1;
 	dpk_info->is_dpk_by_channel= 1;
-#endif
 }
 
 #endif
