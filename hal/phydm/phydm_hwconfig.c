@@ -82,23 +82,6 @@ odm_config_rf_with_header_file(struct dm_struct *dm,
 	return result;
 }
 
-enum hal_status
-odm_config_rf_with_tx_pwr_track_header_file(struct dm_struct *dm)
-{
-	PHYDM_DBG(dm, ODM_COMP_INIT, "===>%s (%s)\n", __func__,
-		  (dm->is_mp_chip) ? "MPChip" : "TestChip");
-	PHYDM_DBG(dm, ODM_COMP_INIT,
-		  "support_platform: 0x%X, support_interface: 0x%X, board_type: 0x%X\n",
-		  dm->support_platform, dm->support_interface, dm->board_type);
-
-	if (dm->en_tssi_mode)
-		READ_AND_CONFIG_MP(8822c, _txpowertracktssi);
-	else
-		READ_AND_CONFIG_MP(8822c, _txpowertrack);
-
-	return HAL_STATUS_SUCCESS;
-}
-
 u32 odm_get_hw_img_version(struct dm_struct *dm)
 {
 	u32 version = 0;

@@ -59,10 +59,8 @@ static u8 _init_bb_reg(PADAPTER Adapter)
 	PHAL_DATA_TYPE hal = GET_HAL_DATA(Adapter);
 
 	odm_read_and_config_mp_8822c_phy_reg(&hal->odmpriv);
-
 	odm_read_and_config_mp_8822c_agc_tab(&hal->odmpriv);
 
-exit:
 	return _TRUE; 
 }
 
@@ -92,86 +90,13 @@ static u8 _init_rf_reg(PADAPTER adapter)
 	enum rf_path phydm_path;
 	PHAL_DATA_TYPE hal = GET_HAL_DATA(adapter);
 	struct hal_spec_t *hal_spec = GET_HAL_SPEC(adapter);
-#ifdef CONFIG_LOAD_PHY_PARA_FROM_FILE
-	u8 *regfile;
-#endif
-	enum hal_status status;
-	int res;
-	u8 ret = _TRUE;
 
+	odm_read_and_config_mp_8822c_cal_init(&hal->odmpriv);
+	odm_read_and_config_mp_8822c_radioa(&hal->odmpriv);
+	odm_read_and_config_mp_8822c_radiob(&hal->odmpriv);
+	odm_read_and_config_mp_8822c_txpowertrack(&hal->odmpriv);
 
-	/*
-	 * Initialize IQK
-	 */
-
-	status = halrf_config_rfk_with_header_file(&hal->odmpriv, CONFIG_BB_RF_CAL_INIT);
-	if (HAL_STATUS_SUCCESS == status)
-		ret = _TRUE;
-
-	if (_FALSE == ret) {
-		RTW_INFO("%s: Init IQK Fail!\n", __FUNCTION__);
-		goto exit;
-	}
-
-	/*
-	 * Initialize RF
-	 */
-	for (path = 0; path < hal_spec->rf_reg_path_num; path++) {
-		/* Initialize RF from configuration file */
-		switch (path) {
-		case 0:
-			phydm_path = RF_PATH_A;
-			#ifdef CONFIG_LOAD_PHY_PARA_FROM_FILE
-			regfile = PHY_FILE_RADIO_A;
-			#endif
-			break;
-
-		case 1:
-			phydm_path = RF_PATH_B;
-			#ifdef CONFIG_LOAD_PHY_PARA_FROM_FILE
-			regfile = PHY_FILE_RADIO_B;
-			#endif
-			break;
-
-		default:
-			RTW_INFO("%s: [WARN] Unknown path=%d, skip!\n", __FUNCTION__, path);
-			continue;
-		}
-
-		ret = _FALSE;
-#ifdef CONFIG_LOAD_PHY_PARA_FROM_FILE
-		res = PHY_ConfigRFWithParaFile(adapter, regfile, phydm_path);
-		if (_SUCCESS == res)
-			ret = _TRUE;
-#endif
-		if (_FALSE == ret) {
-			status = odm_config_rf_with_header_file(&hal->odmpriv, CONFIG_RF_RADIO, phydm_path);
-			if (HAL_STATUS_SUCCESS != status)
-				goto exit;
-			ret = _TRUE;
-		}
-	}
-
-	/*
-	 * Configuration of Tx Power Tracking
-	 */
-	ret = _FALSE;
-#ifdef CONFIG_LOAD_PHY_PARA_FROM_FILE
-	res = PHY_ConfigRFWithTxPwrTrackParaFile(adapter, PHY_FILE_TXPWR_TRACK);
-	if (_SUCCESS == res)
-		ret = _TRUE;
-#endif
-	if (_FALSE == ret) {
-		status = odm_config_rf_with_tx_pwr_track_header_file(&hal->odmpriv);
-		if (HAL_STATUS_SUCCESS != status) {
-			RTW_INFO("%s: Write PwrTrack Table Fail!\n", __FUNCTION__);
-			goto exit;
-		}
-		ret = _TRUE;
-	}
-
-exit:
-	return ret;
+	return _TRUE;
 }
 
 static u8 init_rf_reg(PADAPTER adapter)

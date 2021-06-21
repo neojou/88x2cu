@@ -50,9 +50,6 @@
  ************************************************************/
 
 enum hal_status
-odm_config_rf_with_tx_pwr_track_header_file(struct dm_struct *dm);
-
-enum hal_status
 odm_config_rf_with_header_file(struct dm_struct *dm,
 			       enum odm_rf_config_type config_type,
 			       u8 e_rf_path);
