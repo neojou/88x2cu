@@ -82,15 +82,6 @@ odm_config_rf_with_header_file(struct dm_struct *dm,
 	return result;
 }
 
-u32 odm_get_hw_img_version(struct dm_struct *dm)
-{
-	u32 version = 0;
-
-	version = odm_get_version_mp_8822c_phy_reg();
-
-	return version;
-}
-
 u32 query_phydm_trx_capability(struct dm_struct *dm)
 {
 	u32 value32 = 0xFFFFFFFF;

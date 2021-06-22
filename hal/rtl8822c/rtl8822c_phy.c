@@ -49,17 +49,6 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 	cfo_track = &phydm->dm_cfo_track;
 	physts_table = &phydm->dm_physts_table;
 
-#if 0 //NEO
-	// odm pre setting: disable OFDM and CCK
-	value32 = rtw_read32(adapter, 0x1c3c);
-	value32 &= ~(0x3);
-	rtw_write32(adapter, 0x1c3c, value32);
-
-	/* config BB and AGC */
-	odm_read_and_config_mp_8822c_phy_reg(&hal->odmpriv);
-#endif //NEO
-	odm_read_and_config_mp_8822c_agc_tab(&hal->odmpriv);
-
 	odm_read_and_config_mp_8822c_cal_init(&hal->odmpriv);
 	odm_read_and_config_mp_8822c_radioa(&hal->odmpriv);
 	odm_read_and_config_mp_8822c_radiob(&hal->odmpriv);

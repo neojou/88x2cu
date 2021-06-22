@@ -54,8 +54,6 @@ odm_config_rf_with_header_file(struct dm_struct *dm,
 			       enum odm_rf_config_type config_type,
 			       u8 e_rf_path);
 
-u32 odm_get_hw_img_version(struct dm_struct *dm);
-
 u32 query_phydm_trx_capability(struct dm_struct *dm);
 
 u32 query_phydm_stbc_capability(struct dm_struct *dm);

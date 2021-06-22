@@ -98,12 +98,6 @@ void phydm_agc_lower_bound_8822c(struct dm_struct *dm, u32 addr, u32 data)
 	}
 }
 
-void odm_config_bb_agc_8822c(struct dm_struct *dm, u32 addr, u32 bitmask,
-			     u32 data)
-{
-	//phydm_agc_lower_bound_8822c(dm, addr, data);
-}
-
 void odm_config_bb_phy_reg_pg_8822c(struct dm_struct *dm, u32 band, u32 rf_path,
 				    u32 tx_num, u32 addr, u32 bitmask, u32 data)
 {
