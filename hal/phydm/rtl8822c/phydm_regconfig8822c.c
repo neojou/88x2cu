@@ -98,32 +98,10 @@ void phydm_agc_lower_bound_8822c(struct dm_struct *dm, u32 addr, u32 data)
 	}
 }
 
-void phydm_agc_store_8822c(struct dm_struct *dm, u32 addr, u32 data)
-{
-	u16 rf_gain = (u16)(data & 0x000003ff);
-	u8 mp_gain = (u8)((data & 0x003f0000) >> 16);
-	u8 tab = (u8)((data & 0x03c00000) >> 22);
-
-	if (addr != R_0x1d90)
-		return;
-
-	PHYDM_DBG(dm, ODM_COMP_INIT,
-		  "data = 0x%x, mp_gain = 0x%x, tab = 0x%x, rxbb_gain = 0x%x\n",
-		  data, mp_gain, tab, rf_gain);
-
-	dm->agc_rf_gain_ori[tab][mp_gain] = rf_gain;
-	dm->agc_rf_gain[tab][mp_gain] = rf_gain;
-	if (tab > dm->agc_table_cnt)
-		dm->agc_table_cnt = tab;
-}
-
 void odm_config_bb_agc_8822c(struct dm_struct *dm, u32 addr, u32 bitmask,
 			     u32 data)
 {
 	phydm_agc_lower_bound_8822c(dm, addr, data);
-	phydm_agc_store_8822c(dm, addr, data);
-
-	//odm_set_bb_reg(dm, addr, bitmask, data);
 }
 
 void odm_config_bb_phy_reg_pg_8822c(struct dm_struct *dm, u32 band, u32 rf_path,

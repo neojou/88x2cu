@@ -867,22 +867,12 @@ struct dm_struct {
 	u16			dis_dpd_rate;
 	u8			en_auto_bw_th;
 	boolean			is_pause_dig;
-	#if (RTL8822C_SUPPORT || RTL8814B_SUPPORT || RTL8197G_SUPPORT)
 	u8			txagc_buff[RF_PATH_MEM_SIZE][PHY_NUM_RATE_IDX];
 	u32			bp_0x9b0;
-	#elif (RTL8723F_SUPPORT)
-	u8			txagc_buff[2][PHY_NUM_RATE_IDX];
-	u32			bp_0x9b0;
-	#endif
-	#if (RTL8822C_SUPPORT || RTL8723F_SUPPORT)
 	u8			ofdm_rxagc_l_bnd[16];
 	boolean			l_bnd_detect[16];
-	u16			agc_rf_gain_ori[16][64];/*[table][mp_gain_idx]*/
-	u16			agc_rf_gain[16][64];/*[table][mp_gain_idx]*/
-	u8			agc_table_cnt;
 	boolean			is_agc_tab_pos_shift;
 	u8			agc_table_shift;
-	#endif
 /*@-----------HOOK BEFORE REG INIT-----------*/
 /*@===========================================================*/
 /*@====[ CALL BY Reference ]=========================================*/
