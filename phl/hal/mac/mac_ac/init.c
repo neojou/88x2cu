@@ -1512,13 +1512,13 @@ static u32 phy_init(struct mac_adapter *adapter)
 
 	mac_odm_phy_reg_init(adapter);
 	mac_odm_agc_init(adapter);
-	mac_odm_set_crystal_cap(adapter);
-	mac_odm_cal_init(adapter);
-	mac_odm_radioa_init(adapter);
-	mac_odm_radiob_init(adapter);
+	//mac_odm_set_crystal_cap(adapter);
+	//mac_odm_cal_init(adapter);
+	//mac_odm_radioa_init(adapter);
+	//mac_odm_radiob_init(adapter);
 
-	mac_odm_post_setting(adapter);
-	mac_odm_reset_bb(adapter);
+	//mac_odm_post_setting(adapter);
+	//mac_odm_reset_bb(adapter);
 
 	return ret;
 }
