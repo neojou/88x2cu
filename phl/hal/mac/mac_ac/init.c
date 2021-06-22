@@ -1284,43 +1284,48 @@ static void rf_write_reg_direct(struct mac_adapter *adapter, u32 addr, u32 data,
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 	u32 direct_addr = 0;
 	u32 offset_write_rf[2] = {0x3c00, 0x4c00};
+	u32 value32;
 
 	addr &= 0xff;
 	direct_addr = offset_write_rf[path] + (addr << 2);
 
-	MAC_REG_W32(direct_addr, data & 0xFFFFF);
+	value32 = MAC_REG_R32(direct_addr);
+	value32 &= ~(0xFFFFF);
+	value32 |= data & 0xFFFFF;
+	MAC_REG_W32(direct_addr, value32);
 	udelay(1);
-}
-
-static void rf_write_reg(struct mac_adapter *adapter, u32 addr, u32 data, u8 path)
-{
-	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
-	u32 offset_write_rf[2] = {0x1808, 0x4108};
-
-	if (addr) {
-		rf_write_reg_direct(adapter, addr, data, path);
-		return;
-	}
-
-	MAC_REG_W32(offset_write_rf[path], data & 0xFFFFF);
 }
 
 static void odm_config_rf_reg_radioa(struct mac_adapter *adapter, u32 addr, u32 data)
 {
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 value32;
+	u32 data_and_addr;
+
 	if (addr == 0xffe) {
 		msleep(50);
 	} else if (addr == 0xfe) {
-		udelay(100);
+		usleep_range(100, 101);
 	} else if (addr == 0xffff) {
 		udelay(1);
 	} else {
-		rf_write_reg(adapter, addr, data, 0);
+		if (addr) {
+			rf_write_reg_direct(adapter, addr, data, 0);
+		} else {
+			addr &= 0xFF;
+			data_and_addr = ((addr << 20) | (data & 0x000FFFFF)) & 0x0FFFFFFF;
+			MAC_REG_W32(0x1808, data_and_addr);
+		}
 		udelay(1);
 	}
 }
 
 static void odm_config_rf_reg_radiob(struct mac_adapter *adapter, u32 addr, u32 data)
 {
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 value32;
+	u32 data_and_addr;
+
 	if (addr == 0xffe) {
 		msleep(50);
 	} else if (addr == 0xfe) {
@@ -1328,7 +1333,13 @@ static void odm_config_rf_reg_radiob(struct mac_adapter *adapter, u32 addr, u32 
 	} else if (addr == 0xffff) {
 		udelay(1);
 	} else {
-		rf_write_reg(adapter, addr, data, 1);
+		if (addr) {
+			rf_write_reg_direct(adapter, addr, data, 1);
+		} else {
+			addr &= 0xFF;
+			data_and_addr = ((addr << 20) | (data & 0xFFFFF)) & 0x0FFFFFFF;
+			MAC_REG_W32(0x4108, data_and_addr);
+		}
 		udelay(1);
 	}
 }
@@ -1348,8 +1359,6 @@ static void phy_reg_setting(struct mac_adapter *adapter, u32 *array, u32 array_l
 	u32 v1 = 0, v2 = 0;
 	u8 h_size = 0;
 	u8 h_idx = 0;
-
-	array_len = sizeof(array_phy_reg) / sizeof(u32);
 
 	if (!halbb_sel_headline(adapter, array, array_len, &h_size, &h_idx)) {
 		return;
@@ -1529,7 +1538,7 @@ static u32 phy_init(struct mac_adapter *adapter)
 	mac_odm_phy_reg_init(adapter);
 	mac_odm_agc_init(adapter);
 	mac_odm_cal_init(adapter);
-	//mac_odm_radioa_init(adapter);
+	mac_odm_radioa_init(adapter);
 	//mac_odm_radiob_init(adapter);
 
 	//mac_odm_set_crystal_cap(adapter);

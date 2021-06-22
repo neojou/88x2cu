@@ -240,31 +240,9 @@ u32 odm_get_bb_reg(struct dm_struct *dm, u32 reg_addr, u32 bit_mask)
 void odm_set_rf_reg(struct dm_struct *dm, u8 e_rf_path, u32 reg_addr,
 		    u32 bit_mask, u32 data)
 {
-#if (DM_ODM_SUPPORT_TYPE & ODM_AP)
-	phy_set_rf_reg(dm->priv, e_rf_path, reg_addr, bit_mask, data);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_WIN)
-	void *adapter = dm->adapter;
-	PHY_SetRFReg(adapter, e_rf_path, reg_addr, bit_mask, data);
-	ODM_delay_us(2);
-
-#elif (DM_ODM_SUPPORT_TYPE & ODM_CE) && defined(DM_ODM_CE_MAC80211)
-	struct rtl_priv *rtlpriv = (struct rtl_priv *)dm->adapter;
-
-	rtl_set_rfreg(rtlpriv->hw, e_rf_path, reg_addr, bit_mask, data);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_CE) && defined(DM_ODM_CE_MAC80211_V2)
-	struct rtw_dev *rtwdev = dm->adapter;
-
-	rtw_write_rf(rtwdev, e_rf_path, reg_addr, bit_mask, data);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_CE)
 	phy_set_rf_reg(dm->adapter, e_rf_path, reg_addr, bit_mask, data);
-#elif (DM_ODM_SUPPORT_TYPE & ODM_IOT)
-	phy_set_rf_reg(dm->adapter, e_rf_path, reg_addr, bit_mask, data);
-	ODM_delay_us(2);
-#endif
-
-	if (dm->en_reg_mntr_rf)
-		pr_debug("RF:path=0x%x, addr=0x%x, mask=0x%x, data=0x%x\n",
-			 e_rf_path, reg_addr, bit_mask, data);
+	pr_info("RF:path=0x%x, addr=0x%x, mask=0x%x, data=0x%x\n",
+		 e_rf_path, reg_addr, bit_mask, data);
 }
 
 u32 odm_get_rf_reg(struct dm_struct *dm, u8 e_rf_path, u32 reg_addr,
