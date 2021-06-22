@@ -33,6 +33,7 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 	struct dm_struct *phydm;
 	struct phydm_cfo_track_struct *cfo_track;
 	struct phydm_physts *physts_table;
+	struct dm_dpk_info *dpk_info;
 	u8 ok = _TRUE;
 	u8 crystal_cap;
 	u8 cck_gi_u_bnd_msb = 0;
@@ -48,8 +49,12 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 	phydm = adapter_to_phydm(adapter);
 	cfo_track = &phydm->dm_cfo_track;
 	physts_table = &phydm->dm_physts_table;
+	dpk_info = &phydm->dpk_info;
 
-	odm_read_and_config_mp_8822c_cal_init(&hal->odmpriv);
+	dpk_info->is_dpk_pwr_on = 1;
+	dpk_info->is_dpk_enable = 1;
+	dpk_info->is_dpk_by_channel = 1;
+
 	odm_read_and_config_mp_8822c_radioa(&hal->odmpriv);
 	odm_read_and_config_mp_8822c_radiob(&hal->odmpriv);
 	odm_read_and_config_mp_8822c_txpowertrack(&hal->odmpriv);

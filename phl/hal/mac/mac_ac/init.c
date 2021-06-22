@@ -1472,14 +1472,14 @@ static void mac_odm_radiob_init(struct mac_adapter *adapter)
 static void mac_odm_table_init(struct mac_adapter *adapter, u32 *array, u32 array_len)
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
-	u32 i;
+	u32 i = 0;
 	u32 addr, val;
 	u32 value32;
 
 	while ((i + 1) < array_len) {
 		addr = array[i];
 		val = array[i + 1];
-		MAC_REG_W32(addr, val);
+		odm_config_bb_reg(adapter, addr, val);
 		i += 2;
 	}
 }
@@ -1491,10 +1491,26 @@ static void mac_odm_cal_init(struct mac_adapter *adapter)
 	u32 *array;
 	u32 array_len;
 
+	/* r_iqk_dpk_clock_src */
 	value32 = MAC_REG_R32(0x1cd0);
-	value32 &= ~(0xF0000000);
-	value32 |= 0x70000000;
+	value32 |= BIT(28);
 	MAC_REG_W32(0x1cd0, value32);
+	udelay(1);
+	/* r_iqk_dpk_reset_src */
+	value32 = MAC_REG_R32(0x1cd0);
+	value32 |= BIT(29);
+	MAC_REG_W32(0x1cd0, value32);
+	udelay(1);
+	/* r_en_IOq_iqk_dpk */
+	value32 = MAC_REG_R32(0x1cd0);
+	value32 |= BIT(30);
+	MAC_REG_W32(0x1cd0, value32);
+	udelay(1);
+	/* r_tst_iqk2set_src */
+	value32 = MAC_REG_R32(0x1cd0);
+	value32 &= ~(BIT(31));
+	MAC_REG_W32(0x1cd0, value32);
+	udelay(1);
 
 	array = (u32 *)array_cal_init;
 	array_len = sizeof(array_cal_init) / sizeof(u32);
@@ -1512,11 +1528,11 @@ static u32 phy_init(struct mac_adapter *adapter)
 
 	mac_odm_phy_reg_init(adapter);
 	mac_odm_agc_init(adapter);
-	//mac_odm_set_crystal_cap(adapter);
-	//mac_odm_cal_init(adapter);
+	mac_odm_cal_init(adapter);
 	//mac_odm_radioa_init(adapter);
 	//mac_odm_radiob_init(adapter);
 
+	//mac_odm_set_crystal_cap(adapter);
 	//mac_odm_post_setting(adapter);
 	//mac_odm_reset_bb(adapter);
 

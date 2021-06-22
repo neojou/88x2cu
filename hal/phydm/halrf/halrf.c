@@ -1592,16 +1592,6 @@ void halrf_iqk_info_rsvd_page(void *dm_void, u8 *buf, u32 *buf_size)
 	iqk_info_rsvd_page_8822c(dm, buf, buf_size);
 }
 
-enum hal_status
-halrf_config_rfk_with_header_file(void *dm_void, u32 config_type)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	enum hal_status result = HAL_STATUS_SUCCESS;
-	if (config_type == CONFIG_BB_RF_CAL_INIT)
-		odm_read_and_config_mp_8822c_cal_init(dm);
-	return result;
-}
-
 void halrf_txgapk_trigger(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;

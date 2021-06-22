@@ -596,16 +596,7 @@ void halrf_bubble(void *dm_void, u32 *v1, u32 *v2);
 
 void halrf_swap(void *dm_void, u32 *v1, u32 *v2);
 
-enum hal_status
-halrf_config_rfk_with_header_file(void *dm_void, u32 config_type);
-
-#if (RTL8822B_SUPPORT == 1 || RTL8821C_SUPPORT == 1 ||\
-	RTL8195B_SUPPORT == 1 || RTL8198F_SUPPORT == 1 ||\
-	RTL8814B_SUPPORT == 1  || RTL8822C_SUPPORT == 1 ||\
-	RTL8812F_SUPPORT == 1 || RTL8710C_SUPPORT == 1 ||\
-	RTL8197G_SUPPORT == 1)
 void halrf_iqk_dbg(void *dm_void);
-#endif
 
 void halrf_tssi_get_efuse(void *dm_void);
 
