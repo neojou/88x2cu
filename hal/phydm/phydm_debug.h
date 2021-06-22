@@ -418,10 +418,6 @@ enum auto_detection_state { /*@Fast antenna training*/
  * ============================================================
  */
 
-#ifdef CONFIG_PHYDM_DEBUG_FUNCTION
-u8 phydm_get_l_sig_rate(void *dm_void, u8 rate_idx_l_sig);
-#endif
-
 void phydm_init_debug_setting(struct dm_struct *dm);
 
 void phydm_bb_dbg_port_header_sel(void *dm_void, u32 header_idx);
