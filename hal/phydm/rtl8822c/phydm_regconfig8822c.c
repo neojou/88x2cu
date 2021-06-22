@@ -107,47 +107,14 @@ void odm_config_bb_phy_reg_pg_8822c(struct dm_struct *dm, u32 band, u32 rf_path,
 		phy_store_tx_power_by_rate(dm->adapter, band, rf_path, tx_num,
 					   addr, bitmask, data);
 	}
-	PHYDM_DBG(dm, ODM_COMP_INIT,
-		  "===> config_bb: [PHY_REG] %08X %08X %08X\n", addr, bitmask,
-		  data);
-}
-
-void odm_config_bb_phy_8822c(struct dm_struct *dm, u32 addr, u32 bitmask,
-			     u32 data)
-{
-	{
-		if (addr == 0xfe)
-			ODM_sleep_ms(50);
-		else if (addr == 0xfd)
-			ODM_delay_ms(5);
-		else if (addr == 0xfc)
-			ODM_delay_ms(1);
-		else if (addr == 0xfb)
-			ODM_delay_us(50);
-		else if (addr == 0xfa)
-			ODM_delay_us(5);
-		else if (addr == 0xf9)
-			ODM_delay_us(1);
-		else
-			odm_set_bb_reg(dm, addr, bitmask, data);
-	}
-
-	PHYDM_DBG(dm, ODM_COMP_INIT, "===> config_bb: [PHY_REG] %08X %08X\n",
-		  addr, data);
 }
 
 void odm_config_bb_txpwr_lmt_8822c_ex(struct dm_struct *dm, u8 regulation,
 				      u8 band, u8 bandwidth, u8 rate_section,
 				      u8 rf_path, u8 channel, s8 power_limit)
 {
-#if (DM_ODM_SUPPORT_TYPE & ODM_CE)
 	phy_set_tx_power_limit_ex(dm, regulation, band, bandwidth, rate_section,
 				  rf_path, channel, power_limit);
-#endif
-#if 0
-	PHY_SetTxPowerLimit_ex(dm, regulation, band, bandwidth, rate_section,
-			       rf_path, channel, power_limit);
-#endif
 }
 
 void odm_config_bb_txpwr_lmt_8822c(struct dm_struct *dm, u8 *regulation,
