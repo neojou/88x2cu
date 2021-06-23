@@ -2340,13 +2340,6 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 		fw_ok = _TRUE;
 	}
 
-	/* Init BB, RF */
-	ok = rtw_hal_init_phy(adapter);
-	if (_FALSE == ok) {
-		RTW_ERR("%s rtw_hal_init_phy=%d\n", __func__, err);
-		goto out;
-	}
-
 	/* InitMACFlow */
 	err = init_mac_flow(d);
 	if (err) {
@@ -2371,6 +2364,13 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 	if (_TRUE == fw_ok) {
 		if (halmac->halmac_state.dlfw_state == HALMAC_DLFW_DONE)
 			halmac->halmac_state.dlfw_state = HALMAC_GEN_INFO_SENT;
+	}
+
+	/* Init BB, RF */
+	ok = rtw_hal_init_phy(adapter);
+	if (_FALSE == ok) {
+		RTW_ERR("%s rtw_hal_init_phy=%d\n", __func__, err);
+		goto out;
 	}
 
 	status = api->halmac_init_interface_cfg(halmac);
