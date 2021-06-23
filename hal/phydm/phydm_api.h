@@ -111,9 +111,6 @@ void phydm_config_cck_rx_path(void *dm_void, enum bb_path path);
 
 void phydm_config_cck_rx_antenna_init(void *dm_void);
 
-void phydm_config_trx_path(void *dm_void, char input[][16], u32 *_used,
-			   char *output, u32 *_out_len);
-
 void phydm_config_ofdm_tx_path(void *dm_void, enum bb_path path);
 
 void phydm_config_cck_tx_path(void *dm_void, enum bb_path path);

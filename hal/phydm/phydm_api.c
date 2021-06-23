@@ -158,70 +158,6 @@ void phydm_config_cck_tx_path(void *dm_void, enum bb_path path)
 #endif
 }
 
-void phydm_config_trx_path_v2(void *dm_void, char input[][16], u32 *_used,
-			      char *output, u32 *_out_len)
-{
-#if (RTL8822B_SUPPORT || RTL8197F_SUPPORT || RTL8192F_SUPPORT ||\
-	RTL8822C_SUPPORT || RTL8814B_SUPPORT || RTL8197G_SUPPORT ||\
-	RTL8812F_SUPPORT || RTL8198F_SUPPORT)
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	u32 used = *_used;
-	u32 out_len = *_out_len;
-	u32 val[10] = {0};
-	char help[] = "-h";
-	u8 i = 0, input_idx = 0;
-	enum bb_path tx_path, rx_path, tx_path_ctrl;
-	boolean dbg_mode_en;
-
-	for (i = 0; i < 5; i++) {
-		PHYDM_SSCANF(input[i + 1], DCMD_HEX, &val[i]);
-		input_idx++;
-	}
-
-	if (input_idx == 0)
-		return;
-
-	dbg_mode_en = (boolean)val[0];
-	tx_path = (enum bb_path)val[1];
-	rx_path = (enum bb_path)val[2];
-	tx_path_ctrl = (enum bb_path)val[3];
-
-	if ((strcmp(input[1], help) == 0)) {
-			PDM_SNPF(out_len, used, output + used, out_len - used,
-				 "{en} {tx_path} {rx_path} {ff:auto, else:1ss_tx_path}\n"
-				 );
-	} else if (dbg_mode_en) {
-		dm->is_disable_phy_api = false;
-		phydm_api_trx_mode(dm, tx_path, rx_path, tx_path_ctrl);
-		dm->is_disable_phy_api = true;
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "T/RX path = 0x%x/0x%x, tx_path_ctrl=%d\n",
-			 tx_path, rx_path, tx_path_ctrl);
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "T/RX path_en={0x%x, 0x%x}, tx_1ss=%d\n",
-			 dm->tx_ant_status, dm->rx_ant_status,
-			 dm->tx_1ss_status);
-	} else {
-		dm->is_disable_phy_api = false;
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "Disable API debug mode\n");
-	}
-#endif
-}
-
-void phydm_config_trx_path_v1(void *dm_void, char input[][16], u32 *_used,
-			      char *output, u32 *_out_len)
-{
-}
-
-void phydm_config_trx_path(void *dm_void, char input[][16], u32 *_used,
-			   char *output, u32 *_out_len)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-
-	phydm_config_trx_path_v2(dm, input, _used, output, _out_len);
-}
-
 void phydm_tx_2path(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -1579,10 +1515,6 @@ phydm_api_trx_mode(void *dm_void, enum bb_path tx_path, enum bb_path rx_path,
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	boolean ret = false;
-	boolean is_2tx = false;
-
-	if (tx_path_ctrl == BB_PATH_AB)
-		is_2tx = true;
 
 	ret = config_phydm_trx_mode_8822c(dm, tx_path, rx_path,
 					  tx_path_ctrl);

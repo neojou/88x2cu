@@ -1193,9 +1193,7 @@ boolean
 config_phydm_trx_mode_8822c(struct dm_struct *dm, enum bb_path tx_path_en,
 			    enum bb_path rx_path, enum bb_path tx_path_sel_1ss)
 {
-#ifdef CONFIG_PATH_DIVERSITY
 	struct _ODM_PATH_DIVERSITY_ *p_div = &dm->dm_path_div;
-#endif
 	boolean disable_2sts_div_mode = false;
 	enum bb_path tx_path_mode_table = tx_path_en;
 	enum bb_path tx_path_2ss = BB_PATH_AB;
@@ -1231,7 +1229,6 @@ config_phydm_trx_mode_8822c(struct dm_struct *dm, enum bb_path tx_path_en,
 	phydm_config_rx_path_8822c(dm, rx_path);
 
 	/* @==== [TX Path] ==============================================*/
-#ifdef CONFIG_PATH_DIVERSITY
 	/*@ [PHYDM-312]*/
 	if (p_div->default_tx_path != BB_PATH_A &&
 	    p_div->default_tx_path != BB_PATH_B)
@@ -1254,22 +1251,6 @@ config_phydm_trx_mode_8822c(struct dm_struct *dm, enum bb_path tx_path_en,
 		tx_path_sel_1ss = p_div->default_tx_path;
 		tx_path_2ss = BB_PATH_NON;
 	}
-#else
-	if (dm->tx_1ss_status == BB_PATH_NON)
-		dm->tx_1ss_status = BB_PATH_A;
-
-	if (tx_path_en == BB_PATH_A || tx_path_en == BB_PATH_B) {
-		tx_path_2ss = BB_PATH_NON;
-		tx_path_sel_1ss = tx_path_en;
-	} else if (tx_path_en == BB_PATH_AB) {
-		tx_path_2ss = BB_PATH_AB;
-		if (tx_path_sel_1ss == BB_PATH_AUTO)
-			tx_path_sel_1ss = dm->tx_1ss_status;
-	} else if (disable_2sts_div_mode) {
-		tx_path_2ss = BB_PATH_NON;
-		tx_path_sel_1ss = dm->tx_1ss_status;
-	}
-#endif
 	phydm_config_tx_path_8822c(dm, tx_path_2ss, tx_path_sel_1ss,
 				   tx_path_sel_1ss);
 

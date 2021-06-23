@@ -1409,14 +1409,11 @@ exit:
 */
 static u8 rtw_phydm_config_trx_path(_adapter *adapter)
 {
-	u8 rst = _SUCCESS;
-
-#if defined(CONFIG_RTL8192F) || defined(CONFIG_RTL8822B) ||defined(CONFIG_RTL8822C)
-{
 	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
 	enum bb_path txpath = hal_data->txpath;
 	enum bb_path rxpath = hal_data->rxpath;
 	enum bb_path txpath_1ss = hal_data->txpath_nss[0];
+	u8 rst = _SUCCESS;
 
 	if (phydm_api_trx_mode(adapter_to_phydm(adapter), txpath, rxpath, txpath_1ss) == FALSE) {
 		RTW_ERR("%s txpath=0x%x, rxpath=0x%x, txpath_1ss=0x%x fail\n", __func__
@@ -1424,34 +1421,6 @@ static u8 rtw_phydm_config_trx_path(_adapter *adapter)
 		rtw_warn_on(1);
 		rst = _FAIL;
 	}
-}
-#elif defined(CONFIG_RTL8814B)
-{
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
-	enum bb_path txpath = hal_data->txpath;
-	enum bb_path rxpath = hal_data->rxpath;
-
-	if (txpath == BB_PATH_ABCD && rxpath == BB_PATH_ABCD)
-		rst = config_phydm_trx_mode_8814b(adapter_to_phydm(adapter), txpath, rxpath);
-	else
-		rst = config_phydm_trx_mode_ext_8814b(adapter_to_phydm(adapter), txpath,
-						      rxpath,
-						      txpath, txpath, txpath);
-	if (rst == FALSE) {
-		RTW_ERR("%s txpath=0x%x, rxpath=0x%x fail\n", __func__
-			, txpath, rxpath);
-		rtw_warn_on(1);
-		rst = _FAIL;
-	}
-}
-#elif defined(CONFIG_RTL8812A) || defined(CONFIG_RTL8192E)
-{
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
-
-	if (hal_data->txpath_num_nss[0] == 2)
-		phydm_tx_2path(adapter_to_phydm(adapter));
-}
-#endif
 
 	return rst;
 }
@@ -1464,10 +1433,6 @@ void rtw_phydm_init(_adapter *adapter)
 	rtw_phydm_config_trx_path(adapter);
 	init_phydm_info(adapter);
 	hal_data->phydm_init_result = odm_dm_init(phydm);
-
-#ifdef CONFIG_CUSTOMER01_SMART_ANTENNA
-	phydm_pathb_q_matrix_rotate_en(phydm);
-#endif
 }
 
 static u8 _rtw_phydm_rfk_condition_check(_adapter *adapter, u8 is_scaning, u8 ifs_linked)

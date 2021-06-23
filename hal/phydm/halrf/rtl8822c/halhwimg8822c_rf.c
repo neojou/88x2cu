@@ -28,15 +28,7 @@
 
 #define ODM_WIN 0x08
 
-#if (DM_ODM_SUPPORT_TYPE == ODM_WIN)
-#if RT_PLATFORM == PLATFORM_MACOSX
-#include "phydm_precomp.h"
-#else
-#include "../phydm_precomp.h"
-#endif
-#else
 #include "../../phydm_precomp.h"
-#endif
 
 #define D_S_SIZE DELTA_SWINGIDX_SIZE
 #define D_ST_SIZE DELTA_SWINTSSI_SIZE
@@ -50,117 +42,10 @@
 #define PARA_CHK	0x4
 
 
-#if (RTL8822C_SUPPORT == 1)
-static boolean
-halbb_sel_headline(struct dm_struct *dm, u32 *array, u32 array_len,
-				  u8 *headline_size, u8 *headline_idx)
-{
-	boolean case_match = false;
-	//NEO
-	//u32 cut_drv = (u32)dm->cut_version;
-	u32 cut_drv = 2;
-	u32 rfe_drv = (u32)dm->rfe_type;
-	u32 cut_para = 0, rfe_para = 0;
-	u32 compare_target = 0;
-	u32 cut_max = 0;
-	u32 i = 0;
-
-	*headline_idx = 0;
-	*headline_size = 0;
-
-	while ((i + 1) < array_len) {
-		if ((array[i] >> 28) != 0xf) {
-			*headline_size = (u8)i;
-			break;
-		}
-		PHYDM_DBG(dm, ODM_COMP_INIT, "array[%02d]=0x%08x, array[%02d]=0x%08x\n",
-			   i, array[i], i+1, array[i+1]);
-		i += 2;
-	}
-
-	PHYDM_DBG(dm, ODM_COMP_INIT, "headline_size=%d\n", i);
-
-	if (i == 0)
-		return true;
-
-	/*case_idx:1 {RFE:Match, CUT:Match}*/
-	compare_target = ((cut_drv & 0x0f) << 24) | (rfe_drv & 0xff);
-	PHYDM_DBG(dm, ODM_COMP_INIT, "[1] CHK {RFE:Match, CUT:Match}\n");
-	for (i = 0; i < *headline_size; i += 2) {
-		if ((array[i] & 0x0f0000ff) == compare_target) {
-			*headline_idx = (u8)(i >> 1);
-			return true;
-		}
-	}
-	PHYDM_DBG(dm, ODM_COMP_INIT, "	 fail\n");
-
-	/*case_idx:2 {RFE:Match, CUT:Dont care}*/
-	compare_target = (CUT_DONT_CARE << 24) | (rfe_drv & 0xff);
-	PHYDM_DBG(dm, ODM_COMP_INIT, "[2] CHK {RFE:Match, CUT:Dont_Care}\n");
-	for (i = 0; i < *headline_size; i += 2) {
-		if ((array[i] & 0x0f0000ff) == compare_target) {
-			*headline_idx = (u8)(i >> 1);
-			return true;
-		}
-	}
-	PHYDM_DBG(dm, ODM_COMP_INIT, "	 fail\n");
-
-	/*case_idx:3 {RFE:Match, CUT:Max_in_table}*/
-	PHYDM_DBG(dm, ODM_COMP_INIT, "[3] CHK {RFE:Match, CUT:Max_in_Table}\n");
-	for (i = 0; i < *headline_size; i += 2) {
-		rfe_para = array[i] & 0xff;
-		cut_para = (array[i] & 0x0f000000) >> 24;
-		if (rfe_para == rfe_drv) {
-			if (cut_para >= cut_max) {
-				cut_max = cut_para;
-				*headline_idx = (u8)(i >> 1);
-				PHYDM_DBG(dm, ODM_COMP_INIT, "cut_max:%d\n", cut_max);
-				case_match = true;
-			}
-		}
-	}
-	if (case_match) {
-		return true;
-	}
-	PHYDM_DBG(dm, ODM_COMP_INIT, "	 fail\n");
-
-	/*case_idx:4 {RFE:Dont Care, CUT:Max_in_table}*/
-	PHYDM_DBG(dm, ODM_COMP_INIT, "[4] CHK {RFE:Dont_Care, CUT:Max_in_Table}\n");
-	for (i = 0; i < *headline_size; i += 2) {
-		rfe_para = array[i] & 0xff;
-		cut_para = (array[i] & 0x0f000000) >> 24;
-		if (rfe_para == RFE_DONT_CARE) {
-			if (cut_para >= cut_max) {
-				cut_max = cut_para;
-				*headline_idx = (u8)(i >> 1);
-				PHYDM_DBG(dm, ODM_COMP_INIT, "cut_max:%d\n", cut_max);
-				case_match = true;
-			}
-		}
-	}
-	if (case_match) {
-		return true;
-	}
-	PHYDM_DBG(dm, ODM_COMP_INIT, "	 fail\n");
-
-	/*case_idx:5 {RFE:Not_Match, CUT:Not_Match}*/
-	PHYDM_DBG(dm, ODM_COMP_INIT, "[5] CHK {RFE:Not_Match, CUT:Not_Match}\n");
-	PHYDM_DBG(dm, ODM_COMP_INIT, "	 all fail\n");
-	return false;
-}
-
-static void
-halbb_flag_2_default(boolean *is_matched, boolean *find_target)
-{
-	*is_matched = true;
-	*find_target = false;
-}
-
 /******************************************************************************
  *                           txpowertrack.TXT
  ******************************************************************************/
 
-#ifdef CONFIG_8822C
 const u8 delta_swingidx_mp_5gb_n_txpwrtrk_8822c[][D_S_SIZE] = {
 	{0, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18,
 	 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32},
@@ -221,13 +106,10 @@ const u8 delta_swingidx_mp_2g_cck_a_n_txpwrtrk_8822c[] = {
 const u8 delta_swingidx_mp_2g_cck_a_p_txpwrtrk_8822c[] = {
 	0, 1, 2, 3, 4, 5, 5, 6, 7, 8, 9, 10, 11, 11, 12, 13, 14,
 	 15, 16, 17, 18, 18, 19, 20, 21, 22, 23, 24, 24, 25};
-#endif
 
 void
 odm_read_and_config_mp_8822c_txpowertrack(struct dm_struct *dm)
 {
-#ifdef CONFIG_8822C
-
 struct dm_rf_calibration_struct  *cali_info = &dm->rf_calibrate_info;
 
 PHYDM_DBG(dm, ODM_COMP_INIT, "===> ODM_ReadAndConfig_MP_mp_8822c\n");
@@ -270,7 +152,6 @@ odm_move_memory(dm, cali_info->delta_swing_table_idx_5gb_p,
 odm_move_memory(dm, cali_info->delta_swing_table_idx_5gb_n,
 		(void *)delta_swingidx_mp_5gb_n_txpwrtrk_8822c,
 		DELTA_SWINGIDX_SIZE * 3);
-#endif
 }
 
 /******************************************************************************
@@ -338,7 +219,6 @@ const u8 delta_swingidx_mp_2g_cck_a_n_txpwrtrktssi_8822c[] = {
 const u8 delta_swingidx_mp_2g_cck_a_p_txpwrtrktssi_8822c[] = {
 	0, 0, 0, 1, 1, 2, 2, 3, 3, 3, 4, 4, 5, 5, 6, 6, 6,
 	 7, 7, 8, 8, 9, 9, 9, 10, 10, 11, 11, 12, 12};
-#endif
 
 void
 odm_read_and_config_mp_8822c_txpowertracktssi(struct dm_struct *dm)
@@ -394,7 +274,6 @@ odm_move_memory(dm, cali_info->delta_swing_table_idx_5gb_n,
  *                           txpwr_lmt.TXT
  ******************************************************************************/
 
-#ifdef CONFIG_8822C
 const struct txpwr_lmt_t_8822c array_mp_8822c_txpwr_lmt[] = {
 	{PW_LMT_REGU_FCC, PW_LMT_BAND_2_4G, PW_LMT_BW_20M, PW_LMT_RS_CCK, PW_LMT_PH_1T, 1, 72},
 	{PW_LMT_REGU_ETSI, PW_LMT_BAND_2_4G, PW_LMT_BW_20M, PW_LMT_RS_CCK, PW_LMT_PH_1T, 1, 60},
@@ -2877,12 +2756,10 @@ const struct txpwr_lmt_t_8822c array_mp_8822c_txpwr_lmt[] = {
 	{PW_LMT_REGU_MEXICO, PW_LMT_BAND_5G, PW_LMT_BW_80M, PW_LMT_RS_VHT, PW_LMT_PH_2T, 155, 62},
 	{PW_LMT_REGU_CN, PW_LMT_BAND_5G, PW_LMT_BW_80M, PW_LMT_RS_VHT, PW_LMT_PH_2T, 155, -128}
 };
-#endif
 
 void
 odm_read_and_config_mp_8822c_txpwr_lmt(struct dm_struct *dm)
 {
-#ifdef CONFIG_8822C
 
 	int	i = 0;
 	const	struct	txpwr_lmt_t_8822c	*array = (const	struct	txpwr_lmt_t_8822c	*)array_mp_8822c_txpwr_lmt;
@@ -2902,8 +2779,6 @@ odm_read_and_config_mp_8822c_txpwr_lmt(struct dm_struct *dm)
 		odm_config_bb_txpwr_lmt_8822c_ex(dm, regulation, band, bandwidth,
 					      rate, rf_path, chnl, val);
 	}
-
-#endif
 }
 
 /******************************************************************************
