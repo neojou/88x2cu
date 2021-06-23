@@ -377,7 +377,6 @@ mount_api_8822c(struct halmac_adapter *adapter)
 
 	if (adapter->intf == HALMAC_INTERFACE_SDIO) {
 	} else if (adapter->intf == HALMAC_INTERFACE_USB) {
-		api->halmac_phy_cfg = phy_cfg_usb_8822c;
 		api->halmac_pcie_switch = pcie_switch_usb_8822c;
 		api->halmac_interface_integration_tuning = intf_tun_usb_8822c;
 	} else if (adapter->intf == HALMAC_INTERFACE_PCIE) {

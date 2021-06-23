@@ -686,17 +686,6 @@ int rtw_halmac_init_adapter(struct dvobj_priv *d, struct halmac_platform_api *pf
 		goto deinit;
 	}
 
-#ifdef CONFIG_PLATFORM_RTK1319
-	pltfm = HALMAC_INTF_PHY_PLATFORM_DHC;
-#endif /* CONFIG_PLATFORM_RTK1319 */
-	status = api->halmac_phy_cfg(halmac, pltfm);
-	if (status != HALMAC_RET_SUCCESS) {
-		RTW_ERR("%s: halmac_phy_cfg fail! (platform=%d, status=%d)\n",
-			__FUNCTION__, pltfm, status);
-		err = -1;
-		goto deinit;
-	}
-
 	init_write_rsvd_page_size(d);
 
 	return 0;

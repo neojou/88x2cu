@@ -24,10 +24,6 @@ extern struct halmac_intf_phy_para usb2_phy_param_8822c[];
 extern struct halmac_intf_phy_para usb3_phy_param_8822c[];
 
 enum halmac_ret_status
-phy_cfg_usb_8822c(struct halmac_adapter *adapter,
-		  enum halmac_intf_phy_platform pltfm);
-
-enum halmac_ret_status
 pcie_switch_usb_8822c(struct halmac_adapter *adapter, enum halmac_pcie_cfg cfg);
 
 enum halmac_ret_status
