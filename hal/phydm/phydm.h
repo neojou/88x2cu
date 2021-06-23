@@ -941,7 +941,6 @@ struct dm_struct {
 	u8			number_linked_client;
 	u8			pre_number_active_client;
 	u8			number_active_client;
-	boolean			is_disable_phy_api;
 	u8			rssi_a;
 	u8			rssi_b;
 	u8			rssi_c;

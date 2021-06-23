@@ -379,12 +379,6 @@ config_phydm_write_txagc_ref_8822c(struct dm_struct *dm, u8 power_index,
 
 	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
 
-	/*Input need to be HW rate index, not driver rate index!!!! */
-	if (dm->is_disable_phy_api) {
-		PHYDM_DBG(dm, ODM_PHY_CONFIG, "Disable PHY API for debug\n");
-		return true;
-	}
-
 	/*Error handling */
 	if (path > RF_PATH_B) {
 		PHYDM_DBG(dm, ODM_PHY_CONFIG, "Unsupported path (%d)\n",
@@ -440,12 +434,6 @@ config_phydm_write_txagc_diff_8822c(struct dm_struct *dm, s8 power_index1,
 		 power_idx1;
 
 	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
-
-	/*Input need to be HW rate index, not driver rate index!!!! */
-	if (dm->is_disable_phy_api) {
-		PHYDM_DBG(dm, ODM_PHY_CONFIG, "Disable PHY API for debug\n");
-		return true;
-	}
 
 	/*Error handling */
 	if (hw_rate > ODM_RATEVHTSS2MCS9) {
@@ -589,11 +577,6 @@ boolean config_phydm_write_txagc_8822c(struct dm_struct *dm, u32 pw_idx,
 
 	if (*dm->is_fcs_mode_enable)
 		return false;
-
-	if (dm->is_disable_phy_api) {
-		PHYDM_DBG(dm, ODM_PHY_CONFIG, "Disable PHY API for debug\n");
-		return true;
-	}
 
 	if (path > RF_PATH_B) {
 		pr_debug("[Warning 1] %s\n", __func__);
@@ -1201,11 +1184,6 @@ config_phydm_trx_mode_8822c(struct dm_struct *dm, enum bb_path tx_path_en,
 
 	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
 
-	if (dm->is_disable_phy_api) {
-		pr_debug("[%s] Disable PHY API\n", __func__);
-		return true;
-	}
-
 	/*RX Check*/
 	if (rx_path & ~BB_PATH_AB) {
 		pr_debug("[Warning][%s] RX:0x%x\n", __func__, rx_path);
@@ -1545,11 +1523,6 @@ config_phydm_switch_channel_8822c(struct dm_struct *dm, u8 central_ch)
 
 	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
 
-	if (dm->is_disable_phy_api) {
-		PHYDM_DBG(dm, ODM_PHY_CONFIG, "Disable PHY API\n");
-		return true;
-	}
-
 	if ((central_ch > 14 && central_ch < 36) ||
 	    (central_ch > 64 && central_ch < 100) ||
 	    (central_ch > 144 && central_ch < 149) ||
@@ -1688,11 +1661,6 @@ config_phydm_switch_bandwidth_8822c(struct dm_struct *dm, u8 pri_ch,
 	boolean rf_reg_status = true;
 
 	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
-
-	if (dm->is_disable_phy_api) {
-		PHYDM_DBG(dm, ODM_PHY_CONFIG, "Disable PHY API for debug!!\n");
-		return true;
-	}
 
 	/*Error handling */
 	if (bw >= CHANNEL_WIDTH_MAX || (bw == CHANNEL_WIDTH_40 && pri_ch > 2) ||

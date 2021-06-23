@@ -318,11 +318,6 @@ void rtl8822c_set_tx_power_index(PADAPTER adapter, u32 powerindex, enum rf_path 
 	if (write_ret == true)
 		goto clear_buf;
 
-	RTW_INFO(FUNC_ADPT_FMT" (index:0x%08x, %c, rate:%s(0x%02x), disable api:%d) %s\n"
-		, FUNC_ADPT_ARG(adapter), hal->txagc_set_buf, rf_path_char(rfpath)
-		, HDATA_RATE(rate), rate, phydm->is_disable_phy_api
-		, write_ret == true ? "OK" : "FAIL");
-
 	rtw_warn_on(write_ret != true);
 
 clear_buf:

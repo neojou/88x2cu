@@ -234,7 +234,6 @@ struct bb_info {
 	u64			dbg_component;
 	u8			cmn_dbg_msg_period;
 	u8			cmn_dbg_msg_cnt;
-	bool			is_disable_phy_api;
 	/*[Dummy]*/
 	bool			bool_dummy;
 	u8			u8_dummy;
