@@ -83,34 +83,134 @@ void rtl8822c_init_hal_spec(PADAPTER adapter)
 
 }
 
+
+void _rtw_hal_set_fw_rsvd_page(_adapter *adapter, bool finished, u8 *page_num);
+
+enum halmac_ret_status 
+set_trx_fifo_info_8822c(struct halmac_adapter *halmac);
+
+static int init_mac_flow(struct dvobj_priv *d)
+{
+	PADAPTER p;
+	struct hal_com_data *hal;
+	struct halmac_adapter *halmac;
+	struct halmac_api *api;
+	struct phl_info_t *phl_info = d->phl;
+	struct hal_info_t *hal_info = phl_info->hal;
+	enum rtw_hal_status hal_status;
+	union halmac_wlan_addr hwa;
+	enum halmac_trx_mode trx_mode;
+	enum halmac_ret_status status;
+	u8 drv_rsvd_num;
+	u8 nettype;
+	int err, err_ret = -1;
+
+	p = dvobj_get_primary_adapter(d);
+	hal = GET_HAL_DATA(p);
+	halmac = dvobj_to_halmac(d);
+	api = HALMAC_GET_API(halmac);
+
+	_rtw_hal_set_fw_rsvd_page(p, _FALSE, &drv_rsvd_num);
+	halmac->txff_alloc.rsvd_drv_pg_num = 8;
+	hal->drv_rsvd_page_number = 8;
+
+	hal_status = rtw_hal_mac_trx_init(hal_info);
+	if (hal_status != RTW_HAL_STATUS_SUCCESS) {
+		RTW_ERR("%s: drtw_hal_mac_trx_init FAIL! status=0x%02x\n", __func__, hal_status);
+		return -1;
+	}
+
+
+	status = set_trx_fifo_info_8822c(halmac);
+	if (status != HALMAC_RET_SUCCESS) {
+		RTW_ERR("[ERR]set trx fifo!\n");
+		goto out;
+	}
+
+	halmac->pq_map[HALMAC_PQ_MAP_VO] = HALMAC_MAP2_NQ;
+	halmac->pq_map[HALMAC_PQ_MAP_VI] = HALMAC_MAP2_NQ;
+	halmac->pq_map[HALMAC_PQ_MAP_BE] = HALMAC_MAP2_LQ;
+	halmac->pq_map[HALMAC_PQ_MAP_BK] = HALMAC_MAP2_LQ;
+	halmac->pq_map[HALMAC_PQ_MAP_MG] = HALMAC_MAP2_HQ;
+	halmac->pq_map[HALMAC_PQ_MAP_HI] = HALMAC_MAP2_HQ;
+
+	halmac->txff_alloc.high_queue_pg_num = 64;
+	halmac->txff_alloc.low_queue_pg_num = 64;
+	halmac->txff_alloc.normal_queue_pg_num = 64;
+	halmac->txff_alloc.extra_queue_pg_num = 0;
+	halmac->txff_alloc.pub_queue_pg_num = 1;
+
+	halmac->h2c_info.buf_size = 1024;
+
+	/* Driver insert flow: Sync driver setting with register */
+	/* Sync driver RCR cache with register setting */
+	rtw_hal_get_hwreg(dvobj_get_primary_adapter(d), HW_VAR_RCR, NULL);
+
+	err_ret = 0;
+out:
+	return err_ret;
+}
+
 u8 rtl8822c_hal_init(PADAPTER adapter)
 {
-	struct dvobj_priv *d;
 	PHAL_DATA_TYPE hal;
-	int err;
+	struct dvobj_priv *d;
+	struct halmac_adapter *halmac;
+	struct halmac_api *api;
+	struct phl_info_t *phl_info = d->phl;
+	struct hal_info_t *hal_info = phl_info->hal;
+	struct halmac_fw_version *info;
+	enum halmac_ret_status status;
+	enum rtw_hal_status hal_status;
 	u8 fw_bin = _TRUE;
+	u32 ok;
+	int err = 0, err_ret = -1;
 
 	d = adapter_to_dvobj(adapter);
 	hal = GET_HAL_DATA(adapter);
+	halmac = dvobj_to_halmac(d);
+	info = &halmac->fw_ver;
+	api = HALMAC_GET_API(halmac);
 
-	hal->bFWReady = _FALSE;
-	hal->fw_ractrl = _FALSE;
-
+	hal->bMacPwrCtrlOn = _TRUE;
 	{
-		RTW_INFO("%s fw source from array\n", __FUNCTION__);
-		fw_bin = _FALSE;
+		/* 5.1. (Driver) Reset driver variables if needed */
+		hal->LastHMEBoxNum = 0;
+
+		/* 5.2. (Driver) Get FW version */
+		hal->firmware_version = info->version;
+		hal->firmware_sub_version = info->sub_version;
+		hal->firmware_size = array_length_mp_8822c_fw_nic;
 	}
 
-	err = rtw_halmac_init_hal_fw(d, array_mp_8822c_fw_nic, array_length_mp_8822c_fw_nic);
-
+	/* InitMACFlow */
+	err = init_mac_flow(d);
 	if (err) {
-		RTW_ERR("%s Download Firmware from %s failed\n", __FUNCTION__, (fw_bin) ? "file" : "array");
+		RTW_ERR("%s init_mac_flow err=%d\n", __func__, err);
 		return _FALSE;
 	}
 
-	RTW_INFO("%s Download Firmware from %s success\n", __FUNCTION__, (fw_bin) ? "file" : "array");
-	RTW_INFO("%s FW Version:%d SubVersion:%d FW size:%d\n", "NIC",
-		hal->firmware_version, hal->firmware_sub_version, hal->firmware_size);
+	#ifdef CONFIG_CORE_CMD_THREAD 
+	if (is_primary_adapter(adapter) && !adapter->cmdThread) {
+		RTW_INFO(FUNC_ADPT_FMT " start RTW_CMD_THREAD\n", FUNC_ADPT_ARG(adapter));
+		adapter->cmdThread = kthread_run(rtw_cmd_thread, adapter, "RTW_CMD_THREAD");
+		if (IS_ERR(adapter->cmdThread)) {
+			adapter->cmdThread = NULL;
+			return _FALSE;
+		}
+		else
+			_rtw_down_sema(&adapter_to_dvobj(adapter)->cmdpriv.start_cmdthread_sema); /* wait for cmd_thread to run */
+	}
+	#endif
+
+	halmac->halmac_state.dlfw_state = HALMAC_GEN_INFO_SENT;
+
+	/* Init BB, RF */
+	ok = rtw_hal_init_phy(adapter);
+	if (_FALSE == ok) {
+		RTW_ERR("%s rtw_hal_init_phy=%d\n", __func__, err);
+		return _FALSE;
+	}
 
 	/* Sync driver status with hardware setting */
 	rtw_hal_get_hwreg(adapter, HW_VAR_RCR, NULL);

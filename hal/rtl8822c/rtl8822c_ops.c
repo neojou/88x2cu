@@ -3255,7 +3255,6 @@ void rtl8822c_set_hal_ops(PADAPTER adapter)
 	ops->hal_mac_c2h_handler = rtl8822c_c2h_handler;
 	ops->fill_h2c_cmd = rtl8822c_fillh2ccmd;
 	ops->fill_fake_txdesc = fill_fake_txdesc;
-	ops->fw_dl = rtl8822c_fw_dl;
 
 #if defined(CONFIG_WOWLAN) || defined(CONFIG_AP_WOWLAN) || defined(CONFIG_PCI_HCI)
 /*

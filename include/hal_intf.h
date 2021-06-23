@@ -402,7 +402,6 @@ struct hal_ops {
 	s32(*fill_h2c_cmd)(PADAPTER, u8 ElementID, u32 CmdLen, u8 *pCmdBuffer);
 	void (*fill_fake_txdesc)(PADAPTER, u8 *pDesc, u32 BufferLen,
 				 u8 IsPsPoll, u8 IsBTQosNull, u8 bDataFrame);
-	s32(*fw_dl)(_adapter *adapter, u8 wowlan);
 	s32 (*fw_mem_dl)(_adapter *adapter, enum fw_mem mem);
 
 #if defined(CONFIG_WOWLAN) || defined(CONFIG_AP_WOWLAN) || defined(CONFIG_PCI_HCI)
@@ -816,10 +815,6 @@ void rtw_hal_update_hisr_hsisr_ind(_adapter *padapter, u32 flag);
 int rtw_hal_gpio_func_check(_adapter *padapter, u8 gpio_num);
 void rtw_hal_gpio_multi_func_reset(_adapter *padapter, u8 gpio_num);
 #endif
-#ifdef CONFIG_FW_CORRECT_BCN
-void rtw_hal_fw_correct_bcn(_adapter *padapter);
-#endif
-s32 rtw_hal_fw_dl(_adapter *padapter, u8 wowlan);
 
 #if defined(CONFIG_WOWLAN) || defined(CONFIG_AP_WOWLAN)
 	void rtw_hal_clear_interrupt(_adapter *padapter);

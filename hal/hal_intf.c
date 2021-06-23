@@ -633,19 +633,6 @@ u8 rtw_hal_check_ips_status(_adapter *padapter)
 	return val;
 }
 
-s32 rtw_hal_fw_dl(_adapter *padapter, u8 wowlan)
-{
-	s32 ret;
-
-	ret = padapter->hal_func.fw_dl(padapter, wowlan);
-
-#ifdef CONFIG_LPS_1T1R
-	GET_HAL_DATA(padapter)->lps_1t1r = 0;
-#endif
-
-	return ret;
-}
-
 s32 rtw_hal_fw_mem_dl(_adapter *padapter, enum fw_mem mem)
 {
 	systime dlfw_start_time = rtw_get_current_time();
@@ -1971,12 +1958,6 @@ u8 rtw_hal_ops_check(_adapter *padapter)
 		ret = _FAIL;
 	}
 #endif
-
-
-	if (NULL == padapter->hal_func.fw_dl) {
-		rtw_hal_error_msg("fw_dl");
-		ret = _FAIL;
-	}
 
 	#ifdef CONFIG_FW_CORRECT_BCN
 	if (IS_HARDWARE_TYPE_8814A(padapter)

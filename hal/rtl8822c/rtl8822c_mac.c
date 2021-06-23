@@ -90,48 +90,6 @@ inline u8 rtl8822c_rx_tsf_addr_filter_config(PADAPTER p, u8 config)
 	return _TRUE;
 }
 
-/*
- * Return:
- *	_SUCCESS	Download Firmware OK.
- *	_FAIL		Download Firmware FAIL!
- */
-s32 rtl8822c_fw_dl(PADAPTER adapter, u8 wowlan)
-{
-	struct dvobj_priv *d = adapter_to_dvobj(adapter);
-	HAL_DATA_TYPE *hal = GET_HAL_DATA(adapter);
-	struct pwrctrl_priv *pwrpriv = adapter_to_pwrctl(adapter);
-	int err;
-	u8 fw_bin = _TRUE;
-
-	{
-		RTW_INFO("%s fw source from array\n", __FUNCTION__);
-		fw_bin = _FALSE;
-	}
-
-	{
-		#ifdef CONFIG_WOWLAN
-		if (_TRUE == wowlan)
-			err = rtw_halmac_dlfw(d, array_mp_8822c_fw_wowlan, array_length_mp_8822c_fw_wowlan);
-		else
-		#endif /* CONFIG_WOWLAN */
-			err = rtw_halmac_dlfw(d, array_mp_8822c_fw_nic, array_length_mp_8822c_fw_nic);
-	}
-
-	if (!err) {
-		hal->bFWReady = _TRUE;
-		hal->fw_ractrl = _TRUE;
-		RTW_INFO("%s Download Firmware from %s success\n", __FUNCTION__, (fw_bin) ? "file" : "array");
-		RTW_INFO("%s FW Version:%d SubVersion:%d FW size:%d\n", (wowlan) ? "WOW" : "NIC",
-			hal->firmware_version, hal->firmware_sub_version, hal->firmware_size);
-		return _SUCCESS;
-	} else {
-		hal->bFWReady = _FALSE;
-		hal->fw_ractrl = _FALSE;
-		RTW_ERR("%s Download Firmware from %s failed\n", __FUNCTION__, (fw_bin) ? "file" : "array");
-		return _FAIL;
-	}
-}
-
 u32 rtl8822c_get_tx_desc_size(struct _ADAPTER *a)
 {
 	struct dvobj_priv *d;
