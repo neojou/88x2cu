@@ -1096,32 +1096,6 @@ void phydm_config_rx_path_8822c(struct dm_struct *dm, enum bb_path rx_path)
 
 __odm_func__
 void
-phydm_set_rf_mode_table_8822c(struct dm_struct *dm,
-			      enum bb_path tx_path_mode_table,
-			      enum bb_path rx_path)
-{
-	/*Cannot shutdown path-A, beacause synthesizer will shutdown
-	 *when path-A is in shut down mode.
-	 */
-
-	/*Cannot set path-A into standby mode due to the sensitivity of CCK
-	 *would degrade when 1T1R-B.
-	 */
-
-	/*RF mode setting : 0:shutdown, 1:standby, 2:TX, 3:RX*/
-	/*Mode table setting : tx:[3:0], txoff:[7:4], rx:[19:8]*/
-	if (rx_path == BB_PATH_A) {
-		if (tx_path_mode_table == BB_PATH_A)
-			odm_set_bb_reg(dm, R_0x4100, 0xfffff, 0x0);
-		else
-			odm_set_bb_reg(dm, R_0x4100, 0xfffff, 0x11112);
-	} else {
-		odm_set_bb_reg(dm, R_0x4100, 0xfffff, 0x33312);
-	}
-}
-
-__odm_func__
-void
 phydm_rfe_8822c(struct dm_struct *dm, enum bb_path path)
 {
 	u8 rfe_type = dm->rfe_type;
@@ -1183,25 +1157,6 @@ config_phydm_trx_mode_8822c(struct dm_struct *dm, enum bb_path tx_path_en,
 	u8 rfe_type = dm->rfe_type;
 
 	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
-
-	/*RX Check*/
-	if (rx_path & ~BB_PATH_AB) {
-		pr_debug("[Warning][%s] RX:0x%x\n", __func__, rx_path);
-		return false;
-	}
-
-	/*TX Check*/
-	if (tx_path_en == BB_PATH_AUTO && tx_path_sel_1ss == BB_PATH_AUTO) {
-		/*@ Shutting down 2sts rate, but 1sts PathDiv is enabled*/
-		disable_2sts_div_mode = true;
-		tx_path_mode_table = BB_PATH_AB;
-	} else if (tx_path_en & ~BB_PATH_AB) {
-		pr_debug("[Warning][%s] TX:0x%x\n", __func__, tx_path_en);
-		return false;
-	}
-
-	/* @==== [RF Mode Table] ========================================*/
-	phydm_set_rf_mode_table_8822c(dm, tx_path_mode_table, rx_path);
 
 	/* @==== [RX Path] ==============================================*/
 	phydm_config_rx_path_8822c(dm, rx_path);

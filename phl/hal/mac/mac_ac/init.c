@@ -1558,7 +1558,7 @@ static void init_usb_cfg(struct mac_adapter *adapter)
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 	u8 value8;
 
-	value8 |= (BIT_DMA_MODE | (0x3 << BIT_SHIFT_BURST_CNT));
+	value8 = (BIT_DMA_MODE | (0x3 << BIT_SHIFT_BURST_CNT));
 
 	if (MAC_REG_R8(REG_SYS_CFG2 + 3) == 0x20) {
 		 /* usb3.0 */
@@ -1572,6 +1572,21 @@ static void init_usb_cfg(struct mac_adapter *adapter)
 
 	MAC_REG_W8(REG_RXDMA_MODE, value8);
 	MAC_REG_W16_SET(REG_TXDMA_OFFSET_CHK, BIT_DROP_DATA_EN);
+}
+
+static u32 phydm_rf_init(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 value32;
+
+	/* set rf mode table : BB_PATH_AB */
+	value32 = MAC_REG_R32(0x4100);
+	value32 &= ~(0xFFFFF);
+	value32 |= 0x11112;
+	MAC_REG_W32(0x4100, value32);
+	udelay(1);
+
+	return MACSUCCESS;
 }
 
 static u32 phy_init(struct mac_adapter *adapter)
@@ -1594,6 +1609,9 @@ static u32 phy_init(struct mac_adapter *adapter)
 	mac_odm_reset_bb(adapter);
 
 	init_usb_cfg(adapter);
+
+	phydm_rf_init(adapter);
+
 	return ret;
 }
 
