@@ -29,13 +29,6 @@
 
 #define RXBB_MAX_GAIN_8822C 0x14
 
-void odm_config_rf_reg_8822c(struct dm_struct *dm, u32 addr, u32 data,
-			     enum rf_path rf_path, u32 reg_addr);
-
-void odm_config_rf_radio_a_8822c(struct dm_struct *dm, u32 addr, u32 data);
-
-void odm_config_rf_radio_b_8822c(struct dm_struct *dm, u32 addr, u32 data);
-
 void odm_config_bb_phy_reg_pg_8822c(struct dm_struct *dm, u32 band, u32 rf_path,
 			u32 tx_num, u32 addr, u32 bitmask,
 			u32 data);

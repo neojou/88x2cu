@@ -28,45 +28,6 @@
 
 #if (RTL8822C_SUPPORT)
 
-void odm_config_rf_reg_8822c(struct dm_struct *dm, u32 addr, u32 data,
-			     enum rf_path rf_path, u32 reg_addr)
-{
-	{
-		if (addr == 0xffe) {
-#ifdef CONFIG_LONG_DELAY_ISSUE
-			ODM_sleep_ms(50);
-#else
-			ODM_delay_ms(50);
-#endif
-		} else if (addr == 0xfe) {
-#ifdef CONFIG_LONG_DELAY_ISSUE
-			ODM_sleep_us(100);
-#else
-			ODM_delay_us(100);
-#endif
-		} else if (addr == 0xffff) {
-			ODM_delay_us(1);
-		} else {
-			odm_set_rf_reg(dm, rf_path, reg_addr, RFREG_MASK, data);
-
-			/*Add 1us delay between BB/RF register setting.*/
-			ODM_delay_us(1);
-		}
-	}
-}
-
-void odm_config_rf_radio_b_8822c(struct dm_struct *dm, u32 addr, u32 data)
-{
-	u32 content = 0x1001; /* RF_Content: radiob_txt */
-	u32 maskfor_phy_set = (u32)(content & 0xE000);
-
-	odm_config_rf_reg_8822c(dm, addr, data, RF_PATH_B, addr |
-				maskfor_phy_set);
-
-	PHYDM_DBG(dm, ODM_COMP_INIT, "===> config_rf: [RadioB] %08X %08X\n",
-		  addr, data);
-}
-
 void phydm_agc_lower_bound_8822c(struct dm_struct *dm, u32 addr, u32 data)
 {
 	u8 rxbb_gain = (u8)(data & 0x0000001f);
