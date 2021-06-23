@@ -1586,6 +1586,27 @@ static u32 phydm_rf_init(struct mac_adapter *adapter)
 	MAC_REG_W32(0x4100, value32);
 	udelay(1);
 
+	/* set CCK rx path : BB_PATH_AB */
+	/* Select ant A to receive CCK 1 and ant B to receive CCK 2 */
+	value32 = MAC_REG_R32(0x1a04);
+	value32 &= ~(0x0f000000);
+	value32 |= 0x01000000;
+	MAC_REG_W32(0x1a04, value32);
+	/* enable rx clk gated */
+	value32 = MAC_REG_R32(0x1a2c);
+	value32 &= ~(BIT(5));
+	MAC_REG_W32(0x1a2c, value32);
+	/* enable MRC for CCK barker */
+	value32 = MAC_REG_R32(0x1a2c);
+	value32 &= ~(0x00060000);
+	value32 |= 0x00010000;
+	MAC_REG_W32(0x1a2c, value32);
+	/* enable MRC for CCK CCA */
+	value32 = MAC_REG_R32(0x1a2c);
+	value32 &= ~(0x00600000);
+	value32 |= 0x00100000;
+	MAC_REG_W32(0x1a2c, value32);
+
 	return MACSUCCESS;
 }
 
@@ -1606,11 +1627,11 @@ static u32 phy_init(struct mac_adapter *adapter)
 
 	mac_odm_set_crystal_cap(adapter);
 	mac_odm_post_setting(adapter);
+
+	phydm_rf_init(adapter);
 	mac_odm_reset_bb(adapter);
 
 	init_usb_cfg(adapter);
-
-	phydm_rf_init(adapter);
 
 	return ret;
 }

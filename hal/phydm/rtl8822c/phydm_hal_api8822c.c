@@ -927,47 +927,6 @@ phydm_config_cck_tx_path_8822c(struct dm_struct *dm, enum bb_path tx_path)
 }
 
 __odm_func__
-boolean
-phydm_config_cck_rx_path_8822c(struct dm_struct *dm, enum bb_path rx_path)
-{
-	boolean set_result = PHYDM_SET_FAIL;
-
-	if (rx_path == BB_PATH_A) {
-		/* Select ant_A to receive CCK_1 and CCK_2*/
-		odm_set_bb_reg(dm, R_0x1a04, 0x0f000000, 0x0);
-		/* Enable Rx clk gated */
-		odm_set_bb_reg(dm, R_0x1a2c, BIT(5), 0x0);
-		/* Disable MRC for CCK barker */
-		odm_set_bb_reg(dm, R_0x1a2c, 0x00060000, 0x0);
-		/* Disable MRC for CCK CCA */
-		odm_set_bb_reg(dm, R_0x1a2c, 0x00600000, 0x0);
-	} else if (rx_path == BB_PATH_B) {
-		/* Select ant_B to receive CCK_1 and CCK_2*/
-		odm_set_bb_reg(dm, R_0x1a04, 0x0f000000, 0x5);
-		/* Disable Rx clk gated */
-		odm_set_bb_reg(dm, R_0x1a2c, BIT(5), 0x1);
-		/* replace path-B with path-AB: [PHYDM-336]*/
-		/* Disable MRC for CCK barker */
-		odm_set_bb_reg(dm, R_0x1a2c, 0x00060000, 0x0);
-		/* Enable MRC for CCK CCA */
-		odm_set_bb_reg(dm, R_0x1a2c, 0x00600000, 0x1);
-	} else if (rx_path == BB_PATH_AB) {
-		/* Select ant_A to receive CCK_1 and ant_B to receive CCK_2*/
-		odm_set_bb_reg(dm, R_0x1a04, 0x0f000000, 0x1);
-		/* Enable Rx clk gated */
-		odm_set_bb_reg(dm, R_0x1a2c, BIT(5), 0x0);
-		/* Enable MRC for CCK barker */
-		odm_set_bb_reg(dm, R_0x1a2c, 0x00060000, 0x1);
-		/* Enable MRC for CCK CCA */
-		odm_set_bb_reg(dm, R_0x1a2c, 0x00600000, 0x1);
-	}
-
-	set_result = PHYDM_SET_SUCCESS;
-	phydm_bb_reset_8822c(dm);
-	return set_result;
-}
-
-__odm_func__
 void
 phydm_config_ofdm_tx_path_8822c(struct dm_struct *dm, enum bb_path tx_path_2ss,
 				enum bb_path tx_path_sel_1ss)
@@ -1083,9 +1042,6 @@ void phydm_config_tx_path_8822c(struct dm_struct *dm, enum bb_path tx_path_2ss,
 __odm_func__
 void phydm_config_rx_path_8822c(struct dm_struct *dm, enum bb_path rx_path)
 {
-	/* @CCK RX antenna mapping */
-	phydm_config_cck_rx_path_8822c(dm, rx_path);
-
 	/* @OFDM RX antenna mapping*/
 	phydm_config_ofdm_rx_path_8822c(dm, rx_path);
 
