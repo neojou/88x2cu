@@ -1766,7 +1766,60 @@ s8 rtw_hal_get_txpwr_target_extra_bias(_adapter *adapter, enum rf_path rfpath
  */
 u8 rtw_hal_init_phy(PADAPTER adapter)
 {
-	return adapter->hal_func.init_phy(adapter);
+	PHAL_DATA_TYPE hal = GET_HAL_DATA(adapter);
+	struct dvobj_priv *d;
+	struct dm_struct *phydm;
+	struct phydm_cfo_track_struct *cfo_track;
+	struct phydm_physts *physts_table;
+	struct dm_dpk_info *dpk_info;
+	u8 ok = _TRUE;
+	u8 crystal_cap;
+	u8 cck_gi_u_bnd_msb = 0;
+	u8 cck_gi_u_bnd_lsb = 0;
+	u8 cck_gi_l_bnd_msb = 0;
+	u8 cck_gi_l_bnd_lsb = 0;
+	u32 value32;
+	u32 reg_val = 0;
+	BOOLEAN ret;
+	int err;
+
+	d = adapter_to_dvobj(adapter);
+	phydm = adapter_to_phydm(adapter);
+	cfo_track = &phydm->dm_cfo_track;
+	physts_table = &phydm->dm_physts_table;
+	dpk_info = &phydm->dpk_info;
+
+	dpk_info->is_dpk_pwr_on = 1;
+	dpk_info->is_dpk_enable = 1;
+	dpk_info->is_dpk_by_channel = 1;
+
+	odm_read_and_config_mp_8822c_txpowertrack(&hal->odmpriv);
+
+	cfo_track->crystal_cap = 0;
+
+	/* CCK GI bound */
+	value32 = rtw_read32(adapter, 0x1a98);
+	cck_gi_u_bnd_msb = value32 >> 14;
+	cck_gi_u_bnd_msb &= 0x3;
+
+	value32 = rtw_read32(adapter, 0x1aa8);
+	cck_gi_u_bnd_lsb = value32 >> 16;
+	cck_gi_u_bnd_lsb &= 0xf;
+
+	value32 = rtw_read32(adapter, 0x1a98);
+	cck_gi_l_bnd_lsb = value32 >> 6;
+	cck_gi_l_bnd_lsb &= 0x3;
+
+	value32 = rtw_read32(adapter, 0x1a70);
+	cck_gi_l_bnd_lsb = value32 >> 24;
+	cck_gi_l_bnd_lsb &= 0xf;
+
+	physts_table->cck_gi_u_bnd = (u8)((cck_gi_u_bnd_msb << 4) |
+				     (cck_gi_u_bnd_lsb));
+	physts_table->cck_gi_l_bnd = (u8)((cck_gi_l_bnd_msb << 4) |
+				     (cck_gi_l_bnd_lsb));
+
+	return _TRUE;
 }
 
 #ifdef CONFIG_RFKILL_POLL
@@ -1977,11 +2030,6 @@ u8 rtw_hal_ops_check(_adapter *padapter)
 		ret = _FAIL;
 	}
 #endif  /* #ifdef DBG_CONFIG_ERROR_DETECT */
-
-	if (NULL == padapter->hal_func.init_phy) {
-		rtw_hal_error_msg("init_phy");
-		ret = _FAIL;
-	}
 
 #ifdef CONFIG_RFKILL_POLL
 	if (padapter->hal_func.hal_radio_onoff_check == NULL) {

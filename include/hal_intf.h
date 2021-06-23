@@ -418,8 +418,6 @@ struct hal_ops {
 	void (*fw_correct_bcn)(PADAPTER padapter);
 #endif
 
-	u8(*init_phy)(PADAPTER);
-
 #ifdef CONFIG_PCI_HCI
 	void (*hal_set_l1ssbackdoor_handler)(_adapter *padapter, u8 enable);
 #endif
