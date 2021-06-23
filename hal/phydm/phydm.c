@@ -526,11 +526,6 @@ enum phydm_init_result odm_dm_init(struct dm_struct *dm)
 {
 	enum phydm_init_result result = PHYDM_INIT_SUCCESS;
 
-	if (!phydm_chk_bb_rf_pkg_set_valid(dm)) {
-		pr_debug("[Warning][%s] Init fail\n", __func__);
-		return PHYDM_INIT_FAIL_BBRF_REG_INVALID;
-	}
-
 	halrf_init(dm);
 	phydm_supportability_init(dm);
 	phydm_pause_func_init(dm);

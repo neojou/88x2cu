@@ -100,7 +100,7 @@
 #endif //NEO
 
 	#ifndef RTW_IQK_FW_OFFLOAD
-		/* #define RTW_IQK_FW_OFFLOAD */
+	#define RTW_IQK_FW_OFFLOAD
 	#endif /* RTW_IQK_FW_OFFLOAD */
 	#define CONFIG_ADVANCE_OTA
 
