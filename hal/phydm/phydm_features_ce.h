@@ -237,8 +237,4 @@
 	#define CONFIG_DIRECTIONAL_BF
 #endif
 
-#if (RTL8822C_SUPPORT)
-	#define CONFIG_MU_RSOML
-#endif
-
 #endif

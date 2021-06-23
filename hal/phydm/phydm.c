@@ -588,10 +588,6 @@ enum phydm_init_result odm_dm_init(struct dm_struct *dm)
 	phydm_cck_rx_pathdiv_init(dm);
 #endif
 
-#ifdef CONFIG_MU_RSOML
-	phydm_mu_rsoml_init(dm);
-#endif
-
 	return result;
 }
 
@@ -1150,10 +1146,6 @@ void phydm_watchdog(struct dm_struct *dm)
 
 #ifdef CONFIG_MCC_DM
 	phydm_mcc_switch(dm);
-#endif
-
-#ifdef CONFIG_MU_RSOML
-	phydm_mu_rsoml_decision(dm);
 #endif
 
 	phydm_common_info_self_reset(dm);
