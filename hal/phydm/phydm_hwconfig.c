@@ -54,34 +54,6 @@
 #define GET_VERSION(ic, txt) GET_VERSION_MP(ic, txt)
 #endif
 
-enum hal_status
-odm_config_rf_with_header_file(struct dm_struct *dm,
-			       enum odm_rf_config_type config_type,
-			       u8 e_rf_path)
-{
-	enum hal_status result = HAL_STATUS_SUCCESS;
-
-	PHYDM_DBG(dm, ODM_COMP_INIT, "===>%s (%s)\n", __func__,
-		  (dm->is_mp_chip) ? "MPChip" : "TestChip");
-	PHYDM_DBG(dm, ODM_COMP_INIT,
-		  "support_platform: 0x%X, support_interface: 0x%X, board_type: 0x%X\n",
-		  dm->support_platform, dm->support_interface, dm->board_type);
-
-	if (config_type == CONFIG_RF_RADIO) {
-		if (e_rf_path == RF_PATH_A)
-			READ_AND_CONFIG_MP(8822c, _radioa);
-		else if (e_rf_path == RF_PATH_B)
-			READ_AND_CONFIG_MP(8822c, _radiob);
-	} else if (config_type == CONFIG_RF_TXPWR_LMT) {
-		if (dm->rfe_type == 5)
-			READ_AND_CONFIG_MP(8822c, _txpwr_lmt_type5);
-		else
-			READ_AND_CONFIG_MP(8822c, _txpwr_lmt);
-	}
-
-	return result;
-}
-
 u32 query_phydm_trx_capability(struct dm_struct *dm)
 {
 	u32 value32 = 0xFFFFFFFF;

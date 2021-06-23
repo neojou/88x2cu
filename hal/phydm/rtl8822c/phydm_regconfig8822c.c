@@ -55,21 +55,6 @@ void odm_config_rf_reg_8822c(struct dm_struct *dm, u32 addr, u32 data,
 	}
 }
 
-void odm_config_rf_radio_a_8822c(struct dm_struct *dm, u32 addr, u32 data)
-{
-	odm_config_rf_reg_8822c(dm, addr, data, RF_PATH_A, addr);
-#if 0
-	u32 content = 0x1000; /* RF_Content: radioa_txt */
-	u32 maskfor_phy_set = (u32)(content & 0xE000);
-
-	odm_config_rf_reg_8822c(dm, addr, data, RF_PATH_A, addr |
-				maskfor_phy_set);
-
-	PHYDM_DBG(dm, ODM_COMP_INIT, "===> config_rf: [RadioA] %08X %08X\n",
-		  addr, data);
-#endif
-}
-
 void odm_config_rf_radio_b_8822c(struct dm_struct *dm, u32 addr, u32 data)
 {
 	u32 content = 0x1001; /* RF_Content: radiob_txt */

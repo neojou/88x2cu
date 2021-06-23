@@ -55,7 +55,6 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 	dpk_info->is_dpk_enable = 1;
 	dpk_info->is_dpk_by_channel = 1;
 
-	//odm_read_and_config_mp_8822c_radioa(&hal->odmpriv);
 	odm_read_and_config_mp_8822c_radiob(&hal->odmpriv);
 	odm_read_and_config_mp_8822c_txpowertrack(&hal->odmpriv);
 
