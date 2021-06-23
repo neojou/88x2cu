@@ -25,7 +25,7 @@ inline u8 rtl8822c_rcr_config(PADAPTER p, u32 rcr)
 	u32 v32;
 	int err;
 
-	v32 = GET_HAL_DATA(p)->ReceiveConfig;
+	v32 = rtw_read32(p, REG_RCR);
 	v32 ^= rcr;
 	v32 &= BIT_APP_PHYSTS_8822C;
 	if (v32) {
@@ -47,9 +47,7 @@ inline u8 rtl8822c_rcr_config(PADAPTER p, u32 rcr)
 		}
 	}
 
-	rtw_write32(p, REG_RCR_8822C, rcr);
-
-	GET_HAL_DATA(p)->ReceiveConfig = rcr;
+	rtw_write32(p, REG_RCR, rcr);
 	return _TRUE;
 }
 

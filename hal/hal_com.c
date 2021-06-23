@@ -2418,9 +2418,6 @@ static void rtw_hal_set_tsf_update(_adapter *adapter, u8 en)
 #endif /*CONFIG_MI_WITH_MBSSID_CAM*/
 static void rtw_hal_set_hw_update_tsf(PADAPTER padapter)
 {
-#ifdef CONFIG_MI_WITH_MBSSID_CAM
-
-#else
 	struct mlme_ext_priv *pmlmeext = &padapter->mlmeextpriv;
 
 	if (!pmlmeext->en_hw_update_tsf)
@@ -2436,7 +2433,6 @@ static void rtw_hal_set_hw_update_tsf(PADAPTER padapter)
 	}
 
 	pmlmeext->en_hw_update_tsf = 0;
-#endif
 }
 
 void rtw_iface_enable_tsf_update(_adapter *adapter)
@@ -2583,11 +2579,7 @@ void rtw_hal_periodic_tsf_update_end_timer_hdl(void *ctx)
 
 static inline u8 hw_var_rcr_config(_adapter *adapter, u32 rcr)
 {
-#ifdef CONFIG_CUSTOMER_ALIBABA_GENERAL
-	rcr = RCR_AAP | RCR_APM | RCR_AM | RCR_AB | RCR_APWRMGT | RCR_ADF | RCR_AMF | RCR_APP_PHYST_RXFF | RCR_APP_MIC | RCR_APP_ICV;
-#endif
 	rtw_write32(adapter, REG_RCR, rcr);
-	GET_HAL_DATA(adapter)->ReceiveConfig = rcr;
 	return _SUCCESS;
 }
 
@@ -2598,7 +2590,6 @@ static inline u8 hw_var_rcr_get(_adapter *adapter, u32 *rcr)
 	v32 = rtw_read32(adapter, REG_RCR);
 	if (rcr)
 		*rcr = v32;
-	GET_HAL_DATA(adapter)->ReceiveConfig = v32;
 	return _SUCCESS;
 }
 
@@ -2610,7 +2601,7 @@ inline u8 rtw_hal_rcr_check(_adapter *adapter, u32 check_bit)
 
 	hal = GET_HAL_DATA(adapter);
 
-	rcr = hal->ReceiveConfig;
+	rcr = rtw_read32(adapter, REG_RCR);
 	if ((rcr & check_bit) == check_bit)
 		return 1;
 
@@ -2627,8 +2618,7 @@ inline u8 rtw_hal_rcr_add(_adapter *adapter, u32 add)
 
 	rtw_hal_get_hwreg(adapter, HW_VAR_RCR, (u8 *)&rcr);
 	rcr |= add;
-	if (rcr != hal->ReceiveConfig)
-		ret = rtw_hal_set_hwreg(adapter, HW_VAR_RCR, (u8 *)&rcr);
+	ret = rtw_hal_set_hwreg(adapter, HW_VAR_RCR, (u8 *)&rcr);
 
 	return ret;
 }
@@ -2643,8 +2633,7 @@ inline u8 rtw_hal_rcr_clear(_adapter *adapter, u32 clear)
 
 	rtw_hal_get_hwreg(adapter, HW_VAR_RCR, (u8 *)&rcr);
 	rcr &= ~clear;
-	if (rcr != hal->ReceiveConfig)
-		ret = rtw_hal_set_hwreg(adapter, HW_VAR_RCR, (u8 *)&rcr);
+	ret = rtw_hal_set_hwreg(adapter, HW_VAR_RCR, (u8 *)&rcr);
 
 	return ret;
 }

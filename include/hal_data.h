@@ -336,7 +336,6 @@ typedef struct hal_com_data {
 	BOOLEAN		bSwChnlAndSetBWInProgress;
 	u8				bDisableSWChannelPlan; /* flag of disable software change channel plan	 */
 	u16				BasicRateSet;
-	u32				ReceiveConfig;
 #ifdef CONFIG_WIFI_MONITOR
 	struct mon_reg_backup		mon_backup; /* used for switching back from monitor mode */
 #endif /* CONFIG_WIFI_MONITOR */
