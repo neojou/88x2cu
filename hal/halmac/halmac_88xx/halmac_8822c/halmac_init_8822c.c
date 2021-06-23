@@ -23,9 +23,6 @@
 #include "halmac_sdio_8822c.h"
 #include "../halmac_sdio_88xx.h"
 #endif
-#if HALMAC_USB_SUPPORT
-#include "halmac_usb_8822c.h"
-#endif
 #include "halmac_gpio_8822c.h"
 #include "halmac_common_8822c.h"
 #include "halmac_cfg_wmac_8822c.h"
@@ -374,15 +371,6 @@ mount_api_8822c(struct halmac_adapter *adapter)
 	api->halmac_cfg_drv_info = cfg_drv_info_8822c;
 	api->halmac_fill_txdesc_checksum = fill_txdesc_check_sum_8822c;
 	api->halmac_init_low_pwr = init_low_pwr_8822c;
-
-	if (adapter->intf == HALMAC_INTERFACE_SDIO) {
-	} else if (adapter->intf == HALMAC_INTERFACE_USB) {
-		api->halmac_interface_integration_tuning = intf_tun_usb_8822c;
-	} else if (adapter->intf == HALMAC_INTERFACE_PCIE) {
-	} else {
-		PLTFM_MSG_ERR("[ERR]Undefined IC\n");
-		return HALMAC_RET_CHIP_NOT_SUPPORT;
-	}
 
 	return HALMAC_RET_SUCCESS;
 }

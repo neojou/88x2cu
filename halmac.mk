@@ -72,9 +72,6 @@ halmac-y +=		$(path_hm_d2)/halmac_gpio_$(ic).o \
 			$(path_hm_d2)/halmac_init_$(ic).o \
 			$(path_hm_d2)/halmac_phy_$(ic).o \
 			$(path_hm_d2)/halmac_pwr_seq_$(ic).o
-halmac-$(pci) += 	$(path_hm_d2)/halmac_pcie_$(ic).o
-halmac-$(sdio) +=	$(path_hm_d2)/halmac_sdio_$(ic).o
-halmac-$(usb) += 	$(path_hm_d2)/halmac_usb_$(ic).o
 
 _HAL_INTFS_FILES +=	hal/hal_halmac.o
 _HAL_INTFS_FILES +=	$(halmac-y)

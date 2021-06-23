@@ -679,13 +679,6 @@ int rtw_halmac_init_adapter(struct dvobj_priv *d, struct halmac_platform_api *pf
 
 	dvobj_set_halmac(d, halmac);
 
-	status = api->halmac_interface_integration_tuning(halmac);
-	if (status != HALMAC_RET_SUCCESS) {
-		RTW_ERR("%s: halmac_interface_integration_tuning fail!(status=%d)\n", __FUNCTION__, status);
-		err = -1;
-		goto deinit;
-	}
-
 	init_write_rsvd_page_size(d);
 
 	return 0;

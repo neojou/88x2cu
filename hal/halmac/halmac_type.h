@@ -2438,8 +2438,6 @@ struct halmac_api {
 	(*halmac_rw_bcn_ctrl)(struct halmac_adapter *adapter, u8 port,
 			      u8 write_en, struct halmac_bcn_ctrl *ctrl);
 	enum halmac_ret_status
-	(*halmac_interface_integration_tuning)(struct halmac_adapter *adapter);
-	enum halmac_ret_status
 	(*halmac_txfifo_is_empty)(struct halmac_adapter *adapter, u32 chk_num);
 	enum halmac_ret_status
 	(*halmac_cfg_edca_para)(struct halmac_adapter *adapter,
