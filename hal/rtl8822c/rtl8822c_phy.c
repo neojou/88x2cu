@@ -57,9 +57,6 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 
 	odm_read_and_config_mp_8822c_txpowertrack(&hal->odmpriv);
 
-	value32 = rtw_read32(adapter, 0x1040);
-	value32 &= ~(0x00FFFC00);
-	rtw_write32(adapter, 0x1040, value32);
 	cfo_track->crystal_cap = 0;
 
 	/* CCK GI bound */
@@ -83,38 +80,6 @@ u8 rtl8822c_phy_init(PADAPTER adapter)
 				     (cck_gi_u_bnd_lsb));
 	physts_table->cck_gi_l_bnd = (u8)((cck_gi_l_bnd_msb << 4) |
 				     (cck_gi_l_bnd_lsb));
-
-	/* Disable low rate DPD*/
-	value32 = rtw_read32(adapter, 0xa70);
-	value32 &= ~(0x3ff);
-	rtw_write32(adapter, 0xa70, value32);
- 	phydm->dis_dpd_rate = 0;
- 
-	/* @Do not use PHYDM API to read/write because FW can not access */
-	/* @Turn on 3-wire*/
-	value32 = rtw_read32(adapter, 0x180c);
-	value32 |= 0x3;
-	value32 |= BIT(28);
-	rtw_write32(adapter, 0x180c, value32);
-
-	value32 = rtw_read32(adapter, 0x410c);
-	value32 |= 0x3;
-	value32 |= BIT(28);
-	rtw_write32(adapter, 0x410c, value32);
-
-	// odm post setting: enable OFDM and CCK
-	value32 = rtw_read32(adapter, 0x1c3c);
-	value32 |= 0x3;
-	rtw_write32(adapter, 0x1c3c, value32);
-
-	/* reset bb */
-	value32 = rtw_read32(adapter, 0x0);
-	value32 |= BIT(16);
-	rtw_write32(adapter, 0x0, value32);
-	value32 &= ~(BIT(16));
-	rtw_write32(adapter, 0x0, value32);
-	value32 |= BIT(16);
-	rtw_write32(adapter, 0x0, value32);
 
 	return _TRUE;
 }
