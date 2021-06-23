@@ -402,9 +402,6 @@ void Init_ODM_ComInfo(_adapter *adapter)
 #ifdef CONFIG_DYNAMIC_SOML
 	odm_cmn_info_hook(pDM_Odm, ODM_CMNINFO_ADAPTIVE_SOML, &(adapter->registrypriv.dyn_soml_en));
 #endif
-#ifdef CONFIG_RTW_PATH_DIV
-	odm_cmn_info_hook(pDM_Odm, ODM_CMNINFO_PATH_DIV, &(adapter->registrypriv.path_div));
-#endif
 	odm_cmn_info_hook(pDM_Odm, ODM_CMNINFO_FCS_MODE, &(pHalData->multi_ch_switch_mode));
 
 	/*halrf info hook*/
@@ -1324,20 +1321,10 @@ u8 rtw_hal_runtime_trx_path_decision(_adapter *adapter)
 				txpath_1ss = BB_PATH_AB;
 			else
 			#endif
-			#ifdef CONFIG_RTW_PATH_DIV
-			if (adapter->registrypriv.path_div == 1) /* path diversity, support 2sts TX */
-				txpath_1ss = BB_PATH_AUTO;
-			else
-			#endif
-				txpath_1ss = BB_PATH_A;
+			txpath_1ss = BB_PATH_A;
 			break;
 		case 1:
-			#ifdef CONFIG_RTW_PATH_DIV
-			if (adapter->registrypriv.path_div == 1) /* path diversity, no support 2sts TX */
-				txpath = txpath_1ss = BB_PATH_AUTO;
-			else
-			#endif
-				txpath = txpath_1ss = BB_PATH_A;
+			txpath = txpath_1ss = BB_PATH_A;
 			break;
 		default:
 			RTW_ERR("%s invalid max_tx_cnt:%u\n", __func__

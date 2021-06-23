@@ -416,7 +416,6 @@ u64 phydm_supportability_init_ce(void *dm_void)
 			ODM_BB_RSSI_MONITOR |
 			ODM_BB_CCK_PD |
 			ODM_BB_RATE_ADAPTIVE |
-			/* ODM_BB_PATH_DIV | */
 			ODM_BB_ADAPTIVITY |
 			ODM_BB_CFO_TRACKING |
 			ODM_BB_ENV_MONITOR;
@@ -499,10 +498,6 @@ void phydm_supportability_init(void *dm_void)
 		/*@[Config Antenna Diversity]*/
 		if (IS_FUNC_EN(dm->enable_antdiv))
 			support_ability |= ODM_BB_ANT_DIV;
-
-		/*@[Config TXpath Diversity]*/
-		if (IS_FUNC_EN(dm->enable_pathdiv))
-			support_ability |= ODM_BB_PATH_DIV;
 
 		/*@[Config Adaptive SOML]*/
 		if (IS_FUNC_EN(dm->en_adap_soml))
@@ -1468,9 +1463,6 @@ void odm_cmn_info_hook(struct dm_struct *dm, enum odm_cmninfo cmn_info,
 		break;
 	case ODM_CMNINFO_ANT_DIV:
 		dm->enable_antdiv = (u8 *)value;
-		break;
-	case ODM_CMNINFO_PATH_DIV:
-		dm->enable_pathdiv = (u8 *)value;
 		break;
 	case ODM_CMNINFO_ADAPTIVE_SOML:
 		dm->en_adap_soml = (u8 *)value;

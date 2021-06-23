@@ -899,7 +899,6 @@ struct dm_struct {
 
 	u16			*forced_data_rate;
 	u8			*enable_antdiv;
-	u8			*enable_pathdiv;
 	u8			*en_adap_soml;
 	u8			*edcca_mode;
 	u8			*hub_usb_mode;		/*@1:USB2.0, 2:USB3.0*/

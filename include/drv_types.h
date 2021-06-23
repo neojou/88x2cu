@@ -300,9 +300,6 @@ struct registry_priv {
 	#if defined(CONFIG_RTW_TX_NPATH_EN)
 	u8	tx_npath;
 	#endif
-	#if defined(CONFIG_RTW_PATH_DIV)
-	u8 path_div;
-	#endif
 	/*
 	 * BIT0: Enable VHT SU Beamformer
 	 * BIT1: Enable VHT SU Beamformee

@@ -810,14 +810,6 @@ module_param(rtw_tx_npath_enable, int, 0644);
 MODULE_PARM_DESC(rtw_tx_npath_enable, "0:Disable, 1:TX-2PATH");
 #endif
 
-#ifdef CONFIG_RTW_PATH_DIV
-/*0:disable ,1: path diversity*/
-int rtw_path_div_enable = 1;
-module_param(rtw_path_div_enable, int, 0644);
-MODULE_PARM_DESC(rtw_path_div_enable, "0:Disable, 1:Enable path diversity");
-#endif
-
-
 int rtw_tsf_update_pause_factor = CONFIG_TSF_UPDATE_PAUSE_FACTOR;
 module_param(rtw_tsf_update_pause_factor, int, 0644);
 MODULE_PARM_DESC(rtw_tsf_update_pause_factor, "num of bcn intervals to stay TSF update pause status");
@@ -1270,9 +1262,6 @@ uint rtw_load_registry(_adapter *padapter)
 #endif
 #ifdef CONFIG_RTW_TX_NPATH_EN
 		registry_par->tx_npath = (u8)rtw_tx_npath_enable;
-#endif
-#ifdef CONFIG_RTW_PATH_DIV
-		registry_par->path_div = (u8)rtw_path_div_enable;
 #endif
 		registry_par->stbc_cap = (u8)rtw_stbc_cap;
 		registry_par->beamform_cap = (u8)rtw_beamform_cap;
