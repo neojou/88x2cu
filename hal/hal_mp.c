@@ -1419,65 +1419,6 @@ void mpt_SetRFPath_819X(PADAPTER	pAdapter)
 	}
 }	/* MPT_ProSetRFPath */
 
-#ifdef CONFIG_RTL8192F
-
-void mpt_set_rfpath_8192f(PADAPTER	pAdapter)
-{
-	HAL_DATA_TYPE			*pHalData	= GET_HAL_DATA(pAdapter);
-	PMPT_CONTEXT		pMptCtx = &(pAdapter->mppriv.mpt_ctx);
-
-	u16		ForcedDataRate = mpt_to_mgnt_rate(pMptCtx->mpt_rate_index);
-	u8				NssforRate, odmNssforRate;
-	u32				ulAntennaTx, ulAntennaRx;
-	enum bb_path	RxAntToPhyDm;
-	enum bb_path	TxAntToPhyDm;
-
-	ulAntennaTx = pHalData->antenna_tx_path;
-	ulAntennaRx = pHalData->AntennaRxPath;
-	NssforRate = MgntQuery_NssTxRate(ForcedDataRate);
-
-	if (pHalData->rf_chip >= RF_TYPE_MAX)
-		RTW_INFO("This RF chip ID is not supported\n");
-
-	switch (ulAntennaTx) {
-	case ANTENNA_A:
-			pMptCtx->mpt_rf_path = RF_PATH_A;
-			TxAntToPhyDm = BB_PATH_A;
-			break;
-	case ANTENNA_B:
-			pMptCtx->mpt_rf_path = RF_PATH_B;
-			TxAntToPhyDm = BB_PATH_B;
-			break;
-	case ANTENNA_AB:
-			pMptCtx->mpt_rf_path = RF_PATH_AB;
-			TxAntToPhyDm = (BB_PATH_A|BB_PATH_B);
-			break;
-	default:
-			pMptCtx->mpt_rf_path = RF_PATH_AB;
-			TxAntToPhyDm = (BB_PATH_A|BB_PATH_B);
-			break;
-	}
-
-	switch (ulAntennaRx) {
-	case ANTENNA_A:
-			RxAntToPhyDm = BB_PATH_A;
-			break;
-	case ANTENNA_B:
-			RxAntToPhyDm = BB_PATH_B;
-			break;
-	case ANTENNA_AB:
-			RxAntToPhyDm = (BB_PATH_A|BB_PATH_B);
-			break;
-	default:
-			RxAntToPhyDm = (BB_PATH_A|BB_PATH_B);
-			break;
-	}
-
-	phydm_api_trx_mode(GET_PDM_ODM(pAdapter), TxAntToPhyDm, RxAntToPhyDm, TxAntToPhyDm);
-
-}
-
-#endif
 
 void hal_mpt_SetAntenna(PADAPTER	pAdapter)
 {

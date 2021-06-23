@@ -115,8 +115,6 @@ void phydm_config_ofdm_tx_path(void *dm_void, enum bb_path path);
 
 void phydm_config_cck_tx_path(void *dm_void, enum bb_path path);
 
-void phydm_tx_2path(void *dm_void);
-
 void phydm_stop_3_wire(void *dm_void, u8 set_type);
 
 u8 phydm_stop_ic_trx(void *dm_void, u8 set_type);

@@ -1289,23 +1289,6 @@ static void init_phydm_info(_adapter *adapter)
 	odm_cmn_info_init(phydm, ODM_CMNINFO_FW_SUB_VER, hal_data->firmware_sub_version);
 }
 
-#ifdef CONFIG_CTRL_TXSS_BY_TP
-void rtw_phydm_trx_cfg(_adapter *adapter, bool tx_1ss)
-{
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
-	enum bb_path txpath = BB_PATH_AB;
-	enum bb_path rxpath = BB_PATH_AB;
-	/*is_2tx = _FALSE for 8822B, or BB_PATH_AUTO for PATH_DIVERSITY for 8822B*/
-	enum bb_path txpath_1ss = BB_PATH_A;
-
-	rtw_hal_get_trx_path(adapter_to_dvobj(adapter), NULL, &txpath, &rxpath);
-	txpath = (tx_1ss) ? BB_PATH_A : txpath;
-
-	if (phydm_api_trx_mode(adapter_to_phydm(adapter), txpath, rxpath, txpath_1ss) == FALSE)
-		RTW_ERR("%s failed\n", __func__);
-}
-#endif
-
 u8 rtw_hal_runtime_trx_path_decision(_adapter *adapter)
 {
 	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);

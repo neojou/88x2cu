@@ -553,49 +553,6 @@ void phydm_pathdiv_debug_8814a(void *dm_void, char input[][16], u32 *_used,
 
 #endif /* @#if RTL8814A_SUPPORT */
 
-#if RTL8812A_SUPPORT
-void phydm_update_tx_path_8812a(void *dm_void, enum bb_path path)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct _ODM_PATH_DIVERSITY_ *p_div = &dm->dm_path_div;
-
-	if (p_div->default_tx_path != path) {
-		PHYDM_DBG(dm, DBG_PATH_DIV, "Need to Update Tx path\n");
-
-		if (path == BB_PATH_A) {
-			/*Tx by Reg*/
-			odm_set_bb_reg(dm, R_0x80c, 0xFFF0, 0x111);
-			/*Resp Tx by Txinfo*/
-			odm_set_bb_reg(dm, R_0x6d8, 0xc0, 1);
-		} else {
-			/*Tx by Reg*/
-			odm_set_bb_reg(dm, R_0x80c, 0xFFF0, 0x222);
-			 /*Resp Tx by Txinfo*/
-			odm_set_bb_reg(dm, R_0x6d8, 0xc0, 2);
-		}
-	}
-	p_div->default_tx_path = path;
-
-	PHYDM_DBG(dm, DBG_PATH_DIV, "path=%s\n",
-		  (path == BB_PATH_A) ? "A" : "B");
-}
-
-void phydm_path_diversity_init_8812a(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct _ODM_PATH_DIVERSITY_ *p_div = &dm->dm_path_div;
-	u32 i;
-
-	odm_set_bb_reg(dm, R_0x80c, BIT(29), 1); /* Tx path from Reg */
-	odm_set_bb_reg(dm, R_0x80c, 0xFFF0, 0x111); /* Tx by Reg */
-	odm_set_bb_reg(dm, R_0x6d8, BIT(7) | BIT6, 1); /* Resp Tx by Txinfo */
-	phydm_set_tx_path_by_bb_reg(dm, RF_PATH_A);
-
-	for (i = 0; i < ODM_ASSOCIATE_ENTRY_NUM; i++)
-		p_div->path_sel[i] = 1; /* TxInfo default at path-A */
-}
-#endif
-
 #ifdef PHYDM_IC_JGR3_SERIES_SUPPORT
 void phydm_set_resp_tx_path_by_fw_jgr3(void *dm_void, u8 macid,
 				       enum bb_path path, boolean enable)

@@ -158,17 +158,6 @@ void phydm_config_cck_tx_path(void *dm_void, enum bb_path path)
 #endif
 }
 
-void phydm_tx_2path(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	enum bb_path rx_path = (enum bb_path)dm->rx_ant_status;
-
-	PHYDM_DBG(dm, ODM_COMP_API, "%s ======>\n", __func__);
-
-
-	phydm_api_trx_mode(dm, BB_PATH_AB, rx_path, BB_PATH_AB);
-}
-
 void phydm_stop_3_wire(void *dm_void, u8 set_type)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;

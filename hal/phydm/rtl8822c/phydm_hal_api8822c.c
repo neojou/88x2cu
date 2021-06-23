@@ -1077,19 +1077,6 @@ config_phydm_trx_mode_8822c(struct dm_struct *dm, enum bb_path tx_path_en,
 	phydm_config_tx_path_8822c(dm, tx_path_2ss, tx_path_sel_1ss,
 				   tx_path_sel_1ss);
 
-	/*====== [RFE ctrl] =============================================*/
-	if (rfe_type == 21 || rfe_type == 22) {
-		if (dm->tx_ant_status == BB_PATH_A && rx_path == BB_PATH_A)
-			phydm_rfe_8822c(dm, BB_PATH_A);
-		else if (dm->tx_ant_status == BB_PATH_B && rx_path == BB_PATH_B)
-			phydm_rfe_8822c(dm, BB_PATH_B);
-		else
-			phydm_rfe_8822c(dm, BB_PATH_AB);
-	}
-
-	PHYDM_DBG(dm, ODM_PHY_CONFIG, "RX_en=%x, tx_en/2ss/1ss={%x,%x,%x}\n",
-		  rx_path, tx_path_en, tx_path_2ss, tx_path_sel_1ss);
-
 	phydm_bb_reset_8822c(dm);
 
 	phydm_igi_toggle_8822c(dm);
