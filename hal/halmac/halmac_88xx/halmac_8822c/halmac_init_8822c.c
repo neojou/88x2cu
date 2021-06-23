@@ -362,7 +362,6 @@ mount_api_8822c(struct halmac_adapter *adapter)
 	adapter->hw_cfg_info.usb_txagg_num = BLK_DESC_NUM;
 	adapter->txff_alloc.rsvd_drv_pg_num = RSVD_PG_DRV_NUM;
 
-	api->halmac_pinmux_get_func = pinmux_get_func_8822c;
 	api->halmac_pinmux_set_func = pinmux_set_func_8822c;
 	api->halmac_pinmux_free_func = pinmux_free_func_8822c;
 	api->halmac_get_hw_value = get_hw_value_8822c;

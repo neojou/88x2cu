@@ -2442,9 +2442,6 @@ struct halmac_api {
 				enum halmac_acq_id acq_id,
 				struct halmac_edca_para *param);
 	enum halmac_ret_status
-	(*halmac_pinmux_get_func)(struct halmac_adapter *adapter,
-				  enum halmac_gpio_func gpio_func, u8 *enable);
-	enum halmac_ret_status
 	(*halmac_pinmux_set_func)(struct halmac_adapter *adapter,
 				  enum halmac_gpio_func gpio_func);
 	enum halmac_ret_status

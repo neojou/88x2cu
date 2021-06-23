@@ -22,10 +22,6 @@
 #if HALMAC_8822C_SUPPORT
 
 enum halmac_ret_status
-pinmux_get_func_8822c(struct halmac_adapter *adapter,
-		      enum halmac_gpio_func gpio_func, u8 *enable);
-
-enum halmac_ret_status
 pinmux_set_func_8822c(struct halmac_adapter *adapter,
 		      enum halmac_gpio_func gpio_func);
 
