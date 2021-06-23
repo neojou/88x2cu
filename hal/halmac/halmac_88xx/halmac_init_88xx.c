@@ -288,25 +288,9 @@ mount_api_88xx(struct halmac_adapter *adapter)
 	api->halmac_get_watcher = get_watcher_88xx;
 
 	if (adapter->intf == HALMAC_INTERFACE_SDIO) {
-#if HALMAC_SDIO_SUPPORT
-		api->halmac_deinit_sdio_cfg = deinit_sdio_cfg_88xx;
-		api->halmac_cfg_rx_aggregation = cfg_sdio_rx_agg_88xx;
-		api->halmac_deinit_interface_cfg = deinit_sdio_cfg_88xx;
-		api->halmac_cfg_tx_agg_align = cfg_txagg_sdio_align_88xx;
-		api->halmac_get_usb_bulkout_id = get_sdio_bulkout_id_88xx;
-		api->halmac_reg_read_indirect_32 = sdio_indirect_reg_r32_88xx;
-		api->halmac_reg_sdio_cmd53_read_n = sdio_reg_rn_88xx;
-		api->halmac_sdio_cmd53_4byte = sdio_cmd53_4byte_88xx;
-		api->halmac_sdio_hw_info = sdio_hw_info_88xx;
-		api->halmac_en_ref_autok_pcie = en_ref_autok_sdio_88xx;
-
-#endif
 	} else if (adapter->intf == HALMAC_INTERFACE_USB) {
-#if HALMAC_USB_SUPPORT
-		api->halmac_init_usb_cfg = init_usb_cfg_88xx;
 		api->halmac_deinit_usb_cfg = deinit_usb_cfg_88xx;
 		api->halmac_cfg_rx_aggregation = cfg_usb_rx_agg_88xx;
-		api->halmac_init_interface_cfg = init_usb_cfg_88xx;
 		api->halmac_deinit_interface_cfg = deinit_usb_cfg_88xx;
 		api->halmac_cfg_tx_agg_align = cfg_txagg_usb_align_88xx;
 		api->halmac_tx_allowed_sdio = tx_allowed_usb_88xx;
@@ -321,28 +305,7 @@ mount_api_88xx(struct halmac_adapter *adapter)
 		api->halmac_reg_read_indirect_32 = usb_indirect_reg_r32_88xx;
 		api->halmac_reg_sdio_cmd53_read_n = usb_reg_rn_88xx;
 		api->halmac_en_ref_autok_pcie = en_ref_autok_usb_88xx;
-#endif
 	} else if (adapter->intf == HALMAC_INTERFACE_PCIE) {
-#if HALMAC_PCIE_SUPPORT
-		api->halmac_init_pcie_cfg = init_pcie_cfg_88xx;
-		api->halmac_deinit_pcie_cfg = deinit_pcie_cfg_88xx;
-		api->halmac_cfg_rx_aggregation = cfg_pcie_rx_agg_88xx;
-		api->halmac_init_interface_cfg = init_pcie_cfg_88xx;
-		api->halmac_deinit_interface_cfg = deinit_pcie_cfg_88xx;
-		api->halmac_cfg_tx_agg_align = cfg_txagg_pcie_align_88xx;
-		api->halmac_tx_allowed_sdio = tx_allowed_pcie_88xx;
-		api->halmac_get_sdio_tx_addr = get_pcie_tx_addr_88xx;
-		api->halmac_get_usb_bulkout_id = get_pcie_bulkout_id_88xx;
-		api->halmac_reg_read_8 = reg_r8_pcie_88xx;
-		api->halmac_reg_write_8 = reg_w8_pcie_88xx;
-		api->halmac_reg_read_16 = reg_r16_pcie_88xx;
-		api->halmac_reg_write_16 = reg_w16_pcie_88xx;
-		api->halmac_reg_read_32 = reg_r32_pcie_88xx;
-		api->halmac_reg_write_32 = reg_w32_pcie_88xx;
-		api->halmac_reg_read_indirect_32 = pcie_indirect_reg_r32_88xx;
-		api->halmac_reg_sdio_cmd53_read_n = pcie_reg_rn_88xx;
-		api->halmac_en_ref_autok_pcie = en_ref_autok_pcie_88xx;
-#endif
 	} else {
 		PLTFM_MSG_ERR("[ERR]Set halmac io function Error!!\n");
 	}

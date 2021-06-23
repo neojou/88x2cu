@@ -2373,12 +2373,6 @@ static int _halmac_init_hal(struct dvobj_priv *d, u8 *fw, u32 fwsize)
 		goto out;
 	}
 
-	status = api->halmac_init_interface_cfg(halmac);
-	if (status != HALMAC_RET_SUCCESS) {
-		RTW_ERR("%s halmac_init_interface_cfg status=%d\n", __func__, status);
-		goto out;
-	}
-
 	err_ret = 0;
 out:
 	return err_ret;

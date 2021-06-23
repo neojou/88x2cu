@@ -376,43 +376,11 @@ mount_api_8822c(struct halmac_adapter *adapter)
 	api->halmac_init_low_pwr = init_low_pwr_8822c;
 
 	if (adapter->intf == HALMAC_INTERFACE_SDIO) {
-#if HALMAC_SDIO_SUPPORT
-		adapter->sdio_hw_info.tx_addr_format = HALMAC_SDIO_AGG_MODE;
-		api->halmac_init_interface_cfg = init_sdio_cfg_8822c;
-		api->halmac_init_sdio_cfg = init_sdio_cfg_8822c;
-		api->halmac_phy_cfg = phy_cfg_sdio_8822c;
-		api->halmac_pcie_switch = pcie_switch_sdio_8822c;
-		api->halmac_interface_integration_tuning = intf_tun_sdio_8822c;
-		api->halmac_tx_allowed_sdio = tx_allowed_sdio_8822c;
-		api->halmac_get_sdio_tx_addr = get_sdio_tx_addr_8822c;
-		api->halmac_reg_read_8 = reg_r8_sdio_8822c;
-		api->halmac_reg_write_8 = reg_w8_sdio_8822c;
-		api->halmac_reg_read_16 = reg_r16_sdio_8822c;
-		api->halmac_reg_write_16 = reg_w16_sdio_8822c;
-		api->halmac_reg_read_32 = reg_r32_sdio_8822c;
-		api->halmac_reg_write_32 = reg_w32_sdio_8822c;
-
-		adapter->sdio_fs.macid_map_size = MACID_MAX_8822C << 1;
-		if (!adapter->sdio_fs.macid_map) {
-			adapter->sdio_fs.macid_map =
-			(u8 *)PLTFM_MALLOC(adapter->sdio_fs.macid_map_size);
-			if (!adapter->sdio_fs.macid_map)
-				PLTFM_MSG_ERR("[ERR]mac id map malloc!!\n");
-		}
-#endif
 	} else if (adapter->intf == HALMAC_INTERFACE_USB) {
-#if HALMAC_USB_SUPPORT
 		api->halmac_phy_cfg = phy_cfg_usb_8822c;
 		api->halmac_pcie_switch = pcie_switch_usb_8822c;
 		api->halmac_interface_integration_tuning = intf_tun_usb_8822c;
-#endif
 	} else if (adapter->intf == HALMAC_INTERFACE_PCIE) {
-#if HALMAC_PCIE_SUPPORT
-		api->halmac_phy_cfg = phy_cfg_pcie_8822c;
-		api->halmac_pcie_switch = pcie_switch_8822c;
-		api->halmac_interface_integration_tuning = intf_tun_pcie_8822c;
-		api->halmac_cfgspc_set_pcie = cfgspc_set_pcie_8822c;
-#endif
 	} else {
 		PLTFM_MSG_ERR("[ERR]Undefined IC\n");
 		return HALMAC_RET_CHIP_NOT_SUPPORT;

@@ -21,9 +21,6 @@
 #if (HALMAC_88XX_SUPPORT && HALMAC_USB_SUPPORT)
 
 enum halmac_ret_status
-init_usb_cfg_88xx(struct halmac_adapter *adapter);
-
-enum halmac_ret_status
 deinit_usb_cfg_88xx(struct halmac_adapter *adapter);
 
 enum halmac_ret_status

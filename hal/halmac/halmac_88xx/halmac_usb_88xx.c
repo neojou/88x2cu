@@ -29,41 +29,6 @@ enum usb_burst_size {
 #define USB_PHY_PAGE1			0xBB
 
 /**
- * init_usb_cfg_88xx() - init USB
- * @adapter : the adapter of halmac
- * Author : KaiYuan Chang/Ivan Lin
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-init_usb_cfg_88xx(struct halmac_adapter *adapter)
-{
-	u8 value8 = 0;
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-
-	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
-
-	value8 |= (BIT_DMA_MODE | (0x3 << BIT_SHIFT_BURST_CNT));
-
-	if (HALMAC_REG_R8(REG_SYS_CFG2 + 3) == 0x20) {
-		 /* usb3.0 */
-		value8 |= (USB_BURST_SIZE_3_0 << BIT_SHIFT_BURST_SIZE);
-	} else {
-		if ((HALMAC_REG_R8(REG_USB_USBSTAT) & 0x3) == 0x1)/* usb2.0 */
-			value8 |= USB_BURST_SIZE_2_0_HS << BIT_SHIFT_BURST_SIZE;
-		else /* usb1.1 */
-			value8 |= USB_BURST_SIZE_2_0_FS << BIT_SHIFT_BURST_SIZE;
-	}
-
-	HALMAC_REG_W8(REG_RXDMA_MODE, value8);
-	HALMAC_REG_W16_SET(REG_TXDMA_OFFSET_CHK, BIT_DROP_DATA_EN);
-
-	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
-
-	return HALMAC_RET_SUCCESS;
-}
-
-/**
  * deinit_usb_cfg_88xx() - deinit USB
  * @adapter : the adapter of halmac
  * Author : KaiYuan Chang/Ivan Lin

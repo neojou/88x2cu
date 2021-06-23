@@ -1526,6 +1526,54 @@ static void mac_odm_cal_init(struct mac_adapter *adapter)
 	mac_odm_table_init(adapter, array, array_len);
 }
 
+
+enum usb_burst_size {
+	USB_BURST_SIZE_3_0 = 0x0,
+	USB_BURST_SIZE_2_0_HS = 0x1,
+	USB_BURST_SIZE_2_0_FS = 0x2,
+	USB_BURST_SIZE_2_0_OTHERS = 0x3,
+	USB_BURST_SIZE_UNDEFINE = 0x7F,
+};
+
+#define BIT_DMA_MODE BIT(1)
+#define BIT_SHIFT_BURST_SIZE 4
+#define BIT_MASK_BURST_SIZE 0x3
+#define BIT_BURST_SIZE(x) (((x) & BIT_MASK_BURST_SIZE) << BIT_SHIFT_BURST_SIZE)
+#define BITS_BURST_SIZE (BIT_MASK_BURST_SIZE << BIT_SHIFT_BURST_SIZE)
+#define BIT_CLEAR_BURST_SIZE(x) ((x) & (~BITS_BURST_SIZE))
+#define BIT_GET_BURST_SIZE(x)                                                  \
+	(((x) >> BIT_SHIFT_BURST_SIZE) & BIT_MASK_BURST_SIZE)
+#define BIT_SET_BURST_SIZE(x, v) (BIT_CLEAR_BURST_SIZE(x) | BIT_BURST_SIZE(v))
+
+#define BIT_SHIFT_BURST_CNT 2
+#define BIT_MASK_BURST_CNT 0x3
+#define BIT_BURST_CNT(x) (((x) & BIT_MASK_BURST_CNT) << BIT_SHIFT_BURST_CNT)
+#define BITS_BURST_CNT (BIT_MASK_BURST_CNT << BIT_SHIFT_BURST_CNT)
+#define BIT_CLEAR_BURST_CNT(x) ((x) & (~BITS_BURST_CNT))
+#define BIT_GET_BURST_CNT(x) (((x) >> BIT_SHIFT_BURST_CNT) & BIT_MASK_BURST_CNT)
+#define BIT_SET_BURST_CNT(x, v) (BIT_CLEAR_BURST_CNT(x) | BIT_BURST_CNT(v))
+
+static void init_usb_cfg(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u8 value8;
+
+	value8 |= (BIT_DMA_MODE | (0x3 << BIT_SHIFT_BURST_CNT));
+
+	if (MAC_REG_R8(REG_SYS_CFG2 + 3) == 0x20) {
+		 /* usb3.0 */
+		value8 |= (USB_BURST_SIZE_3_0 << BIT_SHIFT_BURST_SIZE);
+	} else {
+		if ((MAC_REG_R8(REG_USB_USBSTAT) & 0x3) == 0x1)/* usb2.0 */
+			value8 |= USB_BURST_SIZE_2_0_HS << BIT_SHIFT_BURST_SIZE;
+		else /* usb1.1 */
+			value8 |= USB_BURST_SIZE_2_0_FS << BIT_SHIFT_BURST_SIZE;
+	}
+
+	MAC_REG_W8(REG_RXDMA_MODE, value8);
+	MAC_REG_W16_SET(REG_TXDMA_OFFSET_CHK, BIT_DROP_DATA_EN);
+}
+
 static u32 phy_init(struct mac_adapter *adapter)
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
@@ -1545,6 +1593,7 @@ static u32 phy_init(struct mac_adapter *adapter)
 	mac_odm_post_setting(adapter);
 	mac_odm_reset_bb(adapter);
 
+	init_usb_cfg(adapter);
 	return ret;
 }
 
