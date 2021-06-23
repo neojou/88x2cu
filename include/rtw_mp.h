@@ -708,7 +708,6 @@ void	SetCarrierSuppressionTx(PADAPTER pAdapter, u8 bStart);
 void	PhySetTxPowerLevel(PADAPTER pAdapter);
 void	fill_txdesc_for_mp(PADAPTER padapter, u8 *ptxdesc);
 void	SetPacketTx(PADAPTER padapter);
-void	SetPacketRx(PADAPTER pAdapter, u8 bStartRx, u8 bAB);
 void	ResetPhyRxPktCount(PADAPTER pAdapter);
 u32	GetPhyRxPktReceived(PADAPTER pAdapter);
 u32	GetPhyRxPktCRC32Error(PADAPTER pAdapter);

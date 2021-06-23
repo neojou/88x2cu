@@ -2001,55 +2001,6 @@ void SetPacketTx(PADAPTER padapter)
 	return;
 }
 
-void SetPacketRx(PADAPTER pAdapter, u8 bStartRx, u8 bAB)
-{
-	PHAL_DATA_TYPE pHalData = GET_HAL_DATA(pAdapter);
-	struct mp_priv *pmppriv = &pAdapter->mppriv;
-
-
-	if (bStartRx) {
-#ifdef CONFIG_RTL8723B
-		phy_set_mac_reg(pAdapter, 0xe70, BIT23 | BIT22, 0x3); /* Power on adc  (in RX_WAIT_CCA state) */
-		write_bbreg(pAdapter, 0xa01, BIT0, bDisable);/* improve Rx performance by jerry	 */
-#endif
-		pHalData->ReceiveConfig = RCR_AAP | RCR_APM | RCR_AM | RCR_AMF | RCR_HTC_LOC_CTRL;
-		pHalData->ReceiveConfig |= RCR_ACRC32;
-		pHalData->ReceiveConfig |= RCR_APP_PHYST_RXFF | RCR_APP_ICV | RCR_APP_MIC;
-
-		if (pmppriv->bSetRxBssid == _TRUE) {
-			RTW_INFO("%s: pmppriv->network_macaddr=" MAC_FMT "\n", __func__,
-				 MAC_ARG(pmppriv->network_macaddr));
-			pHalData->ReceiveConfig = 0;
-			pHalData->ReceiveConfig |= RCR_CBSSID_DATA | RCR_CBSSID_BCN |RCR_APM | RCR_AM | RCR_AB |RCR_AMF;
-			pHalData->ReceiveConfig |= RCR_APP_PHYST_RXFF;
-
-#if defined(CONFIG_RTL8822B) || defined(CONFIG_RTL8821C) || defined(CONFIG_RTL8822C)
-/* todo: 8723F */
-			write_bbreg(pAdapter, 0x550, BIT3, bEnable);
-#endif
-			rtw_write16(pAdapter, REG_RXFLTMAP0, 0xFFEF); /* REG_RXFLTMAP0 (RX Filter Map Group 0) */
-			pmppriv->brx_filter_beacon = _TRUE;
-
-		} else {
-			pHalData->ReceiveConfig |= RCR_ADF;
-			/* Accept all data frames */
-			rtw_write16(pAdapter, REG_RXFLTMAP2, 0xFFFF);
-		}
-
-		if (bAB)
-			pHalData->ReceiveConfig |= RCR_AB;
-	} else {
-#ifdef CONFIG_RTL8723B
-		phy_set_mac_reg(pAdapter, 0xe70, BIT23 | BIT22, 0x00); /* Power off adc  (in RX_WAIT_CCA state)*/
-		write_bbreg(pAdapter, 0xa01, BIT0, bEnable);/* improve Rx performance by jerry	 */
-#endif
-		pHalData->ReceiveConfig = 0;
-		rtw_write16(pAdapter, REG_RXFLTMAP0, 0xFFFF); /* REG_RXFLTMAP0 (RX Filter Map Group 0) */
-	}
-
-	rtw_write32(pAdapter, REG_RCR, pHalData->ReceiveConfig);
-}
-
 void ResetPhyRxPktCount(PADAPTER pAdapter)
 {
 	u32 i, phyrx_set = 0;
