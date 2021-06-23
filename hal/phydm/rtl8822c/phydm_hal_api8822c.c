@@ -960,62 +960,6 @@ phydm_config_ofdm_tx_path_8822c(struct dm_struct *dm, enum bb_path tx_path_2ss,
 	phydm_bb_reset_8822c(dm);
 }
 
-__odm_func__
-void
-phydm_config_ofdm_rx_path_8822c(struct dm_struct *dm, enum bb_path rx_path)
-{
-	u32 ofdm_rx = 0x0;
-
-	ofdm_rx = (u32)rx_path;
-	if (!(*dm->mp_mode)) {
-		if (ofdm_rx == BB_PATH_B) {
-			ofdm_rx = BB_PATH_AB;
-			odm_set_bb_reg(dm, R_0xcc0, 0x7ff, 0x0);
-			odm_set_bb_reg(dm, R_0xcc0, BIT(22), 0x1);
-			odm_set_bb_reg(dm, R_0xcc8, 0x7ff, 0x0);
-			odm_set_bb_reg(dm, R_0xcc8, BIT(22), 0x1);
-		} else { /* ofdm_rx == BB_PATH_A || ofdm_rx == BB_PATH_AB*/
-			odm_set_bb_reg(dm, R_0xcc0, 0x7ff, 0x400);
-			odm_set_bb_reg(dm, R_0xcc0, BIT(22), 0x0);
-			odm_set_bb_reg(dm, R_0xcc8, 0x7ff, 0x400);
-			odm_set_bb_reg(dm, R_0xcc8, BIT(22), 0x0);
-		}
-	}
-
-	if (ofdm_rx == BB_PATH_A || ofdm_rx == BB_PATH_B) {
-		/*@ ht_mcs_limit*/
-		odm_set_bb_reg(dm, R_0x1d30, 0x300, 0x0);
-		/*@ vht_nss_limit*/
-		odm_set_bb_reg(dm, R_0x1d30, 0x600000, 0x0);
-		/* @Disable Antenna weighting */
-		odm_set_bb_reg(dm, R_0xc44, BIT(17), 0x0);
-		/* @htstf ant-wgt enable = 0*/
-		odm_set_bb_reg(dm, R_0xc54, BIT(20), 0x0);
-		/* @MRC_mode = 'original ZF eqz'*/
-		odm_set_bb_reg(dm, R_0xc38, BIT(24), 0x0);
-		/* @Rx_ant */
-		odm_set_bb_reg(dm, R_0x824, 0x000f0000, rx_path);
-		/* @Rx_CCA*/
-		odm_set_bb_reg(dm, R_0x824, 0x0f000000, rx_path);
-	} else if (ofdm_rx == BB_PATH_AB) {
-		/*@ ht_mcs_limit*/
-		odm_set_bb_reg(dm, R_0x1d30, 0x300, 0x1);
-		/*@ vht_nss_limit*/
-		odm_set_bb_reg(dm, R_0x1d30, 0x600000, 0x1);
-		/* @Enable Antenna weighting */
-		odm_set_bb_reg(dm, R_0xc44, BIT(17), 0x1);
-		/* @htstf ant-wgt enable = 1*/
-		odm_set_bb_reg(dm, R_0xc54, BIT(20), 0x1);
-		/* @MRC_mode = 'modified ZF eqz'*/
-		odm_set_bb_reg(dm, R_0xc38, BIT(24), 0x1);
-		/* @Rx_ant */
-		odm_set_bb_reg(dm, R_0x824, 0x000f0000, BB_PATH_AB);
-		/* @Rx_CCA*/
-		odm_set_bb_reg(dm, R_0x824, 0x0f000000, BB_PATH_AB);
-	}
-
-	phydm_bb_reset_8822c(dm);
-}
 
 __odm_func__
 void phydm_config_tx_path_8822c(struct dm_struct *dm, enum bb_path tx_path_2ss,
@@ -1039,16 +983,6 @@ void phydm_config_tx_path_8822c(struct dm_struct *dm, enum bb_path tx_path_2ss,
 	phydm_bb_reset_8822c(dm);
 }
 
-__odm_func__
-void phydm_config_rx_path_8822c(struct dm_struct *dm, enum bb_path rx_path)
-{
-	/* @OFDM RX antenna mapping*/
-	phydm_config_ofdm_rx_path_8822c(dm, rx_path);
-
-	dm->rx_ant_status = rx_path;
-
-	phydm_bb_reset_8822c(dm);
-}
 
 __odm_func__
 void
@@ -1115,7 +1049,7 @@ config_phydm_trx_mode_8822c(struct dm_struct *dm, enum bb_path tx_path_en,
 	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
 
 	/* @==== [RX Path] ==============================================*/
-	phydm_config_rx_path_8822c(dm, rx_path);
+	dm->rx_ant_status = rx_path;
 
 	/* @==== [TX Path] ==============================================*/
 	/*@ [PHYDM-312]*/

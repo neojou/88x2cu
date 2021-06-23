@@ -1574,40 +1574,66 @@ static void init_usb_cfg(struct mac_adapter *adapter)
 	MAC_REG_W16_SET(REG_TXDMA_OFFSET_CHK, BIT_DROP_DATA_EN);
 }
 
-static u32 phydm_rf_init(struct mac_adapter *adapter)
+static void odm_set_bb_reg(struct mac_adapter *adapter, u32 addr, u32 mask, u32 value)
 {
 	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
 	u32 value32;
 
-	/* set rf mode table : BB_PATH_AB */
 	value32 = MAC_REG_R32(0x4100);
-	value32 &= ~(0xFFFFF);
-	value32 |= 0x11112;
+	value32 &= ~(mask);
+	value32 |= value;
 	MAC_REG_W32(0x4100, value32);
 	udelay(1);
+}
+
+static void phydm_rf_ofdm_rx_path_init(struct mac_adapter *adapter)
+{
+	odm_set_bb_reg(adapter, 0xcc0, 0x7FF, 0x400);
+	odm_set_bb_reg(adapter, 0xcc0, BIT(22), 0x0);
+	odm_set_bb_reg(adapter, 0xcc8, 0x7FF, 0x400);
+	odm_set_bb_reg(adapter, 0xcc8, BIT(22), 0x0);
+
+	/* ht_mcs_limit */
+	odm_set_bb_reg(adapter, 0x1d30, 0x300, 0x100);
+	/* vht_nss_limit */
+	odm_set_bb_reg(adapter, 0x1d30, 0x600000, 0x200000);
+	/* enable antenna weighting */
+	odm_set_bb_reg(adapter, 0xc44, BIT(17), 0x20000);
+	/* ant-wgt enable = 1 */
+	odm_set_bb_reg(adapter, 0xc54, BIT(20), 0x100000);
+	/* mrc modified ZF eqz */
+	odm_set_bb_reg(adapter, 0xc38, BIT(24), 0x1000000);
+	/* rx ant */
+	odm_set_bb_reg(adapter, 0x824, 0xf0000, 0x30000);
+	/* rx cca */
+	odm_set_bb_reg(adapter, 0x824, 0xf000000, 0x3000000);
+}
+
+static void phydm_rf_cck_rx_path_init(struct mac_adapter *adapter)
+{
+	/* set rf mode table : BB_PATH_AB */
+	odm_set_bb_reg(adapter, 0x4100, 0xFFFFF, 0x11112);
 
 	/* set CCK rx path : BB_PATH_AB */
 	/* Select ant A to receive CCK 1 and ant B to receive CCK 2 */
-	value32 = MAC_REG_R32(0x1a04);
-	value32 &= ~(0x0f000000);
-	value32 |= 0x01000000;
-	MAC_REG_W32(0x1a04, value32);
+	odm_set_bb_reg(adapter, 0x1a04, 0x0f000000, 0x01000000);
+	
 	/* enable rx clk gated */
-	value32 = MAC_REG_R32(0x1a2c);
-	value32 &= ~(BIT(5));
-	MAC_REG_W32(0x1a2c, value32);
-	/* enable MRC for CCK barker */
-	value32 = MAC_REG_R32(0x1a2c);
-	value32 &= ~(0x00060000);
-	value32 |= 0x00010000;
-	MAC_REG_W32(0x1a2c, value32);
-	/* enable MRC for CCK CCA */
-	value32 = MAC_REG_R32(0x1a2c);
-	value32 &= ~(0x00600000);
-	value32 |= 0x00100000;
-	MAC_REG_W32(0x1a2c, value32);
+	odm_set_bb_reg(adapter, 0x1a2c, BIT(5), 0);
 
-	return MACSUCCESS;
+	/* enable MRC for CCK barker */
+	odm_set_bb_reg(adapter, 0x1a2c, 0x00060000, 0x00010000);
+
+	/* enable MRC for CCK CCA */
+	odm_set_bb_reg(adapter, 0x1a2c, 0x00600000, 0x00100000);
+}
+
+static void phydm_rf_init(struct mac_adapter *adapter)
+{
+
+	phydm_rf_cck_rx_path_init(adapter);
+	phydm_rf_ofdm_rx_path_init(adapter);
+
 }
 
 static u32 phy_init(struct mac_adapter *adapter)
