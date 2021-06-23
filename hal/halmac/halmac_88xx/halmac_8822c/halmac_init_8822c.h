@@ -21,7 +21,4 @@
 enum halmac_ret_status
 mount_api_8822c(struct halmac_adapter *adapter);
 
-enum halmac_ret_status
-init_system_cfg_8822c(struct halmac_adapter *adapter);
-
 #endif/* _HALMAC_INIT_8822C_H_ */

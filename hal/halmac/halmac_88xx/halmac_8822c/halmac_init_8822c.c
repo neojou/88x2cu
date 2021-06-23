@@ -362,7 +362,6 @@ mount_api_8822c(struct halmac_adapter *adapter)
 	adapter->hw_cfg_info.usb_txagg_num = BLK_DESC_NUM;
 	adapter->txff_alloc.rsvd_drv_pg_num = RSVD_PG_DRV_NUM;
 
-	api->halmac_init_system_cfg = init_system_cfg_8822c;
 	api->halmac_pinmux_get_func = pinmux_get_func_8822c;
 	api->halmac_pinmux_set_func = pinmux_set_func_8822c;
 	api->halmac_pinmux_free_func = pinmux_free_func_8822c;
@@ -441,56 +440,6 @@ set_trx_fifo_info_8822c(struct halmac_adapter *adapter)
 
 	if (info->rsvd_boundary != info->rsvd_drv_addr)
 		return HALMAC_RET_CFG_TXFIFO_PAGE_FAIL;
-
-	return HALMAC_RET_SUCCESS;
-}
-/**
- * init_system_cfg_8822c() -  init system config
- * @adapter : the adapter of halmac
- * Author : KaiYuan Chang/Ivan Lin
- * Return : enum halmac_ret_status
- * More details of status code can be found in prototype document
- */
-enum halmac_ret_status
-init_system_cfg_8822c(struct halmac_adapter *adapter)
-{
-	struct halmac_api *api = (struct halmac_api *)adapter->halmac_api;
-	u8 value8;
-	u32 tmp = 0;
-	u32 value32;
-	enum halmac_ret_status status;
-	u8 hwval;
-
-	PLTFM_MSG_TRACE("[TRACE]%s ===>\n", __func__);
-
-	if (adapter->intf == HALMAC_INTERFACE_PCIE) {
-		hwval = 1;
-		status = set_hw_value_8822c(adapter, HALMAC_HW_PCIE_REF_AUTOK,
-					    &hwval);
-		if (status != HALMAC_RET_SUCCESS)
-			return status;
-	}
-
-	value32 = HALMAC_REG_R32(REG_CPU_DMEM_CON);
-	value32 |= (BIT_WL_PLATFORM_RST | BIT_DDMA_EN);
-	HALMAC_REG_W32(REG_CPU_DMEM_CON, value32);
-
-	value8 = HALMAC_REG_R8(REG_SYS_FUNC_EN + 1) | SYS_FUNC_EN;
-	HALMAC_REG_W8(REG_SYS_FUNC_EN + 1, value8);
-
-	/*PHY_REQ_DELAY reg 0x1100[27:24] = 0x0C*/
-	value8 = (HALMAC_REG_R8(REG_CR_EXT + 3) & 0xF0) | 0x0C;
-	HALMAC_REG_W8(REG_CR_EXT + 3, value8);
-
-	/*disable boot-from-flash for driver's DL FW*/
-	tmp = HALMAC_REG_R32(REG_MCUFW_CTRL);
-	if (tmp & BIT_BOOT_FSPI_EN) {
-		HALMAC_REG_W32(REG_MCUFW_CTRL, tmp & (~BIT_BOOT_FSPI_EN));
-		value32 = HALMAC_REG_R32(REG_GPIO_MUXCFG) & (~BIT_FSPI_EN);
-		HALMAC_REG_W32(REG_GPIO_MUXCFG, value32);
-	}
-
-	PLTFM_MSG_TRACE("[TRACE]%s <===\n", __func__);
 
 	return HALMAC_RET_SUCCESS;
 }

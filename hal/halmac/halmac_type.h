@@ -2183,8 +2183,6 @@ struct halmac_api {
 	(*halmac_cfg_multicast_addr)(struct halmac_adapter *adapter,
 				     union halmac_wlan_addr *addr);
 	enum halmac_ret_status
-	(*halmac_init_system_cfg)(struct halmac_adapter *adapter);
-	enum halmac_ret_status
 	(*halmac_cfg_rx_aggregation)(struct halmac_adapter *adapter,
 				     struct halmac_rxagg_cfg *cfg);
 	enum halmac_ret_status
