@@ -961,57 +961,6 @@ phydm_config_ofdm_tx_path_8822c(struct dm_struct *dm, enum bb_path tx_path_2ss,
 }
 
 __odm_func__
-void
-phydm_rfe_8822c(struct dm_struct *dm, enum bb_path path)
-{
-	u8 rfe_type = dm->rfe_type;
-	u32 rf_reg18 = 0;
-	u8 central_ch = 0;
-	boolean is_2g_ch = false;
-
-	rf_reg18 = config_phydm_read_rf_reg_8822c(dm, RF_PATH_A, RF_0x18,
-						  RFREG_MASK);
-	central_ch = (u8)(rf_reg18 & 0xff);
-	is_2g_ch = (central_ch <= 14) ? true : false;
-
-	PHYDM_DBG(dm, ODM_PHY_CONFIG,
-		  "[8822C] Update RFE PINs: T/RX_path:{0x%x, 0x%x}, rfe_type:%d\n",
-		  dm->tx_ant_status, dm->rx_ant_status, rfe_type);
-
-	/*HW Setting for each RFE type */
-	if (rfe_type == 21 || rfe_type == 22) {
-		/*rfe sel*/
-		/*0 : PAPE_2G_rfm*/
-		/*2 : LNAON_2G*/
-		/*3 : rfm_lnaon*/
-		/*7 : 1'b0*/
-		if (is_2g_ch)
-			path = BB_PATH_NON;
-
-		switch (path) {
-		case BB_PATH_NON:
-			odm_set_bb_reg(dm, R_0x1840, 0xffff, 0x7770);
-			odm_set_bb_reg(dm, R_0x4144, 0xffff, 0x7077);
-			break;
-		case BB_PATH_A:
-			odm_set_bb_reg(dm, R_0x1840, 0xffff, 0x2300);
-			odm_set_bb_reg(dm, R_0x4144, 0xffff, 0x7077);
-			break;
-		case BB_PATH_B:
-			odm_set_bb_reg(dm, R_0x1840, 0xffff, 0x7770);
-			odm_set_bb_reg(dm, R_0x4144, 0xffff, 0x2030);
-			break;
-		case BB_PATH_AB:
-			odm_set_bb_reg(dm, R_0x1840, 0xffff, 0x2300);
-			odm_set_bb_reg(dm, R_0x4144, 0xffff, 0x2030);
-			break;
-		default:
-			break;
-		}
-	}
-}
-
-__odm_func__
 boolean
 config_phydm_trx_mode_8822c(struct dm_struct *dm, enum bb_path tx_path_en,
 			    enum bb_path rx_path, enum bb_path tx_path_sel_1ss)
@@ -1401,8 +1350,6 @@ config_phydm_switch_channel_8822c(struct dm_struct *dm, u8 central_ch)
 		/* CCA Mask, default = 0xf */
 		odm_set_bb_reg(dm, R_0x1c80, 0x3F000000, 0xF);
 		/*RFE ctrl*/
-		if (rfe_type == 21 || rfe_type == 22)
-			phydm_rfe_8822c(dm, BB_PATH_NON);
 	} else { /* 5G*/
 		/* Enable BB CCK check */
 		odm_set_bb_reg(dm, R_0x1a80, BIT(18), 0x1);
@@ -1413,14 +1360,6 @@ config_phydm_switch_channel_8822c(struct dm_struct *dm, u8 central_ch)
 		/* CCA Mask */
 		odm_set_bb_reg(dm, R_0x1c80, 0x3F000000, 0x22);
 		/*RFE ctrl*/
-		if (rfe_type == 21 || rfe_type == 22) {
-			if (tx == BB_PATH_A && rx == BB_PATH_A)
-				phydm_rfe_8822c(dm, BB_PATH_A);
-			else if (tx == BB_PATH_B && rx == BB_PATH_B)
-				phydm_rfe_8822c(dm, BB_PATH_B);
-			else
-				phydm_rfe_8822c(dm, BB_PATH_AB);
-		}
 	}
 
 	phydm_bb_reset_8822c(dm);
