@@ -1453,9 +1453,6 @@ void
 phydm_pause_dm_watchdog(void *dm_void, enum phydm_pause_type pause_type);
 
 void
-phydm_watchdog(struct dm_struct *dm);
-
-void
 phydm_watchdog_mp(struct dm_struct *dm);
 
 void

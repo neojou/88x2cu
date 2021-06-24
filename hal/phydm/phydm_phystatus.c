@@ -625,52 +625,6 @@ void phydm_reset_rssi_for_dm(struct dm_struct *dm, u8 station_id)
 
 #if (ODM_IC_11N_SERIES_SUPPORT || ODM_IC_11AC_SERIES_SUPPORT)
 
-s32 phydm_get_rssi_8814_ofdm(struct dm_struct *dm, u8 *rssi_in)
-{
-	s32 rssi_avg;
-	u8 rx_count = 0;
-	u64 rssi_linear = 0;
-
-	if (dm->rx_ant_status & BB_PATH_A) {
-		rx_count++;
-		rssi_linear += phydm_db_2_linear(rssi_in[RF_PATH_A]);
-	}
-
-	if (dm->rx_ant_status & BB_PATH_B) {
-		rx_count++;
-		rssi_linear += phydm_db_2_linear(rssi_in[RF_PATH_B]);
-	}
-
-	if (dm->rx_ant_status & BB_PATH_C) {
-		rx_count++;
-		rssi_linear += phydm_db_2_linear(rssi_in[RF_PATH_C]);
-	}
-
-	if (dm->rx_ant_status & BB_PATH_D) {
-		rx_count++;
-		rssi_linear += phydm_db_2_linear(rssi_in[RF_PATH_D]);
-	}
-
-	/* @Rounding and removing fractional bits */
-	rssi_linear = (rssi_linear + (1 << (FRAC_BITS - 1))) >> FRAC_BITS;
-
-	/* @Calculate average RSSI */
-	switch (rx_count) {
-	case 2:
-		rssi_linear = DIVIDED_2(rssi_linear);
-		break;
-	case 3:
-		rssi_linear = DIVIDED_3(rssi_linear);
-		break;
-	case 4:
-		rssi_linear = DIVIDED_4(rssi_linear);
-		break;
-	}
-	rssi_avg = odm_convert_to_db(rssi_linear);
-
-	return rssi_avg;
-}
-
 void phydm_process_rssi_for_dm(struct dm_struct *dm,
 			       struct phydm_phyinfo_struct *phy_info,
 			       struct phydm_perpkt_info_struct *pktinfo)

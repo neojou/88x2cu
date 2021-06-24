@@ -936,13 +936,6 @@ void	rtw_hal_set_chnl_bw(_adapter *padapter, u8 channel, enum channel_width Band
 	padapter->hal_func.set_chnl_bw_handler(padapter, channel, Bandwidth, Offset40, Offset80);
 }
 
-void	rtw_hal_dm_watchdog(_adapter *padapter)
-{
-
-	rtw_hal_turbo_edca(padapter);
-	padapter->hal_func.hal_dm_watchdog(padapter);
-}
-
 #ifdef CONFIG_LPS_LCLK_WD_TIMER
 void	rtw_hal_dm_watchdog_in_lps(_adapter *padapter)
 {
@@ -1901,11 +1894,6 @@ u8 rtw_hal_ops_check(_adapter *padapter)
 		rtw_hal_error_msg("dm_deinit");
 		ret = _FAIL;
 	}
-	if (NULL == padapter->hal_func.hal_dm_watchdog) {
-		rtw_hal_error_msg("hal_dm_watchdog");
-		ret = _FAIL;
-	}
-
 	/*** xxx section ***/
 	if (NULL == padapter->hal_func.set_chnl_bw_handler) {
 		rtw_hal_error_msg("set_chnl_bw_handler");

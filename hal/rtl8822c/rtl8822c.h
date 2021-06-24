@@ -114,7 +114,6 @@ void rtl8822c_download_BTCoex_AP_mode_rsvd_page(PADAPTER);
 void rtl8822c_phy_init_dm_priv(PADAPTER);
 void rtl8822c_phy_deinit_dm_priv(PADAPTER);
 void rtl8822c_phy_init_haldm(PADAPTER);
-void rtl8822c_phy_haldm_watchdog(PADAPTER);
 u32 rtl8822c_read_bb_reg(PADAPTER, u32 addr, u32 mask);
 void rtl8822c_write_bb_reg(PADAPTER, u32 addr, u32 mask, u32 val);
 u32 rtl8822c_read_rf_reg(PADAPTER adapter, enum rf_path path, u32 addr, u32 mask);

@@ -48,7 +48,6 @@ void rtw_dyn_soml_config(_adapter *adapter);
 #endif
 void rtw_phydm_set_rrsr(_adapter *adapter, u32 rrsr_value, bool write_rrsr);
 void rtw_phydm_dyn_rrsr_en(_adapter *adapter, bool en_rrsr);
-void rtw_phydm_watchdog(_adapter *adapter);
 
 void rtw_hal_update_iqk_fw_offload_cap(_adapter *adapter);
 void dump_sta_info(void *sel, struct sta_info *psta);

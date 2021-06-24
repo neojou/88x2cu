@@ -3223,8 +3223,6 @@ void rtl8822c_set_hal_ops(PADAPTER adapter)
 	ops->set_tx_power_index_handler = rtl8822c_set_tx_power_index;
 	ops->get_tx_power_index_handler = hal_com_get_txpwr_idx;
 
-	ops->hal_dm_watchdog = rtl8822c_phy_haldm_watchdog;
-
 	ops->set_hw_reg_handler = rtl8822c_sethwreg;
 	ops->GetHwRegHandler = rtl8822c_gethwreg;
 	ops->get_hal_def_var_handler = rtl8822c_gethaldefvar;

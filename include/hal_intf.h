@@ -336,8 +336,6 @@ struct hal_ops {
 		, enum channel_width bw, BAND_TYPE band, u8 cch, u8 opch, struct txpwr_idx_comp *tic);
 	s8 (*get_txpwr_target_extra_bias)(_adapter *adapter, enum rf_path rfpath, RATE_SECTION rs, enum MGN_RATE rate, enum channel_width bw, BAND_TYPE band, u8 cch);
 
-	void	(*hal_dm_watchdog)(_adapter *padapter);
-
 	u8	(*set_hw_reg_handler)(_adapter *padapter, u8	variable, u8 *val);
 
 	void	(*GetHwRegHandler)(_adapter *padapter, u8	variable, u8 *val);
@@ -760,7 +758,6 @@ void rtw_hal_write_syson_reg(_adapter *padapter, u32 RegAddr, u32 BitMask, u32 D
 #endif
 
 void	rtw_hal_set_chnl_bw(_adapter *padapter, u8 channel, enum channel_width Bandwidth, u8 Offset40, u8 Offset80);
-void	rtw_hal_dm_watchdog(_adapter *padapter);
 void	rtw_hal_dm_watchdog_in_lps(_adapter *padapter);
 
 #ifdef CONFIG_HOSTAPD_MLME

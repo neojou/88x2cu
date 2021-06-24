@@ -132,8 +132,6 @@ void phydm_c2h_dtp_handler(void *dm_void, u8 *cmd_buf, u8 cmd_len);
 
 void phydm_tx_path_diversity_init(void *dm_void);
 
-void phydm_tx_path_diversity(void *dm_void);
-
 void phydm_process_rssi_for_path_div(void *dm_void, void *phy_info_void,
 				     void *pkt_info_void);
 

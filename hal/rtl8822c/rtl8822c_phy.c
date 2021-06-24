@@ -81,36 +81,6 @@ static void check_rxfifo_full(PADAPTER adapter)
 	}
 }
 
-void rtl8822c_phy_haldm_watchdog(PADAPTER adapter)
-{
-	BOOLEAN bFwCurrentInPSMode = _FALSE;
-	u8 bFwPSAwake = _TRUE;
-	struct pwrctrl_priv *pwrpriv = adapter_to_pwrctl(adapter);
-	PADAPTER current_lps_iface = NULL, iface = NULL;
-	struct dvobj_priv *dvobj = adapter_to_dvobj(adapter);
-	u8 i = 0;
-
-
-	if (!rtw_is_hw_init_completed(adapter))
-		goto skip_dm;
-
-	if ((rtw_is_hw_init_completed(adapter))
-	    && ((!bFwCurrentInPSMode) && bFwPSAwake)) {
-
-		/* check rx fifo */
-		check_rxfifo_full(adapter);
-	}
-
-#ifdef CONFIG_DISABLE_ODM
-	goto skip_dm;
-#endif
-
-	rtw_phydm_watchdog(adapter);
-
-skip_dm:
-	return;
-}
-
 static u32 phy_calculatebitshift(u32 mask)
 {
 	u32 i;

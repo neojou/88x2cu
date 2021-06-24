@@ -2552,9 +2552,6 @@ static u8 _lps_chk_by_pkt_cnts(_adapter *padapter, u8 from_timer, u8 bBusyTraffi
 			#endif /* CONFIG_DYNAMIC_DTIM */
 			LPS_Enter(padapter, "TRAFFIC_IDLE");
 		} else {
-			/* do this at caller */
-			/* rtw_lps_ctrl_wk_cmd(adapter, LPS_CTRL_ENTER, 0); */
-			/* rtw_hal_dm_watchdog_in_lps(padapter); */
 		}
 
 		#ifdef CONFIG_DYNAMIC_DTIM
