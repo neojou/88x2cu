@@ -276,14 +276,6 @@ void halrf_iqk_info_dump(void *dm_void, u32 *_used, char *output, u32 *_out_len)
 {
 }
 
-void halrf_get_fw_version(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct _hal_rf_ *rf = &dm->rf_table;
-
-	rf->fw_ver = (dm->fw_version << 16) | dm->fw_sub_version;
-}
-
 void halrf_iqk_dbg(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -302,8 +294,7 @@ void halrf_iqk_dbg(void *dm_void)
 	       "Driver-IQK");
 
 	if (dm->fw_offload_ability & PHYDM_RF_IQK_OFFLOAD) {
-		halrf_get_fw_version(dm);
-		RF_DBG(dm, DBG_RF_IQK, "%-20s: 0x%x\n", "FW_VER", rf->fw_ver);
+		pr_info("%s NEO IQK offload\n", __func__);
 	} else {
 		RF_DBG(dm, DBG_RF_IQK, "%-20s: %s\n", "IQK_VER", HALRF_IQK_VER);
 	}
@@ -1440,9 +1431,6 @@ void _halrf_display_dpk_info(void *dm_void, u32 *_used, char *output, u32 *_out_
 	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = %s %s\n",
 		 "DPK type", (dm->fw_offload_ability & PHYDM_RF_DPK_OFFLOAD) ? "FW" : "Driver",
 		 (dpk_info->is_dpk_by_channel) ? "(By channel)" : "(By group)");
-
-	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = %d (%d)\n",
-		 "FW Ver (Sub Ver)", dm->fw_version, dm->fw_sub_version);
 
 	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = %s\n",
 		 "DPK Ver", HALRF_DPK_VER);

@@ -819,8 +819,6 @@ struct dm_struct {
 	enum phydm_api_host	run_in_drv_fw;		/*@PHYDM API is using in FW or Driver*/
 	u8			ic_ip_series;		/*N/AC/JGR3*/
 	enum phydm_phy_sts_type	ic_phy_sts_type;	/*@Type1/type2/type3*/
-	u8			fw_version;
-	u8			fw_sub_version;
 	u8			rf_type;		/*@RF type 4T4R/3T3R/2T2R/1T2R/1T1R/...*/
 	u8			rfe_type;
 	u8			board_type;

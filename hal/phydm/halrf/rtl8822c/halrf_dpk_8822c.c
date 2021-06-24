@@ -1830,9 +1830,6 @@ void _dpk_by_fw_8822c(
 
 	RF_DBG(dm, DBG_RF_DPK, "[DPK] DPK by FW !!\n");
 
-	RF_DBG(dm, DBG_RF_DPK, "[DPK] FW Ver (Sub_Ver) = %d (%d)\n",
-	       dm->fw_version, dm->fw_sub_version);
-
 	status = odm_dpk_by_fw(dm);
 
 	if (status == HAL_STATUS_SUCCESS)

@@ -1136,12 +1136,6 @@ void odm_cmn_info_init(struct dm_struct *dm, enum odm_cmninfo cmn_info,
 
 	case ODM_CMNINFO_FAB_VER:
 		break;
-	case ODM_CMNINFO_FW_VER:
-		dm->fw_version = (u8)value;
-		break;
-	case ODM_CMNINFO_FW_SUB_VER:
-		dm->fw_sub_version = (u8)value;
-		break;
 	case ODM_CMNINFO_RFE_TYPE:
 		dm->rfe_type = (u8)value;
 
