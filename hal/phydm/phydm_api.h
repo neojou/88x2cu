@@ -186,10 +186,6 @@ boolean
 phydm_api_switch_bw_channel(void *dm_void, u8 central_ch, u8 primary_ch_idx,
 			    enum channel_width bandwidth);
 
-boolean
-phydm_api_trx_mode(void *dm_void, enum bb_path tx_path, enum bb_path rx_path,
-		   enum bb_path tx_path_ctrl);
-
 #endif
 
 #ifdef PHYDM_COMMON_API_NOT_SUPPORT

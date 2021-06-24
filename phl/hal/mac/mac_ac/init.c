@@ -1649,9 +1649,18 @@ static void phydm_ofdm_tx_path_init(struct mac_adapter *adapter)
 
 static void phydm_tx_path_init(struct mac_adapter *adapter)
 {
-
 	phydm_cck_tx_path_init(adapter);
 	phydm_ofdm_rx_path_init(adapter);
+}
+
+static void phydm_igi_init(struct mac_adapter *adapter)
+{
+	struct mac_intf_ops *ops = adapter_to_intf_ops(adapter);
+	u32 value32;
+
+	value32 = MAC_REG_R32(0x1d70);
+	MAC_REG_W32(0x1d70, value32 & ~(0x202));
+	MAC_REG_W32(0x1d70, value32);
 }
 
 static u32 phy_init(struct mac_adapter *adapter)
@@ -1675,6 +1684,8 @@ static u32 phy_init(struct mac_adapter *adapter)
 	phydm_rx_path_init(adapter);
 	phydm_tx_path_init(adapter);
 	mac_odm_reset_bb(adapter);
+
+	phydm_igi_init(adapter);
 
 	init_usb_cfg(adapter);
 

@@ -62,25 +62,6 @@ void rtl8822c_phy_init_haldm(PADAPTER adapter)
 	rtw_phydm_init(adapter);
 }
 
-static void check_rxfifo_full(PADAPTER adapter)
-{
-	struct dvobj_priv *psdpriv = adapter->dvobj;
-	struct debug_priv *pdbgpriv = &psdpriv->drv_dbg;
-	struct registry_priv *regsty = &adapter->registrypriv;
-	u8 val8 = 0;
-
-	if (regsty->check_hw_status == 1) {
-		/* switch counter to RX fifo */
-		val8 = rtw_read8(adapter, REG_RXERR_RPT_8822C + 3);
-		rtw_write8(adapter, REG_RXERR_RPT_8822C + 3, (val8 | 0xa0));
-
-		pdbgpriv->dbg_rx_fifo_last_overflow = pdbgpriv->dbg_rx_fifo_curr_overflow;
-		pdbgpriv->dbg_rx_fifo_curr_overflow = rtw_read16(adapter, REG_RXERR_RPT_8822C);
-		pdbgpriv->dbg_rx_fifo_diff_overflow =
-			pdbgpriv->dbg_rx_fifo_curr_overflow - pdbgpriv->dbg_rx_fifo_last_overflow;
-	}
-}
-
 static u32 phy_calculatebitshift(u32 mask)
 {
 	u32 i;
@@ -194,9 +175,6 @@ void rtl8822c_set_txpwr_done(_adapter *adapter)
 
 #ifdef CONFIG_TXPWR_PG_WITH_TSSI_OFFSET
 	if (hal_data->txpwr_pg_mode == TXPWR_PG_WITH_TSSI_OFFSET
-		#ifdef CONFIG_MP_INCLUDED
-		&& !rtw_mp_mode_check(adapter)
-		#endif
 	) {
 		halrf_calculate_tssi_codeword(phydm);
 		halrf_set_tssi_codeword(phydm);
@@ -663,63 +641,6 @@ void rtl8822c_notch_filter_switch(PADAPTER adapter, bool enable)
 		RTW_INFO("%s: Disable notch filter\n", __FUNCTION__);
 }
 
-#ifdef CONFIG_MP_INCLUDED
-/*
- * Description:
- *	Config RF path
- *
- * Parameters:
- *	adapter	pointer of struct _ADAPTER
- */
-void rtl8822c_mp_config_rfpath(PADAPTER adapter)
-{
-	PHAL_DATA_TYPE hal;
-	PMPT_CONTEXT mpt;
-	ANTENNA_PATH anttx, antrx;
-	enum bb_path bb_tx, bb_rx;
-
-
-	hal = GET_HAL_DATA(adapter);
-	mpt = &adapter->mppriv.mpt_ctx;
-	anttx = hal->antenna_tx_path;
-	antrx = hal->AntennaRxPath;
-	hal->antenna_test = _TRUE;
-	RTW_INFO("+Config RF Path, tx=0x%x rx=0x%x\n", anttx, antrx);
-
-	switch (anttx) {
-	case ANTENNA_A:
-		mpt->mpt_rf_path = RF_PATH_A;
-		bb_tx = BB_PATH_A;
-		break;
-	case ANTENNA_B:
-		mpt->mpt_rf_path = RF_PATH_B;
-		bb_tx = BB_PATH_B;
-		break;
-	case ANTENNA_AB:
-	default:
-		mpt->mpt_rf_path = RF_PATH_AB;
-		bb_tx = BB_PATH_A | BB_PATH_B;
-		break;
-	}
-
-	switch (antrx) {
-	case ANTENNA_A:
-		bb_rx = BB_PATH_A;
-		break;
-	case ANTENNA_B:
-		bb_rx = BB_PATH_B;
-		break;
-	case ANTENNA_AB:
-	default:
-		bb_rx = BB_PATH_A | BB_PATH_B;
-		break;
-	}
-
-	phydm_api_trx_mode(GET_PDM_ODM(adapter), bb_tx, bb_rx, bb_tx);
-
-	RTW_INFO("-Config RF Path Finish\n");
-}
-#endif /* CONFIG_MP_INCLUDED */
 
 #ifdef CONFIG_BEAMFORMING
 /* REG_TXBF_CTRL		(Offset 0x42C) */

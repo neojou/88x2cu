@@ -102,11 +102,6 @@ void phydm_get_tx_path_en_setting_8822c(struct dm_struct *dm,
 void phydm_get_rx_path_en_setting_8822c(struct dm_struct *dm,
 					struct rx_path_en_8822c *path);
 
-boolean config_phydm_trx_mode_8822c(struct dm_struct *dm,
-				    enum bb_path tx_path_en,
-				    enum bb_path rx_path,
-				    enum bb_path tx_path_sel_1ss);
-
 boolean config_phydm_switch_band_8822c(struct dm_struct *dm, u8 central_ch);
 
 boolean config_phydm_switch_channel_8822c(struct dm_struct *dm, u8 central_ch);

@@ -1494,17 +1494,6 @@ phydm_api_switch_bw_channel(void *dm_void, u8 ch, u8 pri_ch,
 	return ret;
 }
 
-boolean
-phydm_api_trx_mode(void *dm_void, enum bb_path tx_path, enum bb_path rx_path,
-		   enum bb_path tx_path_ctrl)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	boolean ret = false;
-
-	ret = config_phydm_trx_mode_8822c(dm, tx_path, rx_path,
-					  tx_path_ctrl);
-	return ret;
-}
 #endif
 
 #ifdef PHYDM_COMMON_API_NOT_SUPPORT

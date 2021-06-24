@@ -1371,36 +1371,11 @@ exit:
 	return rst;
 }
 
-/*
-* trx_mode init - 8822B / 8822C / 8192F
-* 1ssNTx - 8192E / 8812A / 8822B / 8822C / 8192F
-* Path-diversity - 8822B / 8822C / 8192F
-* PHYDM API - phydm_api_trx_mode
-*/
-static u8 rtw_phydm_config_trx_path(_adapter *adapter)
-{
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
-	enum bb_path txpath = hal_data->txpath;
-	enum bb_path rxpath = hal_data->rxpath;
-	enum bb_path txpath_1ss = hal_data->txpath_nss[0];
-	u8 rst = _SUCCESS;
-
-	if (phydm_api_trx_mode(adapter_to_phydm(adapter), txpath, rxpath, txpath_1ss) == FALSE) {
-		RTW_ERR("%s txpath=0x%x, rxpath=0x%x, txpath_1ss=0x%x fail\n", __func__
-			, txpath, rxpath, txpath_1ss);
-		rtw_warn_on(1);
-		rst = _FAIL;
-	}
-
-	return rst;
-}
-
 void rtw_phydm_init(_adapter *adapter)
 {
 	PHAL_DATA_TYPE	hal_data = GET_HAL_DATA(adapter);
 	struct dm_struct	*phydm = &(hal_data->odmpriv);
 
-	rtw_phydm_config_trx_path(adapter);
 	init_phydm_info(adapter);
 	hal_data->phydm_init_result = odm_dm_init(phydm);
 }

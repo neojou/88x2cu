@@ -960,24 +960,6 @@ phydm_config_ofdm_tx_path_8822c(struct dm_struct *dm, enum bb_path tx_path_2ss,
 	phydm_bb_reset_8822c(dm);
 }
 
-__odm_func__
-boolean
-config_phydm_trx_mode_8822c(struct dm_struct *dm, enum bb_path tx_path_en,
-			    enum bb_path rx_path, enum bb_path tx_path_sel_1ss)
-{
-	struct _ODM_PATH_DIVERSITY_ *p_div = &dm->dm_path_div;
-	boolean disable_2sts_div_mode = false;
-	enum bb_path tx_path_mode_table = tx_path_en;
-	enum bb_path tx_path_2ss = BB_PATH_AB;
-	u8 rfe_type = dm->rfe_type;
-
-	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
-
-	phydm_igi_toggle_8822c(dm);
-
-	return true;
-}
-
 void phydm_cck_rxiq_8822c(struct dm_struct *dm, u8 set_type)
 {
 	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
