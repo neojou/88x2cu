@@ -791,8 +791,11 @@ void phydm_tx_path_diversity(void *dm_void)
 
 	p_div->path_div_in_progress = false;
 
-	if (!(dm->support_ability & ODM_BB_PATH_DIV))
+	pr_info("%s NEO enter\n", __func__);
+	if (!(dm->support_ability & ODM_BB_PATH_DIV)) {
+		pr_info("%s NEO path div is turned off\n", __func__);
 		return;
+	}
 
 	if (p_div->stop_path_div) {
 		PHYDM_DBG(dm, DBG_PATH_DIV,

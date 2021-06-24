@@ -1872,22 +1872,6 @@ inline void rtw_indicate_scan_done(_adapter *padapter, bool aborted)
 	RTW_INFO(FUNC_ADPT_FMT"\n", FUNC_ADPT_ARG(padapter));
 
 	rtw_os_indicate_scan_done(padapter, aborted);
-
-#ifdef CONFIG_IPS
-	if (is_primary_adapter(padapter)
-	    && (_FALSE == adapter_to_pwrctl(padapter)->bInSuspend)
-	    && (check_fwstate(&padapter->mlmepriv, WIFI_ASOC_STATE | WIFI_UNDER_LINKING) == _FALSE)) {
-		struct pwrctrl_priv *pwrpriv;
-
-		pwrpriv = adapter_to_pwrctl(padapter);
-		rtw_set_ips_deny(padapter, 0);
-#ifdef CONFIG_IPS_CHECK_IN_WD
-		_set_timer(&adapter_to_dvobj(padapter)->dynamic_chk_timer, 1);
-#else /* !CONFIG_IPS_CHECK_IN_WD */
-		_rtw_set_pwr_state_check_timer(pwrpriv, 1);
-#endif /* !CONFIG_IPS_CHECK_IN_WD */
-	}
-#endif /* CONFIG_IPS */
 }
 
 static u32 _rtw_wait_join_done(_adapter *adapter, u8 abort, u32 timeout_ms)
@@ -3123,39 +3107,6 @@ static void collect_traffic_statistics(_adapter *padapter)
 #endif
 	
 }
-
-void rtw_dynamic_check_timer_handlder(void *ctx)
-{
-	struct dvobj_priv *pdvobj = (struct dvobj_priv *)ctx;
-	_adapter *adapter = dvobj_get_primary_adapter(pdvobj);
-
-	if (!adapter)
-		goto exit;
-
-#if (MP_DRIVER == 1)
-	if (adapter->registrypriv.mp_mode == 1 && adapter->mppriv.mp_dm == 0) { /* for MP ODM dynamic Tx power tracking */
-		/* RTW_INFO("%s mp_dm =0 return\n", __func__); */
-		goto exit;
-	}
-#endif
-
-	if (!rtw_is_hw_init_completed(adapter))
-		goto exit;
-
-	if (RTW_CANNOT_RUN(pdvobj))
-		goto exit;
-
-	collect_traffic_statistics(adapter);
-	collect_sta_traffic_statistics(adapter);
-	rtw_mi_dynamic_check_timer_handlder(adapter);
-
-	if (!is_drv_in_lps(adapter))
-		rtw_dynamic_chk_wk_cmd(adapter);
-
-exit:
-	_set_timer(&pdvobj->dynamic_chk_timer, 2000);
-}
-
 
 #ifdef CONFIG_LAYER2_ROAMING
 /*

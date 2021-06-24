@@ -1065,6 +1065,7 @@ u8 phydm_stop_dm_watchdog_check(void *dm_void)
 void phydm_watchdog(struct dm_struct *dm)
 {
 	PHYDM_DBG(dm, DBG_COMMON_FLOW, "%s ======>\n", __func__);
+	pr_info("%s NEO enter\n", __func__);
 
 	phydm_common_info_self_update(dm);
 	phydm_phy_info_update(dm);

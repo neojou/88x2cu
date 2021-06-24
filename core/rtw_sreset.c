@@ -264,9 +264,6 @@ void sreset_start_adapter(_adapter *padapter)
 	tasklet_hi_schedule(&pxmitpriv->xmit_tasklet);
 #endif
 
-	if (is_primary_adapter(padapter))
-		_set_timer(&adapter_to_dvobj(padapter)->dynamic_chk_timer, 2000);
-
 	rtw_netif_wake_queue(padapter->pnetdev);
 }
 

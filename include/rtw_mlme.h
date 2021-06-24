@@ -1016,7 +1016,6 @@ extern void rtw_get_encrypt_decrypt_from_registrypriv(_adapter *adapter);
 extern void rtw_join_timeout_handler(void *ctx);
 extern void rtw_scan_timeout_handler(void *ctx);
 
-extern void rtw_dynamic_check_timer_handlder(void *ctx);
 extern void rtw_iface_dynamic_check_timer_handlder(_adapter *adapter);
 
 u8 _rtw_sitesurvey_condition_check(const char *caller, _adapter *adapter, bool check_sc_interval);

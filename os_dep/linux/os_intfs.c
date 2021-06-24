@@ -960,7 +960,6 @@ struct dvobj_priv *devobj_init(void)
 	rtw_init_timer(&(pdvobj->txbcn_timer), tx_beacon_timer_handlder, pdvobj);
 	#endif
 
-	rtw_init_timer(&(pdvobj->dynamic_chk_timer), rtw_dynamic_check_timer_handlder, pdvobj);
 	rtw_init_timer(&(pdvobj->periodic_tsf_update_end_timer), rtw_hal_periodic_tsf_update_end_timer_hdl, pdvobj);
 
 #ifdef CONFIG_RTW_NAPI_DYNAMIC
@@ -1374,13 +1373,6 @@ exit:
 
 }
 
-#ifdef CONFIG_WOWLAN
-void rtw_cancel_dynamic_chk_timer(_adapter *padapter)
-{
-	_cancel_timer_ex(&adapter_to_dvobj(padapter)->dynamic_chk_timer);
-}
-#endif
-
 void rtw_cancel_all_timer(_adapter *padapter)
 {
 
@@ -1392,7 +1384,6 @@ void rtw_cancel_all_timer(_adapter *padapter)
 	_cancel_timer_ex(&adapter_to_rfctl(padapter)->radar_detect_timer);
 #endif
 
-	_cancel_timer_ex(&adapter_to_dvobj(padapter)->dynamic_chk_timer);
 	_cancel_timer_ex(&adapter_to_dvobj(padapter)->periodic_tsf_update_end_timer);
 #ifdef CONFIG_RTW_SW_LED
 	/* cancel sw led timer */
@@ -2236,9 +2227,6 @@ int _pm_netdev_open(_adapter *padapter)
 		if (status == _FAIL)
 			goto netdev_open_error;
 		rtw_led_control(padapter, LED_CTL_NO_LINK);
-		#if 0 /*ifdef CONFIG_CORE_DM_CHK_TIMER*/
-			_set_timer(&adapter_to_dvobj(padapter)->dynamic_chk_timer, 2000);
-		#endif
 
 	#if 0 /*ndef CONFIG_IPS_CHECK_IN_WD*/
 			rtw_set_pwr_state_check_timer(pwrctrlpriv);
@@ -3104,274 +3092,6 @@ exit:
 
 	return ret;
 }
-
-#ifdef CONFIG_WOWLAN
-int rtw_resume_process_wow(_adapter *padapter)
-{
-	struct mlme_priv *pmlmepriv = &padapter->mlmepriv;
-	struct mlme_ext_priv	*pmlmeext = &padapter->mlmeextpriv;
-	struct mlme_ext_info	*pmlmeinfo = &(pmlmeext->mlmext_info);
-	struct pwrctrl_priv *pwrpriv = adapter_to_pwrctl(padapter);
-	struct dvobj_priv *psdpriv = padapter->dvobj;
-	struct debug_priv *pdbgpriv = &psdpriv->drv_dbg;
-	struct wowlan_ioctl_param poidparam;
-	struct sta_info	*psta = NULL;
-	struct registry_priv  *registry_par = &padapter->registrypriv;
-	int ret = _SUCCESS;
-	u8 en = _FALSE;
-
-	RTW_INFO("==> "FUNC_ADPT_FMT" entry....\n", FUNC_ADPT_ARG(padapter));
-
-	if (padapter) {
-		pwrpriv = adapter_to_pwrctl(padapter);
-	} else {
-		pdbgpriv->dbg_resume_error_cnt++;
-		ret = -1;
-		goto exit;
-	}
-
-	if (RTW_CANNOT_RUN(psdpriv)) {
-		RTW_INFO("%s pdapter %p bDriverStopped %s bSurpriseRemoved %s\n"
-			 , __func__, padapter
-			 , dev_is_drv_stopped(psdpriv) ? "True" : "False"
-			, dev_is_surprise_removed(psdpriv) ? "True" : "False");
-		goto exit;
-	}
-
-	pwrpriv->wowlan_in_resume = _TRUE;
-
-	if (pwrpriv->wowlan_pno_enable) {
-		RTW_PRINT("%s: pno: %d\n", __func__, pwrpriv->wowlan_pno_enable);
-		/* ToDo: ICs with HALMAC that use NLO PS 32K should leave LCLK here */
-	} else {
-#ifdef CONFIG_LPS
-		if(pwrpriv->wowlan_power_mgmt != PM_PS_MODE_ACTIVE) {
-			rtw_set_ps_mode(padapter, PM_PS_MODE_ACTIVE, 0, 0, "WOWLAN");
-			rtw_wow_lps_level_decide(padapter, _FALSE);
-		}
-#endif /* CONFIG_LPS */
-	}
-
-	rtw_write8(padapter, 0x426, psdpriv->lifetime_en);
-	rtw_write32(padapter, 0x4c0, psdpriv->pkt_lifetime);
-
-	pwrpriv->bFwCurrentInPSMode = _FALSE;
-
-#if defined(CONFIG_SDIO_HCI) || defined(CONFIG_PCI_HCI)
-	rtw_mi_intf_stop(padapter);
-	rtw_hal_clear_interrupt(padapter);
-#endif
-
-	#ifdef CONFIG_SDIO_HCI
-	#if !(CONFIG_RTW_SDIO_KEEP_IRQ)
-	if (sdio_alloc_irq(adapter_to_dvobj(padapter)) != _SUCCESS) {
-		ret = -1;
-		goto exit;
-	}
-	#endif
-	#endif/*CONFIG_SDIO_HCI*/
-
-	/* Disable WOW, set H2C command */
-	poidparam.subcode = WOWLAN_DISABLE;
-	rtw_hal_set_hwreg(padapter, HW_VAR_WOWLAN, (u8 *)&poidparam);
-
-#ifdef CONFIG_CONCURRENT_MODE
-	rtw_mi_buddy_reset_drv_sw(padapter);
-#endif
-
-	psta = rtw_get_stainfo(&padapter->stapriv, get_bssid(&padapter->mlmepriv));
-	if (psta)
-		set_sta_rate(padapter, psta);
-
-
-	rtw_clr_drv_stopped(padapter);
-	RTW_INFO("%s: wowmode resuming, DriverStopped:%s\n", __func__, rtw_is_drv_stopped(padapter) ? "True" : "False");
-
-	if(registry_par->suspend_type == FW_IPS_WRC)
-		rtw_hal_set_hwreg(padapter, HW_VAR_VENDOR_WOW_MODE, &en);
-
-	rtw_mi_intf_start(padapter);
-
-	if(registry_par->suspend_type == FW_IPS_DISABLE_BBRF && !check_fwstate(pmlmepriv, WIFI_ASOC_STATE)) {
-		if (!rtw_is_surprise_removed(padapter)) {
-			rtk_hal_deinit(padapter);
-			rtk_hal_init(padapter);
-		}
-		RTW_INFO("FW_IPS_DISABLE_BBRF hal deinit, hal init \n");
-	}
-
-#ifdef CONFIG_CONCURRENT_MODE
-	rtw_mi_buddy_netif_carrier_on(padapter);
-#endif
-
-	/* start netif queue */
-	rtw_mi_netif_wake_queue(padapter);
-
-	if (padapter->pid[1] != 0) {
-		RTW_INFO("pid[1]:%d\n", padapter->pid[1]);
-		rtw_signal_process(padapter->pid[1], SIGUSR2);
-	}
-
-	if (rtw_chk_roam_flags(padapter, RTW_ROAM_ON_RESUME)) {
-		if (pwrpriv->wowlan_wake_reason == FW_DECISION_DISCONNECT ||
-		    pwrpriv->wowlan_wake_reason == RX_DISASSOC||
-		    pwrpriv->wowlan_wake_reason == RX_DEAUTH) {
-
-			RTW_INFO("%s: disconnect reason: %02x\n", __func__,
-				 pwrpriv->wowlan_wake_reason);
-			rtw_indicate_disconnect(padapter, 0, _FALSE);
-
-			rtw_sta_media_status_rpt(padapter,
-					 rtw_get_stainfo(&padapter->stapriv,
-					 get_bssid(&padapter->mlmepriv)), 0);
-
-			rtw_free_assoc_resources(padapter, _TRUE);
-			pmlmeinfo->state = WIFI_FW_NULL_STATE;
-
-		} else {
-			RTW_INFO("%s: do roaming\n", __func__);
-			rtw_roaming(padapter, NULL);
-		}
-	}
-
-	if (pwrpriv->wowlan_mode == _TRUE) {
-		pwrpriv->bips_processing = _FALSE;
-		_set_timer(&adapter_to_dvobj(padapter)->dynamic_chk_timer, 2000);
-#ifndef CONFIG_IPS_CHECK_IN_WD
-		rtw_set_pwr_state_check_timer(pwrpriv);
-#endif
-	} else
-		RTW_PRINT("do not reset timer\n");
-
-	pwrpriv->wowlan_mode = _FALSE;
-
-	/* Power On LED */
-#ifdef CONFIG_RTW_SW_LED
-
-	if (pwrpriv->wowlan_wake_reason == RX_DISASSOC||
-	    pwrpriv->wowlan_wake_reason == RX_DEAUTH||
-	    pwrpriv->wowlan_wake_reason == FW_DECISION_DISCONNECT)
-		rtw_led_control(padapter, LED_CTL_NO_LINK);
-	else
-		rtw_led_control(padapter, LED_CTL_LINK);
-#endif
-	/* clean driver side wake up reason. */
-	pwrpriv->wowlan_last_wake_reason = pwrpriv->wowlan_wake_reason;
-	pwrpriv->wowlan_wake_reason = 0;
-
-exit:
-	RTW_INFO("<== "FUNC_ADPT_FMT" exit....\n", FUNC_ADPT_ARG(padapter));
-	return ret;
-}
-#endif /* #ifdef CONFIG_WOWLAN */
-
-#ifdef CONFIG_AP_WOWLAN
-int rtw_resume_process_ap_wow(_adapter *padapter)
-{
-	struct mlme_priv *pmlmepriv = &padapter->mlmepriv;
-	struct pwrctrl_priv *pwrpriv = adapter_to_pwrctl(padapter);
-	struct dvobj_priv *psdpriv = padapter->dvobj;
-	struct debug_priv *pdbgpriv = &psdpriv->drv_dbg;
-	struct wowlan_ioctl_param poidparam;
-	struct sta_info	*psta = NULL;
-	int ret = _SUCCESS;
-	u8 ch, bw, offset;
-
-	RTW_INFO("==> "FUNC_ADPT_FMT" entry....\n", FUNC_ADPT_ARG(padapter));
-
-	if (padapter) {
-		pwrpriv = adapter_to_pwrctl(padapter);
-	} else {
-		pdbgpriv->dbg_resume_error_cnt++;
-		ret = -1;
-		goto exit;
-	}
-
-
-#ifdef CONFIG_LPS
-	if(pwrpriv->wowlan_power_mgmt != PM_PS_MODE_ACTIVE) {
-		rtw_set_ps_mode(padapter, PM_PS_MODE_ACTIVE, 0, 0, "AP-WOWLAN");
-		rtw_wow_lps_level_decide(padapter, _FALSE);
-	}
-#endif /* CONFIG_LPS */
-
-	pwrpriv->bFwCurrentInPSMode = _FALSE;
-
-	rtw_hal_disable_interrupt(padapter);
-
-	rtw_hal_clear_interrupt(padapter);
-
-	#ifdef CONFIG_SDIO_HCI
-	#if !(CONFIG_RTW_SDIO_KEEP_IRQ)
-	if (sdio_alloc_irq(adapter_to_dvobj(padapter)) != _SUCCESS) {
-		ret = -1;
-		goto exit;
-	}
-	#endif
-	#endif/*CONFIG_SDIO_HCI*/
-	/* Disable WOW, set H2C command */
-	poidparam.subcode = WOWLAN_AP_DISABLE;
-	rtw_hal_set_hwreg(padapter, HW_VAR_WOWLAN, (u8 *)&poidparam);
-	pwrpriv->wowlan_ap_mode = _FALSE;
-
-	rtw_clr_drv_stopped(padapter);
-	RTW_INFO("%s: wowmode resuming, DriverStopped:%s\n", __func__, rtw_is_drv_stopped(padapter) ? "True" : "False");
-
-	if (rtw_mi_check_status(padapter, MI_LINKED)) {
-		ch =  rtw_mi_get_union_chan(padapter);
-		bw = rtw_mi_get_union_bw(padapter);
-		offset = rtw_mi_get_union_offset(padapter);
-		RTW_INFO(FUNC_ADPT_FMT" back to linked/linking union - ch:%u, bw:%u, offset:%u\n", FUNC_ADPT_ARG(padapter), ch, bw, offset);
-		set_channel_bwmode(padapter, ch, offset, bw);
-	}
-
-	/*FOR ONE AP - TODO :Multi-AP*/
-	{
-		int i;
-		_adapter *iface;
-		struct dvobj_priv *dvobj = adapter_to_dvobj(padapter);
-
-		for (i = 0; i < dvobj->iface_nums; i++) {
-			iface = dvobj->padapters[i];
-			if ((iface) && rtw_is_adapter_up(iface)) {
-				if (check_fwstate(&iface->mlmepriv, WIFI_AP_STATE | WIFI_MESH_STATE | WIFI_ASOC_STATE))
-					rtw_reset_drv_sw(iface);
-			}
-		}
-
-	}
-	rtw_mi_intf_start(padapter);
-
-	/* start netif queue */
-	rtw_mi_netif_wake_queue(padapter);
-
-	if (padapter->pid[1] != 0) {
-		RTW_INFO("pid[1]:%d\n", padapter->pid[1]);
-		rtw_signal_process(padapter->pid[1], SIGUSR2);
-	}
-
-#ifdef CONFIG_RESUME_IN_WORKQUEUE
-	/* rtw_unlock_suspend(); */
-#endif /* CONFIG_RESUME_IN_WORKQUEUE */
-
-	pwrpriv->bips_processing = _FALSE;
-	_set_timer(&adapter_to_dvobj(padapter)->dynamic_chk_timer, 2000);
-#ifndef CONFIG_IPS_CHECK_IN_WD
-	rtw_set_pwr_state_check_timer(pwrpriv);
-#endif
-	/* clean driver side wake up reason. */
-	pwrpriv->wowlan_wake_reason = 0;
-
-	/* Power On LED */
-#ifdef CONFIG_RTW_SW_LED
-
-	rtw_led_control(padapter, LED_CTL_LINK);
-#endif
-exit:
-	RTW_INFO("<== "FUNC_ADPT_FMT" exit....\n", FUNC_ADPT_ARG(padapter));
-	return ret;
-}
-#endif /* #ifdef CONFIG_APWOWLAN */
 
 void rtw_mi_resume_process_normal(_adapter *padapter)
 {
