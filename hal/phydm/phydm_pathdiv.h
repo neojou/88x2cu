@@ -123,8 +123,6 @@ struct _ODM_PATH_DIVERSITY_ {
 #endif
 };
 
-void phydm_set_tx_path_by_bb_reg(void *dm_void, enum bb_path tx_path_sel_1ss);
-
 void phydm_get_tx_path_txdesc_jgr3(void *dm_void, u8 macid,
 				   struct path_txdesc_ctrl *desc);
 
@@ -134,9 +132,6 @@ void phydm_tx_path_diversity_init(void *dm_void);
 
 void phydm_process_rssi_for_path_div(void *dm_void, void *phy_info_void,
 				     void *pkt_info_void);
-
-void phydm_pathdiv_debug(void *dm_void, char input[][16], u32 *_used,
-			 char *output, u32 *_out_len);
 
 #endif /* @#ifdef CONFIG_PATH_DIVERSITY */
 #endif /* @#ifndef  __PHYDMPATHDIV_H__ */

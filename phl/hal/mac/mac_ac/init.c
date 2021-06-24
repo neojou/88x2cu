@@ -1586,7 +1586,7 @@ static void odm_set_bb_reg(struct mac_adapter *adapter, u32 addr, u32 mask, u32 
 	udelay(1);
 }
 
-static void phydm_rf_ofdm_rx_path_init(struct mac_adapter *adapter)
+static void phydm_ofdm_rx_path_init(struct mac_adapter *adapter)
 {
 	odm_set_bb_reg(adapter, 0xcc0, 0x7FF, 0x400);
 	odm_set_bb_reg(adapter, 0xcc0, BIT(22), 0x0);
@@ -1609,7 +1609,7 @@ static void phydm_rf_ofdm_rx_path_init(struct mac_adapter *adapter)
 	odm_set_bb_reg(adapter, 0x824, 0xf000000, 0x3000000);
 }
 
-static void phydm_rf_cck_rx_path_init(struct mac_adapter *adapter)
+static void phydm_cck_rx_path_init(struct mac_adapter *adapter)
 {
 	/* set rf mode table : BB_PATH_AB */
 	odm_set_bb_reg(adapter, 0x4100, 0xFFFFF, 0x11112);
@@ -1628,12 +1628,30 @@ static void phydm_rf_cck_rx_path_init(struct mac_adapter *adapter)
 	odm_set_bb_reg(adapter, 0x1a2c, 0x00600000, 0x00100000);
 }
 
-static void phydm_rf_init(struct mac_adapter *adapter)
+static void phydm_rx_path_init(struct mac_adapter *adapter)
 {
 
-	phydm_rf_cck_rx_path_init(adapter);
-	phydm_rf_ofdm_rx_path_init(adapter);
+	phydm_cck_rx_path_init(adapter);
+	phydm_ofdm_rx_path_init(adapter);
 
+}
+
+static void phydm_cck_tx_path_init(struct mac_adapter *adapter)
+{
+	odm_set_bb_reg(adapter, 0x1a04, 0xf0000000, 0xc0000000);
+}
+
+static void phydm_ofdm_tx_path_init(struct mac_adapter *adapter)
+{
+	odm_set_bb_reg(adapter, 0x820, 0xff, 0x33);
+	odm_set_bb_reg(adapter, 0x1e2c, 0xffff, 0x0404);
+}
+
+static void phydm_tx_path_init(struct mac_adapter *adapter)
+{
+
+	phydm_cck_tx_path_init(adapter);
+	phydm_ofdm_rx_path_init(adapter);
 }
 
 static u32 phy_init(struct mac_adapter *adapter)
@@ -1654,7 +1672,8 @@ static u32 phy_init(struct mac_adapter *adapter)
 	mac_odm_set_crystal_cap(adapter);
 	mac_odm_post_setting(adapter);
 
-	phydm_rf_init(adapter);
+	phydm_rx_path_init(adapter);
+	phydm_tx_path_init(adapter);
 	mac_odm_reset_bb(adapter);
 
 	init_usb_cfg(adapter);

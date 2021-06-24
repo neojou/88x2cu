@@ -62,8 +62,6 @@ void phydm_set_crystal_cap(void *dm_void, u8 crystal_cap);
 
 void phydm_cfo_tracking_init(void *dm_void);
 
-void phydm_cfo_tracking(void *dm_void);
-
 void phydm_parsing_cfo(void *dm_void, void *pktinfo_void, s8 *pcfotail,
 		       u8 num_ss);
 void phydm_cfo_tracking_debug(void *dm_void, char input[][16], u32 *_used,

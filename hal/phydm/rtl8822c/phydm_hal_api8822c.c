@@ -960,30 +960,6 @@ phydm_config_ofdm_tx_path_8822c(struct dm_struct *dm, enum bb_path tx_path_2ss,
 	phydm_bb_reset_8822c(dm);
 }
 
-
-__odm_func__
-void phydm_config_tx_path_8822c(struct dm_struct *dm, enum bb_path tx_path_2ss,
-				enum bb_path tx_path_sel_1ss,
-				enum bb_path tx_path_sel_cck)
-{
-	dm->tx_2ss_status = tx_path_2ss;
-	dm->tx_1ss_status = tx_path_sel_1ss;
-
-	dm->tx_ant_status = dm->tx_2ss_status | dm->tx_1ss_status;
-
-	/* @CCK TX antenna mapping */
-	phydm_config_cck_tx_path_8822c(dm, tx_path_sel_cck);
-
-	/* @OFDM TX antenna mapping*/
-	phydm_config_ofdm_tx_path_8822c(dm, tx_path_2ss, tx_path_sel_1ss);
-
-	PHYDM_DBG(dm, ODM_PHY_CONFIG, "path_sel_2ss/1ss/cck={%d, %d, %d}\n",
-		  tx_path_2ss, tx_path_sel_1ss, tx_path_sel_cck);
-
-	phydm_bb_reset_8822c(dm);
-}
-
-
 __odm_func__
 void
 phydm_rfe_8822c(struct dm_struct *dm, enum bb_path path)
@@ -1050,34 +1026,6 @@ config_phydm_trx_mode_8822c(struct dm_struct *dm, enum bb_path tx_path_en,
 
 	/* @==== [RX Path] ==============================================*/
 	dm->rx_ant_status = rx_path;
-
-	/* @==== [TX Path] ==============================================*/
-	/*@ [PHYDM-312]*/
-	if (p_div->default_tx_path != BB_PATH_A &&
-	    p_div->default_tx_path != BB_PATH_B)
-		p_div->default_tx_path = BB_PATH_A;
-
-	if (tx_path_en == BB_PATH_A || tx_path_en == BB_PATH_B) {
-		p_div->stop_path_div = true;
-		tx_path_sel_1ss = tx_path_en;
-		tx_path_2ss = BB_PATH_NON;
-	} else if (tx_path_en == BB_PATH_AB) {
-		if (tx_path_sel_1ss == BB_PATH_AUTO) {
-			p_div->stop_path_div = false;
-			tx_path_sel_1ss = p_div->default_tx_path;
-		} else { /* @BB_PATH_AB, BB_PATH_A, BB_PATH_B*/
-			p_div->stop_path_div = true;
-		}
-		tx_path_2ss = BB_PATH_AB;
-	} else if (disable_2sts_div_mode) {
-		p_div->stop_path_div = false;
-		tx_path_sel_1ss = p_div->default_tx_path;
-		tx_path_2ss = BB_PATH_NON;
-	}
-	phydm_config_tx_path_8822c(dm, tx_path_2ss, tx_path_sel_1ss,
-				   tx_path_sel_1ss);
-
-	phydm_bb_reset_8822c(dm);
 
 	phydm_igi_toggle_8822c(dm);
 

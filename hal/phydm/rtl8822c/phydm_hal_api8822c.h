@@ -102,10 +102,6 @@ void phydm_get_tx_path_en_setting_8822c(struct dm_struct *dm,
 void phydm_get_rx_path_en_setting_8822c(struct dm_struct *dm,
 					struct rx_path_en_8822c *path);
 
-void phydm_config_tx_path_8822c(struct dm_struct *dm, enum bb_path tx_path_2ss,
-				enum bb_path tx_path_sel_1ss,
-				enum bb_path tx_path_sel_cck);
-
 boolean config_phydm_trx_mode_8822c(struct dm_struct *dm,
 				    enum bb_path tx_path_en,
 				    enum bb_path rx_path,
