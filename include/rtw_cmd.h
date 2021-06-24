@@ -550,7 +550,6 @@ extern u8 rtw_addbarsp_cmd(_adapter *padapter, u8 *addr, u16 tid, u8 status, u8 
 /* add for CONFIG_IEEE80211W, none 11w also can use */
 extern u8 rtw_reset_securitypriv_cmd(_adapter *padapter);
 extern u8 rtw_free_assoc_resources_cmd(_adapter *padapter, u8 lock_scanned_queue, int flags);
-extern u8 rtw_dynamic_chk_wk_cmd(_adapter *adapter);
 
 u8 rtw_lps_ctrl_wk_cmd(_adapter *padapter, u8 lps_ctrl_type, u8 flags);
 u8 rtw_lps_ctrl_leave_set_level_cmd(_adapter *adapter, u8 lps_level, u8 flags);
