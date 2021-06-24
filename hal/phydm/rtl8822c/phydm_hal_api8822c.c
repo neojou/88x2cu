@@ -973,9 +973,6 @@ config_phydm_trx_mode_8822c(struct dm_struct *dm, enum bb_path tx_path_en,
 
 	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
 
-	/* @==== [RX Path] ==============================================*/
-	dm->rx_ant_status = rx_path;
-
 	phydm_igi_toggle_8822c(dm);
 
 	return true;
@@ -1268,31 +1265,6 @@ config_phydm_switch_channel_8822c(struct dm_struct *dm, u8 central_ch)
 	}
 
 	is_2g_ch = (central_ch <= 14) ? true : false;
-
-	/* [get trx info for cck tx and rfe ctrl] */
-	tx_1sts = dm->tx_1ss_status;
-	if (tx_1sts == BB_PATH_NON) {
-		tx_1sts = (u8)odm_get_bb_reg(dm, R_0x820, 0xf);
-		dm->tx_1ss_status = (u8)tx_1sts;
-		pr_debug("[%s]tx_1ss is non!, update tx_1sts:%d\n",
-			 __func__, tx_1sts);
-	}
-	tx = dm->tx_ant_status;
-	if (tx == BB_PATH_NON) {
-		tx_2sts = (u8)odm_get_bb_reg(dm, R_0x820, 0xf0);
-		tx = (u8)(tx_1sts | tx_2sts);
-		dm->tx_2ss_status = (u8)tx_2sts;
-		dm->tx_ant_status = tx;
-		pr_debug("[%s]tx_ant_status is non!, update tx_2sts/tx_path:%d/%d\n",
-			 __func__, tx_2sts, tx);
-	}
-	rx = dm->rx_ant_status;
-	if (rx == BB_PATH_NON) {
-		rx = (u8)odm_get_bb_reg(dm, R_0x824, 0xf0000);
-		dm->rx_ant_status = (u8)rx;
-		pr_debug("[%s]rx_ant_status is non!, update rx_path:%d\n",
-			 __func__, rx);
-	}
 
 	/* ==== [Set RF Reg 0x18] ===========================================*/
 	rf_reg18 &= ~0x703ff; /*[18:17],[16],[9:8],[7:0]*/

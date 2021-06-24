@@ -289,9 +289,7 @@ void phydm_parsing_cfo(void *dm_void, void *pktinfo_void, s8 *pcfotail,
 
 		/* @ Update CFO report for path-A & path-B */
 		/* Only paht-A and path-B have CFO tail and short CFO */
-		for (i = 0; i < dm->num_rf_path; i++) {
-			if (!(dm->rx_ant_status & BIT(i)))
-				continue;
+		for (i = 0; i < 2; i++) {
 			cfo_track->CFO_tail[i] += pcfotail[i];
 			cfo_track->CFO_cnt[i]++;
 			#if 0

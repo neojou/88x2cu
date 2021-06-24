@@ -1086,16 +1086,6 @@ enum halmac_rf_type {
 	HALMAC_RF_MAX_TYPE = 0xF,
 };
 
-struct halmac_general_info {
-	u8 rfe_type;
-	enum halmac_rf_type rf_type;
-	u8 tx_ant_status;
-	u8 rx_ant_status;
-	u8 ext_pa;
-	u8 package_type;
-	u8 mp_mode;
-};
-
 struct halmac_pwr_tracking_para {
 	u8 enable;
 	u8 tx_pwr_index;

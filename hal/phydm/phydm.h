@@ -953,7 +953,6 @@ struct dm_struct {
 	u64			rssi_trsw_l;
 	u64			rssi_trsw_iso;
 	u8			tx_ant_status; /*TX path enable*/
-	u8			rx_ant_status; /*RX path enable*/
 	#ifdef PHYDM_COMPILE_ABOVE_4SS
 	enum bb_path		tx_4ss_status; /*@Use N-X for 4STS rate*/
 	#endif

@@ -1282,14 +1282,8 @@ void phydm_get_physts_0_jgr3(struct dm_struct *dm, u8 *phy_status_inf,
 				physts_table->cck_gi_u_bnd) << 1);
 
 	/* @Update per-path information */
-	for (i = RF_PATH_A; i < dm->num_rf_path; i++) {
-		if ((dm->rx_ant_status & BIT(i)) == 0)
-			continue;
-
+	for (i = RF_PATH_A; i < 2; i++) {
 		rx_cnt++; /* @check the number of the ant */
-
-		if (rx_cnt > dm->num_rf_path)
-			break;
 
 		if (pktinfo->is_to_self)
 			dm->ofdm_agc_idx[i] = rx_power[i];
@@ -1367,10 +1361,7 @@ void phydm_get_physts_1_others_jgr3(struct dm_struct *dm, u8 *phy_status_inf,
 
 	/* SNR: S(8,1), EVM: S(8,1), CFO: S(8,7) */
 
-	for (i = RF_PATH_A; i < dm->num_rf_path; i++) {
-		if ((dm->rx_ant_status & BIT(i)) == 0)
-			continue;
-
+	for (i = RF_PATH_A; i < 2; i++) {
 		evm = phy_sts->rxevm[i];
 		evm = (evm == -128) ? 0 : ((0 - evm) >> 1);
 		sq = (evm >= 34) ? 100 : evm * 3; /* @Convert EVM to 0~100%*/
@@ -1423,10 +1414,7 @@ void phydm_get_physts_4_others_jgr3(struct dm_struct *dm, u8 *phy_status_inf,
 
 	/* SNR: S(8,1), EVM: S(8,1), CFO: S(8,7) */
 
-	for (i = RF_PATH_A; i < dm->num_rf_path; i++) {
-		if ((dm->rx_ant_status & BIT(i)) == 0)
-			continue;
-
+	for (i = RF_PATH_A; i < 2; i++) {
 		evm = phy_sts->rxevm[i];
 		evm = (evm == -128) ? 0 : ((0 - evm) >> 1);
 		sq = (evm >= 34) ? 100 : evm * 3; /* @Convert EVM to 0~100%*/
@@ -1453,78 +1441,6 @@ void phydm_get_physts_5_others_jgr3(struct dm_struct *dm, u8 *phy_status_inf,
 	struct phy_sts_rpt_jgr3_type5 *phy_sts = NULL;
 
 }
-#if (RTL8723F_SUPPORT)
-void phydm_get_physts_6_jgr3(struct dm_struct *dm, u8 *phy_status_inf,
-			     struct phydm_perpkt_info_struct *pktinfo,
-			     struct phydm_phyinfo_struct *phy_info)
-{
-	/* type 0 is used for cck packet */
-	struct phy_sts_rpt_jgr3_type6 *phy_sts = NULL;
-	struct odm_phy_dbg_info *dbg_i = &dm->phy_dbg_info;
-	u8 sq = 0, i, rx_cnt = 0;
-	s8 rx_power[4], pwdb;
-	s8 rx_pwr_db_max = -120;
-	u8 evm = 0;
-	phy_sts = (struct phy_sts_rpt_jgr3_type6 *)phy_status_inf;
-	/* judy_add_8723F_0512 */
-	/* rssi S(11,3) */
-	rx_power[0] = (s8)((phy_sts->rssi_msb << 5) + (phy_sts->rssi >> 3));
-	/* @Update per-path information */
-	for (i = RF_PATH_A; i < dm->num_rf_path; i++) {
-		if ((dm->rx_ant_status & BIT(i)) == 0)
-			continue;
-
-		rx_cnt++; /* @check the number of the ant */
-
-		if (rx_cnt > dm->num_rf_path)
-			break;
-
-		if (pktinfo->is_to_self)
-			dm->ofdm_agc_idx[i] = rx_power[i]+110;
-
-		/* @Setting the RX power: agc_idx dBm*/
-		pwdb = rx_power[i];
-
-		phy_info->rx_pwr[i] = pwdb;
-		phy_info->rx_mimo_signal_strength[i] = phydm_pw_2_percent(pwdb);
-
-		/* search maximum pwdb */
-		if (pwdb > rx_pwr_db_max)
-			rx_pwr_db_max = pwdb;
-	}
-	
-	/* @Calculate EVM U(8,2)*/
-	evm = phy_sts->evm_pld >> 2;
-	if (pktinfo->data_rate > ODM_RATE2M)
-		phy_info->rx_cck_evm = (u8)(evm - 10);/* @5_5M/11M*/
-	else
-		phy_info->rx_cck_evm = (u8)(evm - 12);/* @1M/2M*/
-
-	sq = (phy_info->rx_cck_evm >= 34) ? 100 : phy_info->rx_cck_evm * 3;
-	phy_info->signal_quality = sq;
-	/*@CCK no STBC and LDPC*/
-	dbg_i->is_ldpc_pkt = false;
-	dbg_i->is_stbc_pkt = false;
-
-	/*cck channel has hw bug, [WLANBB-1429]*/
-	phy_info->channel = 0;
-	phy_info->rx_power = rx_pwr_db_max;
-	phy_info->recv_signal_power = rx_pwr_db_max;
-	phy_info->is_beamformed = false;
-	phy_info->is_mu_packet = false;
-	phy_info->rx_pwdb_all = phydm_pw_2_percent(rx_pwr_db_max);
-	phy_info->band_width = CHANNEL_WIDTH_20;
-	
-	//phydm_parsing_cfo(dm, pktinfo, phy_sts->avg_cfo, pktinfo->rate_ss);
-	
-	#ifdef CONFIG_PHYDM_ANTENNA_DIVERSITY
-	dm->dm_fat_table.antsel_rx_keep_0 = phy_sts->antidx_a;
-	dm->dm_fat_table.antsel_rx_keep_1 = 0;
-	dm->dm_fat_table.antsel_rx_keep_2 = 0;
-	dm->dm_fat_table.antsel_rx_keep_3 = 0;
-	#endif
-}
-#endif
 void phydm_get_physts_ofdm_cmn_jgr3(struct dm_struct *dm, u8 *phy_status_inf,
 				    struct phydm_perpkt_info_struct *pktinfo,
 				    struct phydm_phyinfo_struct *phy_info)
@@ -1538,10 +1454,7 @@ void phydm_get_physts_ofdm_cmn_jgr3(struct dm_struct *dm, u8 *phy_status_inf,
 	phy_sts = (struct phy_sts_rpt_jgr3_ofdm_cmn *)phy_status_inf;
 
 	/* Parsing Offset0 & 4*/
-	for (i = RF_PATH_A; i < dm->num_rf_path; i++) {
-		if ((dm->rx_ant_status & BIT(i)) == 0)
-			continue;
-
+	for (i = RF_PATH_A; i < 2; i++) {
 		rx_cnt++; /* @check the number of the ant */
 
 		pwdb = (s8)phy_sts->pwdb[i] - 110; /*@dB*/
@@ -2058,9 +1971,7 @@ void phydm_get_phy_sts_type1(struct dm_struct *dm, u8 *phy_status_inf,
 	ant_idx[3] = phy_sts->antidx_d;
 
 	/* Update per-path information */
-	for (i = RF_PATH_A; i < PHYDM_MAX_RF_PATH; i++) {
-		if (!(dm->rx_ant_status & BIT(i)))
-			continue;
+	for (i = RF_PATH_A; i < 2; i++) {
 		rx_count++;
 
 		if (rx_count > dm->num_rf_path)
@@ -2141,9 +2052,7 @@ void phydm_get_phy_sts_type2(struct dm_struct *dm, u8 *phy_status_inf,
 
 	phy_sts = (struct phy_sts_rpt_jgr2_type2 *)phy_status_inf;
 
-	for (i = RF_PATH_A; i < PHYDM_MAX_RF_PATH; i++) {
-		if (!(dm->rx_ant_status & BIT(i)))
-			continue;
+	for (i = RF_PATH_A; i < 2; i++) {
 		rx_count++;
 
 		if (rx_count > dm->num_rf_path)

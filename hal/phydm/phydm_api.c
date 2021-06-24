@@ -69,13 +69,9 @@ void phydm_trx_antenna_setting_init(void *dm_void, u8 num_rf_path)
 	/*PHYDM_DBG(dm, ODM_COMP_INIT, "path_bitmap=0x%x\n", path_bitmap);*/
 
 	dm->tx_ant_status = path_bitmap;
-	dm->rx_ant_status = path_bitmap;
 
 	if (num_rf_path == PDM_1SS)
 		return;
-
-	PHYDM_DBG(dm, ODM_COMP_INIT, "[%s]ant_status{tx,rx}={0x%x, 0x%x}\n",
-		  __func__, dm->tx_ant_status, dm->rx_ant_status);
 }
 
 void phydm_config_ofdm_tx_path(void *dm_void, enum bb_path path)
