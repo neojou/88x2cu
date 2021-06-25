@@ -514,10 +514,6 @@ uint rtk_hal_init(_adapter *padapter)
 	uint status = _SUCCESS;
 	PHAL_DATA_TYPE pHalData = GET_HAL_DATA(padapter);
 
-	RTW_INFO("%s\n", __func__);
-
-	halrf_set_rfsupportability(adapter_to_phydm(padapter));
-
 	status = padapter->hal_func.hal_init(padapter);
 
 	if(pHalData ->phydm_init_result) {

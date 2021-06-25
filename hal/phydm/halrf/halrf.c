@@ -787,23 +787,6 @@ void halrf_supportability_init_mp(void *dm_void)
 		0;
 }
 
-void halrf_supportability_init(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct _hal_rf_ *rf = &dm->rf_table;
-
-	rf->rf_supportability =
-		HAL_RF_TX_PWR_TRACK |
-		HAL_RF_IQK |
-		HAL_RF_LCK |
-		HAL_RF_DPK |
-		HAL_RF_DACK |
-		HAL_RF_DPK_TRACK |
-		HAL_RF_RXDCK |
-		HAL_RF_TXGAPK |
-		0;
-}
-
 void halrf_watchdog(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -1143,24 +1126,6 @@ void halrf_x2k_check(struct dm_struct *dm)
 	phy_x2_check_8822c(dm);
 }
 
-void halrf_set_rfsupportability(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct _hal_rf_ *rf = &dm->rf_table;
-
-	if (!dm->mp_mode)
-		return;
-
-	if (rf->manual_rf_supportability &&
-	    *rf->manual_rf_supportability != 0xffffffff) {
-		rf->rf_supportability = *rf->manual_rf_supportability;
-	} else if (*dm->mp_mode) {
-		halrf_supportability_init_mp(dm);
-	} else {
-		halrf_supportability_init(dm);
-	}
-}
-
 void halrf_rfe_definition(struct dm_struct *dm)
 {
 	struct _hal_rf_ *rf = &dm->rf_table;
@@ -1176,8 +1141,17 @@ void halrf_init(void *dm_void)
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	struct _hal_rf_ *rf = &dm->rf_table;
 
-	RF_DBG(dm, DBG_RF_INIT, "HALRF_Init\n");
-	halrf_set_rfsupportability(dm);
+	rf->rf_supportability =
+		HAL_RF_TX_PWR_TRACK |
+		HAL_RF_IQK |
+		HAL_RF_LCK |
+		HAL_RF_DPK |
+		HAL_RF_DACK |
+		HAL_RF_DPK_TRACK |
+		HAL_RF_RXDCK |
+		HAL_RF_TXGAPK |
+		0;
+
 	halrf_rfe_definition(dm);
 
 	/*Init all RF funciton*/

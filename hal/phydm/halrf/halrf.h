@@ -473,8 +473,6 @@ u64 halrf_cmn_info_get(void *dm_void, u32 cmn_info);
 
 void halrf_watchdog(void *dm_void);
 
-void halrf_supportability_init(void *dm_void);
-
 void halrf_init(void *dm_void);
 
 void halrf_iqk_trigger(void *dm_void, boolean is_recovery);
