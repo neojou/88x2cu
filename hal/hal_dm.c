@@ -1277,15 +1277,6 @@ void rtw_phydm_ra_registed(_adapter *adapter, struct sta_info *psta)
 	dump_sta_info(RTW_DBGDUMP, psta);
 }
 
-static void init_phydm_info(_adapter *adapter)
-{
-	PHAL_DATA_TYPE	hal_data = GET_HAL_DATA(adapter);
-	struct dm_struct *phydm = &(hal_data->odmpriv);
-
-	odm_cmn_info_init(phydm, ODM_CMNINFO_FW_VER, hal_data->firmware_version);
-	odm_cmn_info_init(phydm, ODM_CMNINFO_FW_SUB_VER, hal_data->firmware_sub_version);
-}
-
 u8 rtw_hal_runtime_trx_path_decision(_adapter *adapter)
 {
 	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
@@ -1376,7 +1367,6 @@ void rtw_phydm_init(_adapter *adapter)
 	PHAL_DATA_TYPE	hal_data = GET_HAL_DATA(adapter);
 	struct dm_struct	*phydm = &(hal_data->odmpriv);
 
-	init_phydm_info(adapter);
 	hal_data->phydm_init_result = odm_dm_init(phydm);
 }
 
