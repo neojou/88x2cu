@@ -1126,16 +1126,6 @@ void halrf_x2k_check(struct dm_struct *dm)
 	phy_x2_check_8822c(dm);
 }
 
-void halrf_rfe_definition(struct dm_struct *dm)
-{
-	struct _hal_rf_ *rf = &dm->rf_table;
-
-	if (dm->rfe_type == 21 || dm->rfe_type == 22) {
-		rf->ext_pa_5g = 1;
-		rf->ext_lna_5g = 1;
-	}
-}
-
 void halrf_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -1151,8 +1141,6 @@ void halrf_init(void *dm_void)
 		HAL_RF_RXDCK |
 		HAL_RF_TXGAPK |
 		0;
-
-	halrf_rfe_definition(dm);
 
 	/*Init all RF funciton*/
 	halrf_dack_trigger(dm, false);
