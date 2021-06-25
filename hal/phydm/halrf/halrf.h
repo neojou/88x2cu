@@ -415,7 +415,6 @@ struct _hal_rf_ {
 	boolean is_tssi_in_progress;
 	boolean is_bt_iqk_timeout;
 	boolean is_rfk_h2c_timeout;
-	boolean aac_checked;
 	boolean is_txgapk_in_progress;
 
 	u8 *mp_rate_index;

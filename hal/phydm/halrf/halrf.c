@@ -1127,10 +1127,6 @@ void halrf_lck_trigger(void *dm_void)
 	}
 }
 
-void halrf_aac_check(struct dm_struct *dm)
-{
-}
-
 void halrf_rxdck(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -1181,15 +1177,12 @@ void halrf_init(void *dm_void)
 	struct _hal_rf_ *rf = &dm->rf_table;
 
 	RF_DBG(dm, DBG_RF_INIT, "HALRF_Init\n");
-	rf->aac_checked = false;
 	halrf_set_rfsupportability(dm);
 	halrf_rfe_definition(dm);
-#if 1
+
 	/*Init all RF funciton*/
-	halrf_aac_check(dm);
 	halrf_dack_trigger(dm, false);
 	halrf_x2k_check(dm);
-#endif
 
 	/*power trim, thrmal trim, pa bias*/
 	phydm_config_new_kfree(dm);
