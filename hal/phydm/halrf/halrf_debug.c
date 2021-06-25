@@ -97,10 +97,3 @@ void halrf_cmd_parser(void *dm_void, char input[][16], u32 *_used, char *output,
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 }
 
-void halrf_init_debug_setting(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct _hal_rf_ *rf = &dm->rf_table;
-
-	rf->rf_dbg_comp = DBG_RF_RFK;
-}

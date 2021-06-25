@@ -1182,7 +1182,6 @@ void halrf_init(void *dm_void)
 
 	RF_DBG(dm, DBG_RF_INIT, "HALRF_Init\n");
 	rf->aac_checked = false;
-	halrf_init_debug_setting(dm);
 	halrf_set_rfsupportability(dm);
 	halrf_rfe_definition(dm);
 #if 1

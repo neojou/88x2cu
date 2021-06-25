@@ -3774,11 +3774,9 @@ _iqk_one_shot_8822c(
 	RF_DBG(dm, DBG_RF_IQK, "[IQK]0x0 =%x, 0x8f = 0x%x\n", odm_get_rf_reg(dm, path, 0x0, 0xfffff), odm_get_rf_reg(dm, path, 0x8f, 0xfffff));
 	RF_DBG(dm, DBG_RF_IQK, "[IQK]0x38 =%x, 0x73 = 0x%x\n", _iqk_btc_read_indirect_reg_8822c(dm, 0x38), odm_get_bb_reg(dm, 0x70, 0xff000000));
 
-	if (rf->rf_dbg_comp & DBG_RF_IQK) {
-		if (idx != TXIQK) {
-			odm_write_4byte(dm, 0x1b00, 0x8 | path << 1);
-			RF_DBG(dm, DBG_RF_IQK, "[IQK]0x1bcc =0x%x\n", odm_read_1byte(dm, 0x1bcc));
-		}
+	if (idx != TXIQK) {
+		odm_write_4byte(dm, 0x1b00, 0x8 | path << 1);
+		RF_DBG(dm, DBG_RF_IQK, "[IQK]0x1bcc =0x%x\n", odm_read_1byte(dm, 0x1bcc));
 	}
 	//_iqk_set_gnt_wl_gnt_bt_8822c(dm, true);
 	odm_write_4byte(dm, 0x1b00, iqk_cmd);

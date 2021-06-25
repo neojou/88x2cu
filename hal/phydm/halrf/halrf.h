@@ -422,7 +422,6 @@ struct _hal_rf_ {
 	u32 *manual_rf_supportability;
 	u32 p_rate_index;
 	u8 pwt_type;
-	u32 rf_dbg_comp;
 	u8 rfk_type;
 	u32 gnt_control;
 
