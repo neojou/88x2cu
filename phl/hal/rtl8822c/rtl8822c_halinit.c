@@ -366,9 +366,8 @@ enum rtw_hal_status hal_start_8822c(struct rtw_phl_com_t *phl_com,
 #endif
 	/* start watchdog/dm */
 	rtw_hal_bb_dm_init(hal);
-	rtw_hal_rf_dm_init(hal);
-
 #endif // if 0 NEO
+	rtw_hal_rf_dm_init(hal);
 
 	/* Temporarily read hardware setting for RX
 	 * ToDo: driver control MAC setting.

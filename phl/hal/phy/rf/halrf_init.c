@@ -253,6 +253,7 @@ void halrf_rfe_type_gpio_setting(struct rf_info *rf)
 
 	halrf_set_gpio(rf, HW_PHY_0, (u8)band);
 }
+#endif //NEO
 
 enum rtw_hal_status halrf_dm_init(void *rf_void)
 {
@@ -264,6 +265,8 @@ enum rtw_hal_status halrf_dm_init(void *rf_void)
 		return RTW_HAL_STATUS_FAILURE;
 	}
 
+	pr_info("%s NEO doing\n", __func__);
+#if 0 //NEO
 	halrf_cmn_info_self_init(rf);
 	halrf_dbg_setting_init(rf);
 	halrf_cmd_parser_init(rf);
@@ -296,11 +299,10 @@ enum rtw_hal_status halrf_dm_init(void *rf_void)
 		halrf_wl_tx_power_control(rf, 0xffffffff);
 
 	halrf_fcs_init(rf);
-
+#endif //NEO
 	return hal_status;
 }
 
-#endif //NEO
 
 enum rtw_hal_status g6_halrf_init(struct rtw_phl_com_t *phl_com,
 			struct rtw_hal_com_t *hal_com, void **rf_out)

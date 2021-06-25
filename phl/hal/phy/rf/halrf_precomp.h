@@ -57,8 +57,8 @@
 #include "halrf_hw_cfg_ex.h"
 #include "halrf_interface.h"
 #include "halrf_dbg_cmd.h"
-#include "halrf_dbg.h"
 #endif //NEO
+#include "halrf_dbg.h"
 
 #include "halrf_txgapk.h"
 #include "halrf_pwr_track.h"

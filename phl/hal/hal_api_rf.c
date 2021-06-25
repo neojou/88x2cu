@@ -90,13 +90,12 @@ void rtw_hal_init_rf_reg(struct rtw_phl_com_t *phl_com, void *hal)
 				pwrlmt_info->para_data_len, pwrlmt_info->para_data);
 	}
 }
+#endif //NEO
 
 void rtw_hal_rf_dm_init(struct hal_info_t *hal_info)
 {
 	halrf_dm_init(hal_info->rf);
 }
-
-#endif //NEO
 
 enum rtw_hal_status
 rtw_hal_rf_get_efuse_info(struct rtw_hal_com_t *hal_com,
