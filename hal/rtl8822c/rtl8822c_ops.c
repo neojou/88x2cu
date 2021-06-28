@@ -1235,53 +1235,6 @@ static void hw_var_set_h2c_fw_joinbssrpt(PADAPTER adapter, u8 mstatus)
 		hw_var_set_dl_rsvd_page(adapter, RT_MEDIA_CONNECT);
 }
 
-#ifdef CONFIG_WOWLAN
-static void hw_var_vendor_wow_mode(_adapter *adapter, u8 en)
-{
-#ifdef CONFIG_CONCURRENT_MODE
-	_adapter *iface = NULL;
-	struct dvobj_priv *dvobj = adapter_to_dvobj(adapter);
-	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
-	u8 igi = 0, mac_addr[ETH_ALEN];
-
-	RTW_INFO("%s: en(%d)--->\n", __func__, en);
-	if (en) {
-		rtw_hal_get_hwreg(adapter, HW_VAR_MAC_ADDR, mac_addr);
-		/* RTW_INFO("suspend mac addr: "MAC_FMT"\n", MAC_ARG(mac_addr)); */
-		rtw_halmac_set_bssid(dvobj, HW_PORT4, mac_addr);
-		dvobj->rxfltmap2_bf_suspend = rtw_read16(adapter, REG_RXFLTMAP2);
-		dvobj->bcn_ctrl_clint3_bf_suspend = rtw_read8(adapter, REG_BCN_CTRL_CLINT3);
-		dvobj->rcr_bf_suspend = rtw_read32(adapter, REG_RCR);
-		dvobj->cr_ext_bf_suspend = rtw_read32(adapter, REG_CR_EXT);
-		/*RTW_INFO("RCR: 0x%02x, REG_CR_EXT: 0x%02x , REG_BCN_CTRL_CLINT3: 0x%02x, REG_RXFLTMAP2:0x%02x, REG_MACID_DROP0_8822B:0x%02x\n"
-		, rtw_read32(adapter, REG_RCR), rtw_read8(adapter, REG_CR_EXT), rtw_read8(adapter, REG_BCN_CTRL_CLINT3)
-		, rtw_read32(adapter, REG_RXFLTMAP2), rtw_read8(adapter, REG_MACID_DROP0_8822B)); */
-		rtw_write32(adapter, REG_RCR, (rtw_read32(adapter, REG_RCR) & (~(RCR_AM))) | RCR_CBSSID_DATA | RCR_CBSSID_BCN);
-		/* set PORT4 to ad hoc mode to filter not necessary Beacons */
-		rtw_write8(adapter, REG_CR_EXT, (rtw_read8(adapter, REG_CR_EXT)& (~BIT5)) | BIT4);
-		rtw_write8(adapter, REG_BCN_CTRL_CLINT3, rtw_read8(adapter, REG_BCN_CTRL_CLINT3) | BIT3);
-		rtw_write16(adapter, REG_RXFLTMAP2, 0xffff);
-		/* RTW_INFO("RCR: 0x%02x, REG_CR_EXT: 0x%02x , REG_BCN_CTRL_CLINT3: 0x%02x, REG_RXFLTMAP2:0x%02x, REG_MACID_DROP0_8822B:0x%02x\n"
-		, rtw_read32(adapter, REG_RCR), rtw_read8(adapter, REG_CR_EXT), rtw_read8(adapter, REG_BCN_CTRL_CLINT3)
-		, rtw_read32(adapter, REG_RXFLTMAP2), rtw_read8(adapter, REG_MACID_DROP0_8822B)); */
-		
-		/* The WRC's RSSI is weak. Set the IGI to lower */
-		odm_write_dig(adapter_to_phydm(adapter), 0x24);
-	} else {
-		/* restore the rcr, port ctrol setting */
-		rtw_write32(adapter, REG_CR_EXT, dvobj->cr_ext_bf_suspend);
-		rtw_write32(adapter, REG_RCR, dvobj->rcr_bf_suspend);
-		rtw_write8(adapter, REG_BCN_CTRL_CLINT3, dvobj->bcn_ctrl_clint3_bf_suspend);
-		rtw_write16(adapter, REG_RXFLTMAP2, dvobj->rxfltmap2_bf_suspend);
-		
-		/* RTW_INFO("RCR: 0x%02x, REG_CR_EXT: 0x%02x , REG_BCN_CTRL_CLINT3: 0x%02x, REG_RXFLTMAP2:0x%02x, REG_MACID_DROP0_8822B:0x%02x\n"
-		, rtw_read32(adapter, REG_RCR), rtw_read8(adapter, REG_CR_EXT), rtw_read8(adapter, REG_BCN_CTRL_CLINT3)
-		, rtw_read32(adapter, REG_RXFLTMAP2), rtw_read8(adapter, REG_MACID_DROP0_8822B)); */
-	}
-#endif /* CONFIG_CONCURRENT_MODE */
-}
-#endif /* CONFIG_WOWLAN */
-
 
 /*
  * Parameters:

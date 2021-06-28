@@ -343,8 +343,6 @@ void phydm_set_tdma_dig_timer(void *dm_void);
 
 void phydm_tdma_dig_timer_check(void *dm_void);
 
-void phydm_tdma_dig(void *dm_void);
-
 void phydm_tdma_false_alarm_counter_check(void *dm_void);
 
 void phydm_tdma_dig_add_interrupt_mask_handler(void *dm_void);
