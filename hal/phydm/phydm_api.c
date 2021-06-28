@@ -58,22 +58,6 @@ void phydm_reset_bb_hw_cnt(void *dm_void)
 	odm_set_bb_reg(dm, R_0x1eb4, BIT(25), 0);
 }
 
-void phydm_trx_antenna_setting_init(void *dm_void, u8 num_rf_path)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	u8 rx_ant = 0, tx_ant = 0;
-	u8 path_bitmap = 1;
-
-	path_bitmap = (u8)phydm_gen_bitmask(num_rf_path);
-
-	/*PHYDM_DBG(dm, ODM_COMP_INIT, "path_bitmap=0x%x\n", path_bitmap);*/
-
-	dm->tx_ant_status = path_bitmap;
-
-	if (num_rf_path == PDM_1SS)
-		return;
-}
-
 void phydm_config_ofdm_tx_path(void *dm_void, enum bb_path path)
 {
 }

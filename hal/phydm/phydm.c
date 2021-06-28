@@ -154,30 +154,23 @@ void phydm_common_info_self_init(struct dm_struct *dm)
 	dm->ic_phy_sts_type = PHYDM_PHYSTS_TYPE_3;
 	dm->phydm_sys_up_time = 0;
 	dm->num_rf_path = 2;
-
-	phydm_trx_antenna_setting_init(dm, dm->num_rf_path);
-
 	dm->tx_rate = 0xFF;
 	dm->rssi_min_by_path = 0xFF;
-
 	dm->number_linked_client = 0;
 	dm->pre_number_linked_client = 0;
 	dm->number_active_client = 0;
 	dm->pre_number_active_client = 0;
-
 	dm->last_tx_ok_cnt = 0;
 	dm->last_rx_ok_cnt = 0;
 	dm->tx_tp = 0;
 	dm->rx_tp = 0;
 	dm->total_tp = 0;
 	dm->traffic_load = TRAFFIC_LOW;
-
 	dm->nbi_set_result = 0;
 	dm->is_init_hw_info_by_rfe = false;
 	dm->pre_dbg_priority = DBGPORT_RELEASE;
 	dm->tp_active_th = 5;
 	dm->disable_phydm_watchdog = 0;
-
 	dm->u8_dummy = 0xf;
 	dm->u16_dummy = 0xffff;
 	dm->u32_dummy = 0xffffffff;

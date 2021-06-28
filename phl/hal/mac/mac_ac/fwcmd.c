@@ -1684,8 +1684,8 @@ u32 mac_send_phydm_info_h2c(struct mac_adapter *adapter)
 	PHYDM_INFO_SET_REF_TYPE(h2c_buf, 0); //info->rfe_type
 	PHYDM_INFO_SET_RF_TYPE(h2c_buf, 2); //info->rf_type
 	PHYDM_INFO_SET_CUT_VER(h2c_buf, 2); //C-cut
-	PHYDM_INFO_SET_RX_ANT_STATUS(h2c_buf, 3); //info->rx_ant_status
-	PHYDM_INFO_SET_TX_ANT_STATUS(h2c_buf, 3); //info->tx_ant_status
+	PHYDM_INFO_SET_RX_ANT_STATUS(h2c_buf, 0x3); //info->rx_ant_status
+	PHYDM_INFO_SET_TX_ANT_STATUS(h2c_buf, 0x3); //info->tx_ant_status
 	PHYDM_INFO_SET_EXT_PA(h2c_buf, 0); //info->ext_pa
 	PHYDM_INFO_SET_PACKAGE_TYPE(h2c_buf, 0); //info->package_type
 	PHYDM_INFO_SET_MP_MODE(h2c_buf, 0); //info->mp_mode

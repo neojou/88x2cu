@@ -40,8 +40,6 @@
 #include "phydm_antdiv.h"
 #endif
 
-#include "phydm_soml.h"
-
 #ifdef CONFIG_SMART_ANTENNA
 #include "phydm_smt_ant.h"
 #endif
@@ -950,7 +948,6 @@ struct dm_struct {
 	u64			rssi_trsw_h;
 	u64			rssi_trsw_l;
 	u64			rssi_trsw_iso;
-	u8			tx_ant_status; /*TX path enable*/
 	#ifdef PHYDM_COMPILE_ABOVE_4SS
 	enum bb_path		tx_4ss_status; /*@Use N-X for 4STS rate*/
 	#endif

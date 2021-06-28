@@ -1109,8 +1109,8 @@ u32 mac_send_general_info_reg(struct mac_adapter *adapter)
 	GENERAL_INFO_REG_SET_CLASS(h2c, CLASS_GENERAL_INFO_REG);
 	GENERAL_INFO_REG_SET_RFE_TYPE(h2c, 0); //info->rfe_type
 	GENERAL_INFO_REG_SET_RF_TYPE(h2c, 2); //rftype
-	GENERAL_INFO_REG_SET_RX_ANT_STATUS(h2c, 3); //info->rx_ant_status
-	GENERAL_INFO_REG_SET_TX_ANT_STATUS(h2c, 3); //info->tx_ant_status
+	GENERAL_INFO_REG_SET_RX_ANT_STATUS(h2c, 0x3); //info->rx_ant_status
+	GENERAL_INFO_REG_SET_TX_ANT_STATUS(h2c, 0x3); //info->tx_ant_status
 
 	return mac_send_h2c_reg(adapter, h2c);
 }

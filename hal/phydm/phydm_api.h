@@ -103,8 +103,6 @@ enum channel_width phydm_rxsc_2_bw(void *dm_void, u8 rxsc);
 
 void phydm_reset_bb_hw_cnt(void *dm_void);
 
-void phydm_trx_antenna_setting_init(void *dm_void, u8 num_rf_path);
-
 void phydm_config_ofdm_rx_path(void *dm_void, enum bb_path path);
 
 void phydm_config_cck_rx_path(void *dm_void, enum bb_path path);
