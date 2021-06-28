@@ -402,27 +402,6 @@ boolean phydm_chk_bb_rf_pkg_set_valid(struct dm_struct *dm)
 	return valid;
 }
 
-#if (DM_ODM_SUPPORT_TYPE & (ODM_CE))
-u64 phydm_supportability_init_ce(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	u64 support_ability = 0;
-
-	support_ability |=
-			ODM_BB_DIG |
-			ODM_BB_RA_MASK |
-			ODM_BB_DYNAMIC_TXPWR	|
-			ODM_BB_FA_CNT |
-			ODM_BB_RSSI_MONITOR |
-			ODM_BB_CCK_PD |
-			ODM_BB_RATE_ADAPTIVE |
-			ODM_BB_ADAPTIVITY |
-			ODM_BB_CFO_TRACKING |
-			ODM_BB_ENV_MONITOR;
-
-	return support_ability;
-}
-#endif
 
 void phydm_fwoffload_ability_init(struct dm_struct *dm,
 				  enum phydm_offload_ability offload_ability)
@@ -474,42 +453,6 @@ void phydm_fwoffload_ability_clear(struct dm_struct *dm,
 		  dm->fw_offload_ability);
 }
 
-void phydm_supportability_init(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	u64 support_ability;
-
-	if (dm->manual_supportability &&
-	    *dm->manual_supportability != 0xffffffff) {
-		support_ability = *dm->manual_supportability;
-	} else if (*dm->mp_mode) {
-		support_ability = 0;
-	} else {
-		#if (DM_ODM_SUPPORT_TYPE & (ODM_WIN))
-		support_ability = phydm_supportability_init_win(dm);
-		#elif (DM_ODM_SUPPORT_TYPE & (ODM_AP))
-		support_ability = phydm_supportability_init_ap(dm);
-		#elif(DM_ODM_SUPPORT_TYPE & (ODM_CE))
-		support_ability = phydm_supportability_init_ce(dm);
-		#elif(DM_ODM_SUPPORT_TYPE & (ODM_IOT))
-		support_ability = phydm_supportability_init_iot(dm);
-		#endif
-
-		/*@[Config Antenna Diversity]*/
-		if (IS_FUNC_EN(dm->enable_antdiv))
-			support_ability |= ODM_BB_ANT_DIV;
-
-		/*@[Config Adaptive SOML]*/
-		if (IS_FUNC_EN(dm->en_adap_soml))
-			support_ability |= ODM_BB_ADAPTIVE_SOML;
-
-		/*@[DYNAMIC_TXPWR and TSSI cannot coexist]*/
-		if(IS_FUNC_EN(&dm->en_tssi_mode))
-			support_ability &= ~ODM_BB_DYNAMIC_TXPWR;
-	}
-	dm->support_ability = support_ability;
-}
-
 void phydm_dm_early_init(struct dm_struct *dm)
 {
 #if (DM_ODM_SUPPORT_TYPE == ODM_CE)
@@ -533,7 +476,18 @@ enum phydm_init_result odm_dm_init(struct dm_struct *dm)
 		HAL_RF_TXGAPK |
 		0;
 
-	phydm_supportability_init(dm);
+	dm->support_ability =
+			ODM_BB_DIG |
+			ODM_BB_RA_MASK |
+			ODM_BB_DYNAMIC_TXPWR	|
+			ODM_BB_FA_CNT |
+			ODM_BB_RSSI_MONITOR |
+			ODM_BB_CCK_PD |
+			ODM_BB_RATE_ADAPTIVE |
+			ODM_BB_ADAPTIVITY |
+			ODM_BB_CFO_TRACKING |
+			ODM_BB_ENV_MONITOR;
+
 	phydm_pause_func_init(dm);
 	phydm_common_info_self_init(dm);
 	phydm_rx_phy_status_init(dm);
