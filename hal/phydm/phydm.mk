@@ -28,7 +28,6 @@ _PHYDM_FILES := hal/phydm/phydm_debug.o	\
 								hal/phydm/phydm_math_lib.o\
 								hal/phydm/phydm_api.o\
 								hal/phydm/phydm_pow_train.o\
-								hal/phydm/phydm_lna_sat.o\
 								hal/phydm/phydm_pmac_tx_setting.o\
 								hal/phydm/phydm_mp.o\
 								hal/phydm/phydm_cck_rx_pathdiv.o\

@@ -932,21 +932,6 @@ void	rtw_hal_set_chnl_bw(_adapter *padapter, u8 channel, enum channel_width Band
 	padapter->hal_func.set_chnl_bw_handler(padapter, channel, Bandwidth, Offset40, Offset80);
 }
 
-#ifdef CONFIG_LPS_LCLK_WD_TIMER
-void	rtw_hal_dm_watchdog_in_lps(_adapter *padapter)
-{
-#if defined(CONFIG_CONCURRENT_MODE)
-#ifndef CONFIG_FW_MULTI_PORT_SUPPORT
-	if (padapter->hw_port != HW_PORT0)
-		return;
-#endif
-#endif
-
-	if (adapter_to_pwrctl(padapter)->bFwCurrentInPSMode == _TRUE)
-		rtw_phydm_watchdog_in_lps_lclk(padapter);/* this function caller is in interrupt context */
-}
-#endif /*CONFIG_LPS_LCLK_WD_TIMER*/
-
 void rtw_hal_bcn_related_reg_setting(_adapter *padapter)
 {
 	padapter->hal_func.SetBeaconRelatedRegistersHandler(padapter);

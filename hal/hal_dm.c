@@ -860,13 +860,9 @@ void SetHalODMVar(
 		break;
 	case HAL_ODM_INITIAL_GAIN: {
 		u8 rx_gain = *((u8 *)(pValue1));
-		/*printk("rx_gain:%x\n",rx_gain);*/
 		if (rx_gain == 0xff) {/*restore rx gain*/
-			/*odm_write_dig(podmpriv,pDigTable->backup_ig_value);*/
 			odm_pause_dig(podmpriv, PHYDM_RESUME, PHYDM_PAUSE_LEVEL_0, rx_gain);
 		} else {
-			/*pDigTable->backup_ig_value = pDigTable->cur_ig_value;*/
-			/*odm_write_dig(podmpriv,rx_gain);*/
 			odm_pause_dig(podmpriv, PHYDM_PAUSE, PHYDM_PAUSE_LEVEL_0, rx_gain);
 		}
 	}
@@ -1076,61 +1072,6 @@ rtw_phydm_cfg_phy_para(
 		return HAL_STATUS_FAILURE;
 	return HAL_STATUS_SUCCESS;
 }
-
-
-#ifdef CONFIG_LPS_LCLK_WD_TIMER
-void rtw_phydm_wd_lps_lclk_hdl(_adapter *adapter)
-{
-	struct mlme_priv *pmlmepriv = &adapter->mlmepriv;
-	struct pwrctrl_priv *pwrpriv = adapter_to_pwrctl(adapter);
-	PHAL_DATA_TYPE pHalData = GET_HAL_DATA(adapter);
-	struct sta_priv *pstapriv = &adapter->stapriv;
-	struct sta_info *psta = NULL;
-	bool is_linked = _FALSE;
-
-	if (!rtw_is_hw_init_completed(adapter))
-		return;
-
-	if (rtw_mi_check_status(adapter, MI_ASSOC))
-		is_linked = _TRUE;
-
-	if (is_linked == _FALSE)
-		return;
-
-	psta = rtw_get_stainfo(pstapriv, get_bssid(pmlmepriv));
-	if (psta == NULL)
-		return;
-
-	odm_cmn_info_update(&pHalData->odmpriv, ODM_CMNINFO_LINK, is_linked);
-
-	phydm_watchdog_lps_32k(&pHalData->odmpriv);
-}
-
-void rtw_phydm_watchdog_in_lps_lclk(_adapter *adapter)
-{
-	struct mlme_priv	*pmlmepriv = &adapter->mlmepriv;
-	struct sta_priv *pstapriv = &adapter->stapriv;
-	u8 cur_igi = 0;
-	s8 min_rssi = 0;
-
-	if (!rtw_is_hw_init_completed(adapter))
-		return;
-
-	cur_igi = rtw_phydm_get_cur_igi(adapter);
-	min_rssi = rtw_dm_get_min_rssi(adapter);
-	/*RTW_INFO("%s "ADPT_FMT" cur_ig_value=%d, min_rssi = %d\n", __func__,  ADPT_ARG(adapter), cur_igi, min_rssi);*/
-
-	if (min_rssi <= 0)
-		return;
-
-	if ((cur_igi > min_rssi + 5) ||
-		(cur_igi < min_rssi - 5)) {
-#ifdef CONFIG_LPS
-		rtw_dm_in_lps_wk_cmd(adapter);
-#endif
-	}
-}
-#endif /*CONFIG_LPS_LCLK_WD_TIMER*/
 
 void dump_sta_traffic(void *sel, _adapter *adapter, struct sta_info *psta)
 {

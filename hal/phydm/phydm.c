@@ -492,9 +492,6 @@ enum phydm_init_result odm_dm_init(struct dm_struct *dm)
 #ifdef CONFIG_SMART_ANTENNA
 	phydm_smt_ant_init(dm);
 #endif
-#ifdef PHYDM_LNA_SAT_CHK_SUPPORT
-	phydm_lna_sat_check_init(dm);
-#endif
 #ifdef CONFIG_MCC_DM
 	phydm_mcc_init(dm);
 #endif
@@ -846,115 +843,6 @@ u8 phydm_pause_func(void *dm_void, enum phydm_func_idx pause_func,
 		pause_result = PAUSE_FAIL;
 	}
 	return pause_result;
-}
-
-void phydm_pause_func_console(void *dm_void, char input[][16], u32 *_used,
-			      char *output, u32 *_out_len)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	char help[] = "-h";
-	u32 var1[10] = {0};
-	u32 used = *_used;
-	u32 out_len = *_out_len;
-	u32 i;
-	u8 length = 0;
-	u32 buf[5] = {0};
-	u8 set_result = 0;
-	enum phydm_func_idx func = 0;
-	enum phydm_pause_type type = 0;
-	enum phydm_pause_level lv = 0;
-
-	if ((strcmp(input[1], help) == 0)) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "{Func} {1:pause,2:pause no set 3:Resume} {lv:0~3} Val[5:0]\n");
-
-		goto out;
-	}
-
-	for (i = 0; i < 10; i++) {
-		PHYDM_SSCANF(input[i + 1], DCMD_HEX, &var1[i]);
-	}
-
-	func = (enum phydm_func_idx)var1[0];
-	type = (enum phydm_pause_type)var1[1];
-	lv = (enum phydm_pause_level)var1[2];
-
-	for (i = 0; i < 5; i++)
-		buf[i] = var1[3 + i];
-
-	if (func == F00_DIG) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "[DIG]\n");
-		length = 1;
-
-	} else if (func == F05_CCK_PD) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "[CCK_PD]\n");
-		length = 1;
-	} else if (func == F06_ANT_DIV) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "[Ant_Div]\n");
-		length = 1;
-	} else if (func == F13_ADPTVTY) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "[Adaptivity]\n");
-		length = 2;
-	} else if (func == F17_ADPTV_SOML) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "[ADSL]\n");
-		length = 1;
-	} else {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "[Set Function Error]\n");
-		length = 0;
-	}
-
-	if (length != 0) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "{%s, lv=%d} val = %d, %d}\n",
-			 ((type == PHYDM_PAUSE) ? "Pause" :
-			 ((type == PHYDM_RESUME) ? "Resume" : "Pause no_set")),
-			 lv, var1[3], var1[4]);
-
-		set_result = phydm_pause_func(dm, func, type, lv, length, buf);
-	}
-
-	PDM_SNPF(out_len, used, output + used, out_len - used,
-		 "set_result = %d\n", set_result);
-
-out:
-	*_used = used;
-	*_out_len = out_len;
-}
-
-void phydm_pause_dm_by_asso_pkt(struct dm_struct *dm,
-				enum phydm_pause_type pause_type, u8 rssi)
-{
-	u32 igi_val = rssi + 10;
-	u32 th_buf[2];
-
-	PHYDM_DBG(dm, ODM_COMP_API, "[%s][%s] rssi=%d\n", __func__,
-		  ((pause_type == PHYDM_PAUSE) ? "Pause" :
-		  ((pause_type == PHYDM_RESUME) ? "Resume" : "Pause no_set")),
-		  rssi);
-
-	if (pause_type == PHYDM_RESUME) {
-		phydm_pause_func(dm, F00_DIG, PHYDM_RESUME,
-				 PHYDM_PAUSE_LEVEL_1, 1, &igi_val);
-
-		phydm_pause_func(dm, F13_ADPTVTY, PHYDM_RESUME,
-				 PHYDM_PAUSE_LEVEL_1, 2, th_buf);
-	} else {
-		odm_write_dig(dm, (u8)igi_val);
-		phydm_pause_func(dm, F00_DIG, PHYDM_PAUSE,
-				 PHYDM_PAUSE_LEVEL_1, 1, &igi_val);
-
-		th_buf[0] = 0xff;
-		th_buf[1] = 0xff;
-
-		phydm_pause_func(dm, F13_ADPTVTY, PHYDM_PAUSE,
-				 PHYDM_PAUSE_LEVEL_1, 2, th_buf);
-	}
 }
 
 void phydm_fw_dm_ctrl_en(void *dm_void, enum phydm_func_idx fun_idx,
@@ -1672,20 +1560,6 @@ void odm_init_all_timers(struct dm_struct *dm)
 	phydm_tdma_dig_timers(dm, INIT_TDMA_DIG_TIMMER);
 #endif
 #endif
-#ifdef CONFIG_ADAPTIVE_SOML
-	phydm_adaptive_soml_timers(dm, INIT_SOML_TIMMER);
-#endif
-#ifdef PHYDM_LNA_SAT_CHK_SUPPORT
-#ifdef PHYDM_LNA_SAT_CHK_TYPE1
-	phydm_lna_sat_chk_timers(dm, INIT_LNA_SAT_CHK_TIMMER);
-#endif
-#endif
-
-#if (DM_ODM_SUPPORT_TYPE == ODM_WIN)
-	odm_initialize_timer(dm, &dm->sbdcnt_timer,
-			     (void *)phydm_sbd_callback, NULL, "SbdTimer");
-#endif
-
 }
 
 void odm_cancel_all_timers(struct dm_struct *dm)
@@ -1704,19 +1578,6 @@ void odm_cancel_all_timers(struct dm_struct *dm)
 	phydm_tdma_dig_timers(dm, CANCEL_TDMA_DIG_TIMMER);
 #endif
 #endif
-#ifdef CONFIG_ADAPTIVE_SOML
-	phydm_adaptive_soml_timers(dm, CANCEL_SOML_TIMMER);
-#endif
-#ifdef PHYDM_LNA_SAT_CHK_SUPPORT
-#ifdef PHYDM_LNA_SAT_CHK_TYPE1
-	phydm_lna_sat_chk_timers(dm, CANCEL_LNA_SAT_CHK_TIMMER);
-#endif
-#endif
-
-#if (DM_ODM_SUPPORT_TYPE == ODM_WIN)
-	odm_cancel_timer(dm, &dm->sbdcnt_timer);
-#endif
-
 }
 
 void odm_release_all_timers(struct dm_struct *dm)
@@ -1729,19 +1590,6 @@ void odm_release_all_timers(struct dm_struct *dm)
 	phydm_tdma_dig_timers(dm, RELEASE_TDMA_DIG_TIMMER);
 #endif
 #endif
-#ifdef CONFIG_ADAPTIVE_SOML
-	phydm_adaptive_soml_timers(dm, RELEASE_SOML_TIMMER);
-#endif
-#ifdef PHYDM_LNA_SAT_CHK_SUPPORT
-#ifdef PHYDM_LNA_SAT_CHK_TYPE1
-	phydm_lna_sat_chk_timers(dm, RELEASE_LNA_SAT_CHK_TIMMER);
-#endif
-#endif
-
-#if (DM_ODM_SUPPORT_TYPE == ODM_WIN)
-	odm_release_timer(dm, &dm->sbdcnt_timer);
-#endif
-
 }
 
 #if (DM_ODM_SUPPORT_TYPE == ODM_AP)

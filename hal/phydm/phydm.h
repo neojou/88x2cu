@@ -1436,13 +1436,6 @@ phydm_pause_func(void *dm_void, enum phydm_func_idx pause_func,
 		 enum phydm_pause_type pause_type,
 		 enum phydm_pause_level pause_lv, u8 val_lehgth, u32 *val_buf);
 
-void
-phydm_pause_func_console(void *dm_void, char input[][16], u32 *_used,
-			 char *output, u32 *_out_len);
-
-void phydm_pause_dm_by_asso_pkt(struct dm_struct *dm,
-				enum phydm_pause_type pause_type, u8 rssi);
-
 void phydm_fw_dm_ctrl_en(void *dm_void, enum phydm_func_idx fun_idx,
 			 boolean enable);
 

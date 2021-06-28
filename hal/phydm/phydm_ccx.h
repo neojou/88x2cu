@@ -382,8 +382,6 @@ void phydm_fahm_dbg(void *dm_void, char input[][16], u32 *_used, char *output,
 #endif
 
 #ifdef NHM_SUPPORT
-void phydm_nhm_dbg(void *dm_void, char input[][16], u32 *_used, char *output,
-		   u32 *_out_len);
 u8 phydm_get_igi(void *dm_void, enum bb_path path);
 #endif
 

@@ -65,12 +65,6 @@ u8 rtw_phydm_get_cur_igi(_adapter *adapter);
 bool rtw_phydm_get_edcca_flag(_adapter *adapter);
 
 
-#ifdef CONFIG_LPS_LCLK_WD_TIMER
-extern void phydm_rssi_monitor_check(void *p_dm_void);
-
-void rtw_phydm_wd_lps_lclk_hdl(_adapter *adapter);
-void rtw_phydm_watchdog_in_lps_lclk(_adapter *adapter);
-#endif
 #ifdef CONFIG_TDMADIG
 enum rtw_tdmadig_state{
 	TDMADIG_INIT,
