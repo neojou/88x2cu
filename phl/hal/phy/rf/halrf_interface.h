@@ -124,11 +124,11 @@ void halrf_delay_10us(struct rf_info *rf, u32 count);
 
 
 
-u32 odm_read_4byte(struct rf_info *rf, u32 addr);
-void odm_write_1byte(struct rf_info *rf, u32 addr, u8 data);
-void odm_write_4byte(struct rf_info *rf, u32 addr, u32 data);
+u32 odm_read_4byte_g6(struct rf_info *rf, u32 addr);
+void odm_write_1byte_g6(struct rf_info *rf, u32 addr, u8 data);
+void odm_write_4byte_g6(struct rf_info *rf, u32 addr, u32 data);
 
-u32 odm_get_rf_reg(struct rf_info *rf, u8 path, u32 addr);
-void odm_set_rf_reg(struct rf_info *rf, u8 path, u32 addr, u32 mask, u32 value);
+u32 odm_get_rf_reg_g6(struct rf_info *rf, u8 path, u32 addr);
+void odm_set_rf_reg_g6(struct rf_info *rf, u8 path, u32 addr, u32 mask, u32 value);
 
 #endif

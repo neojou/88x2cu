@@ -174,21 +174,6 @@ void halrf_iqk_xym_show(struct dm_struct *dm, u8 xym_type)
 	}
 }
 
-void halrf_iqk_xym_dump(void *dm_void)
-{
-	u32 tmp1, tmp2;
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-
-	odm_write_4byte(dm, 0x1b00, 0xf8000008);
-	tmp1 = odm_read_4byte(dm, 0x1b1c);
-	odm_write_4byte(dm, 0x1b00, 0xf800000a);
-	tmp2 = odm_read_4byte(dm, 0x1b1c);
-	odm_write_4byte(dm, 0x1b00, 0xf8000008);
-	odm_write_4byte(dm, 0x1b1c, tmp1);
-	odm_write_4byte(dm, 0x1b00, 0xf800000a);
-	odm_write_4byte(dm, 0x1b1c, tmp2);
-	_iqk_page_switch(dm);
-}
 #endif
 void halrf_iqk_info_dump(void *dm_void, u32 *_used, char *output, u32 *_out_len)
 {

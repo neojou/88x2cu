@@ -24,22 +24,22 @@
  *****************************************************************************/
 #include "halrf_precomp.h"
 
-u32 odm_read_4byte(struct rf_info *rf, u32 addr)
+u32 odm_read_4byte_g6(struct rf_info *rf, u32 addr)
 {
 	return hal_read32(rf->hal_com, addr);
 }
 
-void odm_write_1byte(struct rf_info *rf, u32 addr, u8 data)
+void odm_write_1byte_g6(struct rf_info *rf, u32 addr, u8 data)
 {
 	hal_write8(rf->hal_com, addr, data);
 }
 
-void odm_write_4byte(struct rf_info *rf, u32 addr, u32 data)
+void odm_write_4byte_g6(struct rf_info *rf, u32 addr, u32 data)
 {
 	hal_write32(rf->hal_com, addr, data);
 }
 
-u32 odm_get_rf_reg(struct rf_info *rf, u8 path, u32 addr)
+u32 odm_get_rf_reg_g6(struct rf_info *rf, u8 path, u32 addr)
 {
 	u32 offset[2] = {0x3c00, 0x4c00};
 
@@ -49,7 +49,7 @@ u32 odm_get_rf_reg(struct rf_info *rf, u8 path, u32 addr)
 	addr &= 0xFF;
 	addr = offset[path] + (addr << 2);
 
-	return odm_read_4byte(rf, addr);
+	return hal_read32(rf->hal_com, addr);
 }
 
 static void config_phydm_direct_write_rf_reg_8822c(struct rf_info *rf, u8 path, u32 addr, u32 mask, u32 data)
@@ -93,7 +93,7 @@ static u32 phydm_check_bit_mask_8822c(u32 mask, u32 data_orig, u32 data)
 	return data;
 }
 
-void odm_set_rf_reg(struct rf_info *rf, u8 path, u32 addr, u32 mask, u32 data)
+void odm_set_rf_reg_g6(struct rf_info *rf, u8 path, u32 addr, u32 mask, u32 data)
 {
 	u32 offset[2] = {0x1808, 0x4108};
 	u32 data_and_addr;
