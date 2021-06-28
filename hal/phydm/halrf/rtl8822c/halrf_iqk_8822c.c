@@ -3826,43 +3826,16 @@ _iqk_rx_iqk_by_path_8822c(
 	boolean KFAIL = false, gonext;
 	u32 tmp;
 
-//RF_DBG(dm, DBG_RF_IQK, "[IQK]rx_iqk_step = 0x%x\n", iqk_info->rxiqk_step);
-
-#if 1
 	switch (iqk_info->rxiqk_step) {
 	case 0: //LOK for RXK 
-#if 1
 		_iqk_lok_for_rxk_setting_8822c(dm, path);
 		_lok_one_shot_8822c(dm, path, true);
-#endif
 		iqk_info->rxiqk_step++;
 		break;
 	case 1: /*gain search_RXK1*/
-#if 0
-		_iqk_rxk1_setting_8822c(dm, path);
-		gonext = false;
-		while (1) {
-			KFAIL = _iqk_rx_iqk_gain_search_fail_8822c(dm, path, RXIQK1);
-			if (KFAIL && iqk_info->gs_retry_count[0][path][0] < 2)
-				iqk_info->gs_retry_count[0][path][0]++;
-			else if (KFAIL) {
-				iqk_info->rxiqk_fail_code[0][path] = 0;
-				iqk_info->rxiqk_step = RXK_STEP_8822C;
-				gonext = true;
-			} else {
-				iqk_info->rxiqk_step++;
-				gonext = true;
-			}
-			if (gonext)
-				break;
-		}
-		//halrf_iqk_xym_read(dm, path, 0x2);
-#else
 		iqk_info->rxiqk_step++;
-#endif
 		break;
 	case 2: /*RXK1*/
-#if 1
 		_iqk_rxk1_setting_8822c(dm, path);
 		gonext = false;
 		while (1) {
@@ -3880,13 +3853,9 @@ _iqk_rx_iqk_by_path_8822c(
 			if (gonext)
 				break;
 		}
-#else
-		iqk_info->rxiqk_step++;
-#endif
-			break;
+		break;
 
 	case 3: /*gain search_RXK2*/
-#if 1
 		_iqk_rxk2_setting_8822c(dm, path, true);
 		iqk_info->isbnd = false;
 		while (1) {
@@ -3899,13 +3868,8 @@ _iqk_rx_iqk_by_path_8822c(
 				break;
 			}
 		}
-		//halrf_iqk_xym_read(dm, path, 0x3);
-#else
-		iqk_info->rxiqk_step++;
-#endif
 		break;
 	case 4: /*RXK2*/
-#if 1
 		_iqk_rxk2_setting_8822c(dm, path, false);
 		gonext = false;
 		while (1) {
@@ -3923,28 +3887,13 @@ _iqk_rx_iqk_by_path_8822c(
 			if (gonext)
 				break;
 		}
-#else
-	iqk_info->rxiqk_step++;
-#endif
 		break;
 	case 5: /*check RX XYM*/
-#if 0
-		RF_DBG(dm, DBG_RF_IQK, "[IQK] check RX XYM step =%d\n", iqk_info->rxiqk_step);
-		KFAIL = _iqk_xym_read_8822c(dm, path);
-		if (KFAIL)
-			iqk_info->rxiqk_step = 0x0;
-		else
-			iqk_info->rxiqk_step++;	
-
-		iqk_info->iqk_fail_report[0][path][RXIQK] = KFAIL;
-#else
 		iqk_info->rxiqk_step++;
-#endif
 		break;
 
 	}
 	return KFAIL;
-#endif
 }
 
 void _iqk_lok_tune_8822c(void *dm_void, u8 path)

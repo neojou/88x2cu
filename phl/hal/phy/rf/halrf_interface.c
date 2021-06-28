@@ -24,6 +24,104 @@
  *****************************************************************************/
 #include "halrf_precomp.h"
 
+u32 odm_read_4byte(struct rf_info *rf, u32 addr)
+{
+	return hal_read32(rf->hal_com, addr);
+}
+
+void odm_write_1byte(struct rf_info *rf, u32 addr, u8 data)
+{
+	hal_write8(rf->hal_com, addr, data);
+}
+
+void odm_write_4byte(struct rf_info *rf, u32 addr, u32 data)
+{
+	hal_write32(rf->hal_com, addr, data);
+}
+
+u32 odm_get_rf_reg(struct rf_info *rf, u8 path, u32 addr)
+{
+	u32 offset[2] = {0x3c00, 0x4c00};
+
+	if (path >= 2)
+		return 0xFFFFFFFF;
+
+	addr &= 0xFF;
+	addr = offset[path] + (addr << 2);
+
+	return odm_read_4byte(rf, addr);
+}
+
+static void config_phydm_direct_write_rf_reg_8822c(struct rf_info *rf, u8 path, u32 addr, u32 mask, u32 data)
+{
+	u32 offset[2] = {0x3c00, 0x4c00};
+
+	addr &= 0xFF;
+	addr = offset[path] + (addr << 2);
+
+	halrf_wreg(rf, addr, mask, data);
+
+	udelay(1);
+}
+
+static u32 config_phydm_read_rf_reg_8822c(struct rf_info *rf, u8 path, u32 addr, u32 mask)
+{
+	u32 offset[2] = {0x3c00, 0x4c00};
+
+	if (path >= 2)
+		return 0xFFFFFFFF;
+
+	addr &= 0xFF;
+	addr = offset[path] + (addr << 2);
+	mask &= 0xFFFFF;
+
+	return halrf_rreg(rf, addr, mask);
+}
+
+static u32 phydm_check_bit_mask_8822c(u32 mask, u32 data_orig, u32 data)
+{
+	u8 shift;
+
+	if (mask != 0xFFFFF) {
+		for (shift = 0; shift <= 19; shift++) {
+			if (mask & BIT(shift))
+				break;
+		}
+		return (data_orig & (~mask)) | (data << shift);
+	}
+
+	return data;
+}
+
+void odm_set_rf_reg(struct rf_info *rf, u8 path, u32 addr, u32 mask, u32 data)
+{
+	u32 offset[2] = {0x1808, 0x4108};
+	u32 data_and_addr;
+
+	if (path >= 2)
+		return;
+
+	if (!addr) {
+		config_phydm_direct_write_rf_reg_8822c(rf, path, addr, mask, data);
+		return;
+	}
+
+	addr &= 0xFF;
+	mask &= 0xFFFFF;
+
+	if (mask != 0xFFFFF) {
+		u32 value32;
+		value32 = config_phydm_read_rf_reg_8822c(rf, path, addr, RFREG_MASK);
+		if (value32 == 0xFFFFFFFF)
+			return;
+
+		data = phydm_check_bit_mask_8822c(mask, value32, data);
+	}
+
+	data_and_addr = ((addr << 20) | (data & 0x000FFFFF)) & 0x0FFFFFFF;
+	halrf_wreg(rf, offset[path], 0xFFFFFFFF, data_and_addr);
+}
+
 u32 halrf_get_sys_time(struct rf_info *rf)
 {
 	return 0;

@@ -26,6 +26,7 @@
 #define __HALRF_INTERFACE_H__
 
 struct rf_info;
+#define ODM_delay_ms(x)	mdelay((x))
 
 #define CF_PHL_BB_CTRL_RX_CCA
 /*@--------------------------[Define] ---------------------------------------*/
@@ -120,4 +121,14 @@ u32 halrf_rreg(struct rf_info *rf, u32 addr, u32 bit_mask);
 void halrf_fill_h2c_cmd(struct rf_info *rf, u16 cmdlen, u8 cmdid,
 			u8 classid, u32 cmdtype, u32 *pval);
 void halrf_delay_10us(struct rf_info *rf, u32 count);
+
+
+
+u32 odm_read_4byte(struct rf_info *rf, u32 addr);
+void odm_write_1byte(struct rf_info *rf, u32 addr, u8 data);
+void odm_write_4byte(struct rf_info *rf, u32 addr, u32 data);
+
+u32 odm_get_rf_reg(struct rf_info *rf, u8 path, u32 addr);
+void odm_set_rf_reg(struct rf_info *rf, u8 path, u32 addr, u32 mask, u32 value);
+
 #endif
