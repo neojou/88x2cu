@@ -841,7 +841,6 @@ u8 phydm_get_tx_stream_num(void *dm_void, enum rf_type type)
 u64 phydm_get_bb_mod_ra_mask(void *dm_void, u8 sta_idx)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct phydm_iot_center	*iot_table = &dm->iot_table;
 	struct cmn_sta_info *sta = dm->phydm_sta_info[sta_idx];
 	struct ra_sta_info *ra = NULL;
 	enum channel_width bw = 0;
@@ -968,13 +967,6 @@ u64 phydm_get_bb_mod_ra_mask(void *dm_void, u8 sta_idx)
 #endif
 	/*@[Modify RA Mask by RSSI level]*/
 	if (wrls_mode != WIRELESS_CCK) {
-		if (iot_table->patch_id_40010700) {
-			ra_mask_bitmap &= (rssi_lv == 0 ?
-					  0xffffffffffffffff :
-					  0xfffffffffffffff0);
-			return ra_mask_bitmap;
-		}
-
 		if (rssi_lv == 0)
 			ra_mask_bitmap &= 0xffffffffffffffff;
 		else if (rssi_lv == 1)

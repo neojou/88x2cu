@@ -178,9 +178,6 @@ void phydm_common_info_self_init(struct dm_struct *dm)
 	dm->is_linked = false;
 	if (dm->en_auto_bw_th == 0)
 		dm->en_auto_bw_th = 20;
-
-	/*init IOT table*/
-	odm_memory_set(dm, &dm->iot_table, 0, sizeof(struct phydm_iot_center));
 }
 
 void phydm_cmn_sta_info_update(void *dm_void, u8 macid)
@@ -1141,9 +1138,6 @@ void odm_cmn_info_init(struct dm_struct *dm, enum odm_cmninfo cmn_info,
 	case ODM_CMNINFO_EXT_LNA_GAIN:
 		dm->ext_lna_gain = (u8)value;
 		break;
-	case ODM_CMNINFO_PATCH_ID:
-		dm->iot_table.win_patch_id = (u8)value;
-		break;
 	case ODM_CMNINFO_BINHCT_TEST:
 		dm->is_in_hct_test = (boolean)value;
 		break;
@@ -1408,10 +1402,6 @@ void odm_cmn_info_update(struct dm_struct *dm, u32 cmn_info, u64 value)
 
 	case ODM_CMNINFO_LINK:
 		dm->is_linked = (boolean)value;
-		break;
-
-	case ODM_CMNINFO_CMW500LINK:
-		dm->iot_table.is_linked_cmw500 = (boolean)value;
 		break;
 
 	case ODM_CMNINFO_STATION_STATE:

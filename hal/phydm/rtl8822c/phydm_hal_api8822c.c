@@ -1227,7 +1227,6 @@ config_phydm_switch_channel_8822c(struct dm_struct *dm, u8 central_ch)
 	enum bb_path tx = BB_PATH_NON;
 	enum bb_path rx = BB_PATH_NON;
 	u8 rfe_type = dm->rfe_type;
-	struct phydm_iot_center	*iot_table = &dm->iot_table;
 
 	PHYDM_DBG(dm, ODM_PHY_CONFIG, "%s ======>\n", __func__);
 

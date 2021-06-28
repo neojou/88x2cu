@@ -724,24 +724,6 @@ struct	phydm_bt_info {
 };
 #endif
 
-struct	phydm_iot_center {
-	boolean			is_linked_cmw500;
-	u8			win_patch_id;		/*Customer ID*/
-	boolean			patch_id_100f0401;
-	boolean			patch_id_10120200;
-	boolean			patch_id_40010700;
-	boolean			patch_id_021f0800;
-	boolean			patch_id_011f0500;
-};
-
-#if (RTL8822B_SUPPORT)
-struct drp_rtl8822b_struct {
-	enum bb_path path_judge;
-	u16 path_a_cck_fa;
-	u16 path_b_cck_fa;
-};
-#endif
-
 #ifdef CONFIG_MCC_DM
 #define MCC_DM_REG_NUM	32
 struct _phydm_mcc_dm_ {
@@ -1206,7 +1188,6 @@ struct dm_struct {
 
 /*@=== PHYDM Structure ======================================== (start)*/
 	struct	phydm_func_poiner	phydm_func_handler;
-	struct	phydm_iot_center	iot_table;
 
 #ifdef ODM_CONFIG_BT_COEXIST
 	struct	phydm_bt_info		bt_info_table;
