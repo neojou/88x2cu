@@ -243,7 +243,7 @@ enum rtw_hal_status halrf_dm_init(void *rf_void)
 	halrf_rck_trigger(rf, HW_PHY_0);
 	//halrf_gapk_save_tx_gain_8852a(rf);
 #endif //NEO
-	halrf_dack_trigger_g6(rf, false);
+	halrf_dack_trigger(rf, false);
 #if 0 //NEO
 	halrf_rx_dck_trigger(rf, HW_PHY_0, true);
 

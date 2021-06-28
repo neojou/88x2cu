@@ -33,7 +33,7 @@ void halrf_dack_recover_8822c(struct rf_info *rf,
 			      enum rf_path path,
 			      u32 val,
 			      bool reload);
-void halrf_dac_cal_8822c_g6(struct rf_info *rf, bool force);
+void halrf_dac_cal_8822c(struct rf_info *rf, bool force);
 bool halrf_dack_reg_check_fail_8822c(struct rf_info *rf);
 
 #endif /*  __INC_PHYDM_API_H_8852A__ */

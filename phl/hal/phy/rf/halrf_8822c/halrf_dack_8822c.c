@@ -889,42 +889,6 @@ static void odm_write_4byte(struct rf_info *rf, u32 addr, u32 data)
 	hal_write32(rf->hal_com, addr, data);
 }
 
-static u32 phy_calculatebitshift(u32 mask)
-{
-	u32 i;
-
-	for (i = 0; i <=31; i++)
-		if (mask & BIT(i))
-			break;
-
-	return i;
-}
-
-static void odm_set_bb_reg(struct rf_info *rf, u32 addr, u32 mask, u32 data)
-{
-	u32 value32;
-	u32 shift;
-
-	if (mask != 0xFFFFFFFF) {
-		value32 = hal_read32(rf->hal_com, addr);
-		shift = phy_calculatebitshift(mask);
-		data = (value32 & (~mask)) | ((data << shift) & mask);
-	}
-
-	hal_write32(rf->hal_com, addr, data);
-}
-
-static u32 odm_get_bb_reg(struct rf_info *rf, u32 addr, u32 mask)
-{
-	u32 value32;
-	u32 shift;
-
-	value32 = hal_read32(rf->hal_com, addr);
-	shift = phy_calculatebitshift(mask);
-
-	return (value32 & mask) >> shift;
-} 
-
 static u32 odm_get_rf_reg(struct rf_info *rf, u8 path, u32 addr)
 {
 	u32 offset[2] = {0x3c00, 0x4c00};
@@ -945,7 +909,7 @@ static void config_phydm_direct_write_rf_reg_8822c(struct rf_info *rf, u8 path, 
 	addr &= 0xFF;
 	addr = offset[path] + (addr << 2);
 
-	odm_set_bb_reg(rf, addr, mask, data);
+	halrf_wreg(rf, addr, mask, data);
 
 	udelay(1);
 }
@@ -961,7 +925,7 @@ static u32 config_phydm_read_rf_reg_8822c(struct rf_info *rf, u8 path, u32 addr,
 	addr = offset[path] + (addr << 2);
 	mask &= 0xFFFFF;
 
-	return odm_get_bb_reg(rf, addr, mask);
+	return halrf_rreg(rf, addr, mask);
 }
 
 static u32 phydm_check_bit_mask_8822c(u32 mask, u32 data_orig, u32 data)
@@ -1005,7 +969,7 @@ static void odm_set_rf_reg(struct rf_info *rf, u8 path, u32 addr, u32 mask, u32 
 	}
 
 	data_and_addr = ((addr << 20) | (data & 0x000FFFFF)) & 0x0FFFFFFF;
-	odm_set_bb_reg(rf, offset[path], 0xFFFFFFFF, data_and_addr);
+	halrf_wreg(rf, offset[path], 0xFFFFFFFF, data_and_addr);
 }
 
 static void halrf_reload_bp_8822c_g6(struct rf_info *dm, u32 *bp_reg, u32 *bp)
@@ -1145,7 +1109,7 @@ static void halrf_mode_8822c(struct rf_info *dm, u32 *i_value, u32 *q_value)
 	c = 0;
 	while (i < SN && c < 10000) {
 		c++;
-		temp = odm_get_bb_reg(dm, 0x2dbc, 0x3fffff);
+		temp = halrf_rreg(dm, 0x2dbc, 0x3fffff);
 		iv[i] = (temp & 0x3ff000) >> 12;
 		qv[i] = temp & 0x3ff;
 
@@ -1186,10 +1150,10 @@ static void halrf_mode_8822c(struct rf_info *dm, u32 *i_value, u32 *q_value)
 			q_delta = q_max + (0x400 - q_min);
 		halrf_b_sort_8822c_g6(dm, iv, qv);
 		if (i_delta > 5 || q_delta > 5) {
-			temp = odm_get_bb_reg(dm, 0x2dbc, 0x3fffff);
+			temp = halrf_rreg(dm, 0x2dbc, 0x3fffff);
 			iv[0] = (temp & 0x3ff000) >> 12;
 			qv[0] = temp & 0x3ff;
-			temp = odm_get_bb_reg(dm, 0x2dbc, 0x3fffff);
+			temp = halrf_rreg(dm, 0x2dbc, 0x3fffff);
 			iv[SN - 1] = (temp & 0x3ff000) >> 12;
 			qv[SN - 1] = temp & 0x3ff;
 		} else {
@@ -1244,12 +1208,12 @@ static void halrf_polling_check(struct rf_info *dm, u32 add, u32 bmask, u32 data
 	c = 0;
 	while (c < 100000) {
 		c++;
-		if (odm_get_bb_reg(dm, add, bmask) == data)
+		if (halrf_rreg(dm, add, bmask) == data)
 			break;
 	}
 }
 
-void halrf_dac_cal_8822c_g6(struct rf_info *rf, bool force)
+void halrf_dac_cal_8822c(struct rf_info *rf, bool force)
 {
 	struct rf_info *dm = rf;
 	struct halrf_dack_info *dack = &rf->dack;
@@ -1268,21 +1232,21 @@ void halrf_dac_cal_8822c_g6(struct rf_info *rf, bool force)
 	halrf_bp_8822c_g6(rf, bp_reg, bp);
 	halrf_bprf_8822c_g6(rf, bp_rfreg, bp_rf);
 	/*BB setting*/
-	odm_set_bb_reg(dm, 0x1d58, 0xff8, 0x1ff);
-	odm_set_bb_reg(dm, 0x1a00, 0x3, 0x2);
-	odm_set_bb_reg(dm, 0x1a14, 0x300, 0x3);
+	halrf_wreg(dm, 0x1d58, 0xff8, 0x1ff);
+	halrf_wreg(dm, 0x1a00, 0x3, 0x2);
+	halrf_wreg(dm, 0x1a14, 0x300, 0x3);
 	odm_write_4byte(dm, 0x1d70, 0x7e7e7e7e);
-	odm_set_bb_reg(dm, 0x180c, 0x3, 0x0);
-	odm_set_bb_reg(dm, 0x410c, 0x3, 0x0);
+	halrf_wreg(dm, 0x180c, 0x3, 0x0);
+	halrf_wreg(dm, 0x410c, 0x3, 0x0);
 	odm_write_4byte(dm, 0x1b00, 0x00000008);
 	odm_write_1byte(dm, 0x1bcc, 0x3f);
 	odm_write_4byte(dm, 0x1b00, 0x0000000a);
 	odm_write_1byte(dm, 0x1bcc, 0x3f);
-	odm_set_bb_reg(dm, 0x1e24, BIT(31), 0x0);
-	odm_set_bb_reg(dm, 0x1e28, 0xf, 0x3);
+	halrf_wreg(dm, 0x1e24, BIT(31), 0x0);
+	halrf_wreg(dm, 0x1e28, 0xf, 0x3);
 /*path-A*/
 /*1.ADCK step1*/
-	odm_set_bb_reg(dm, 0x1830, BIT(30), 0x0);
+	halrf_wreg(dm, 0x1830, BIT(30), 0x0);
 	odm_write_4byte(dm, 0x1860, 0xf0040ff0);
 	odm_write_4byte(dm, 0x180c, 0xdff00220);
 	odm_write_4byte(dm, 0x1810, 0x02dd08c4);
@@ -1362,10 +1326,10 @@ void halrf_dac_cal_8822c_g6(struct rf_info *rf, bool force)
 		odm_write_4byte(dm, 0x18bc, 0x0008ff87);
 		odm_write_4byte(dm, 0x1860, 0xf0000000);
 		/*4.DACK step2*/
-		odm_set_bb_reg(dm, 0x18bc, 0xf0000000, 0x0);
-		odm_set_bb_reg(dm, 0x18c0, 0xf, 0x8);
-		odm_set_bb_reg(dm, 0x18d8, 0xf0000000, 0x0);
-		odm_set_bb_reg(dm, 0x18dc, 0xf, 0x8);
+		halrf_wreg(dm, 0x18bc, 0xf0000000, 0x0);
+		halrf_wreg(dm, 0x18c0, 0xf, 0x8);
+		halrf_wreg(dm, 0x18d8, 0xf0000000, 0x0);
+		halrf_wreg(dm, 0x18dc, 0xf, 0x8);
 
 		odm_write_4byte(dm, 0x1b00, 0x00000008);
 		odm_write_1byte(dm, 0x1bcc, 0x03f);
@@ -1401,16 +1365,16 @@ void halrf_dac_cal_8822c_g6(struct rf_info *rf, bool force)
 		odm_write_4byte(dm, 0x18b0, 0x0a11fb88);
 		odm_write_4byte(dm, 0x18bc, 0xc008ff81);
 		odm_write_4byte(dm, 0x18c0, 0x0003d208);
-		odm_set_bb_reg(dm, 0x18bc, 0xf0000000, ic & 0xf);
-		odm_set_bb_reg(dm, 0x18c0, 0xf, (ic & 0xf0) >> 4);
+		halrf_wreg(dm, 0x18bc, 0xf0000000, ic & 0xf);
+		halrf_wreg(dm, 0x18c0, 0xf, (ic & 0xf0) >> 4);
 		odm_write_4byte(dm, 0x18cc, 0x0a11fb88);
 		odm_write_4byte(dm, 0x18d8, 0xe008ff81);
 		odm_write_4byte(dm, 0x18dc, 0x0003d208);
-		odm_set_bb_reg(dm, 0x18d8, 0xf0000000, qc & 0xf);
-		odm_set_bb_reg(dm, 0x18dc, 0xf, (qc & 0xf0) >> 4);
+		halrf_wreg(dm, 0x18d8, 0xf0000000, qc & 0xf);
+		halrf_wreg(dm, 0x18dc, 0xf, (qc & 0xf0) >> 4);
 		odm_write_4byte(dm, 0x18b8, 0x60000000);
 		mdelay(2);
-		odm_set_bb_reg(dm, 0x18bc, 0xe, 0x6);
+		halrf_wreg(dm, 0x18bc, 0xe, 0x6);
 		mdelay(2);
 		odm_write_4byte(dm, 0x18b0, 0x0a11fb89);
 		odm_write_4byte(dm, 0x18cc, 0x0a11fb89);
@@ -1422,7 +1386,7 @@ void halrf_dac_cal_8822c_g6(struct rf_info *rf, bool force)
 		halrf_polling_check(dm, 0x2850, 0x07f80000, qc);
 		odm_write_4byte(dm, 0x18b8, 0x02000000);
 		mdelay(1);
-		odm_set_bb_reg(dm, 0x18bc, 0xe, 0x3);
+		halrf_wreg(dm, 0x18bc, 0xe, 0x3);
 		odm_write_4byte(dm, 0x9b4, 0xdb6db600);
 		RF_DBG(dm, DBG_RF_DACK, "[DACK]0x18c0 =0x%x",
 		       odm_read_4byte(dm, 0x18c0));
@@ -1459,12 +1423,12 @@ void halrf_dac_cal_8822c_g6(struct rf_info *rf, bool force)
 	}
 	odm_write_4byte(dm, 0x1868, 0x0);
 	odm_write_4byte(dm, 0x1810, 0x02d508c4);
-	odm_set_bb_reg(dm, 0x18bc, 0x1, 0x0);
-	odm_set_bb_reg(dm, 0x1830, BIT(30), 0x1);
+	halrf_wreg(dm, 0x18bc, 0x1, 0x0);
+	halrf_wreg(dm, 0x1830, BIT(30), 0x1);
 /*path-B*/
 /*1.ADCK step1*/
 	RF_DBG(dm, DBG_RF_DACK, "[DACK]step1 ADCK!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-	odm_set_bb_reg(dm, 0x4130, BIT(30), 0x0);
+	halrf_wreg(dm, 0x4130, BIT(30), 0x0);
 	odm_write_4byte(dm, 0x4130, 0x30db8041);
 	odm_write_4byte(dm, 0x4160, 0xf0040ff0);
 	odm_write_4byte(dm, 0x410c, 0xdff00220);
@@ -1545,10 +1509,10 @@ void halrf_dac_cal_8822c_g6(struct rf_info *rf, bool force)
 		odm_write_4byte(dm, 0x41bc, 0x0008ff87);
 		odm_write_4byte(dm, 0x4160, 0xf0000000);
 	/*4.DACK step2*/
-		odm_set_bb_reg(dm, 0x41bc, 0xf0000000, 0x0);
-		odm_set_bb_reg(dm, 0x41c0, 0xf, 0x8);
-		odm_set_bb_reg(dm, 0x41d8, 0xf0000000, 0x0);
-		odm_set_bb_reg(dm, 0x41dc, 0xf, 0x8);
+		halrf_wreg(dm, 0x41bc, 0xf0000000, 0x0);
+		halrf_wreg(dm, 0x41c0, 0xf, 0x8);
+		halrf_wreg(dm, 0x41d8, 0xf0000000, 0x0);
+		halrf_wreg(dm, 0x41dc, 0xf, 0x8);
 		odm_write_4byte(dm, 0x1b00, 0x0000000a);
 		odm_write_1byte(dm, 0x1bcc, 0x3f);
 		odm_write_4byte(dm, 0x410c, 0xdff00220);
@@ -1587,16 +1551,16 @@ void halrf_dac_cal_8822c_g6(struct rf_info *rf, bool force)
 		odm_write_4byte(dm, 0x41b0, 0x0a11fb88);
 		odm_write_4byte(dm, 0x41bc, 0xc008ff81);
 		odm_write_4byte(dm, 0x41c0, 0x0003d208);
-		odm_set_bb_reg(dm, 0x41bc, 0xf0000000, ic & 0xf);
-		odm_set_bb_reg(dm, 0x41c0, 0xf, (ic & 0xf0) >> 4);
+		halrf_wreg(dm, 0x41bc, 0xf0000000, ic & 0xf);
+		halrf_wreg(dm, 0x41c0, 0xf, (ic & 0xf0) >> 4);
 		odm_write_4byte(dm, 0x41cc, 0x0a11fb88);
 		odm_write_4byte(dm, 0x41d8, 0xe008ff81);
 		odm_write_4byte(dm, 0x41dc, 0x0003d208);
-		odm_set_bb_reg(dm, 0x41d8, 0xf0000000, qc & 0xf);
-		odm_set_bb_reg(dm, 0x41dc, 0xf, (qc & 0xf0) >> 4);
+		halrf_wreg(dm, 0x41d8, 0xf0000000, qc & 0xf);
+		halrf_wreg(dm, 0x41dc, 0xf, (qc & 0xf0) >> 4);
 		odm_write_4byte(dm, 0x41b8, 0x60000000);
 		mdelay(2);
-		odm_set_bb_reg(dm, 0x41bc, 0xe, 0x6);
+		halrf_wreg(dm, 0x41bc, 0xe, 0x6);
 		mdelay(2);
 		odm_write_4byte(dm, 0x41b0, 0x0a11fb89);
 		odm_write_4byte(dm, 0x41cc, 0x0a11fb89);
@@ -1608,7 +1572,7 @@ void halrf_dac_cal_8822c_g6(struct rf_info *rf, bool force)
 		halrf_polling_check(dm, 0x4550, 0x07f80000, qc);
 		odm_write_4byte(dm, 0x41b8, 0x02000000);
 		mdelay(1);
-		odm_set_bb_reg(dm, 0x41bc, 0xe, 0x3);
+		halrf_wreg(dm, 0x41bc, 0xe, 0x3);
 		odm_write_4byte(dm, 0x9b4, 0xdb6db600);
 		RF_DBG(dm, DBG_RF_DACK, "[DACK]0x41bc =0x%x",
 		       odm_read_4byte(dm, 0x41bc));
@@ -1649,10 +1613,10 @@ void halrf_dac_cal_8822c_g6(struct rf_info *rf, bool force)
 	}
 	odm_write_4byte(dm, 0x4168, 0x0);
 	odm_write_4byte(dm, 0x4110, 0x02d508c4);
-	odm_set_bb_reg(dm, 0x41bc, 0x1, 0x0);
-	odm_set_bb_reg(dm, 0x4130, BIT(30), 0x1);
+	halrf_wreg(dm, 0x41bc, 0x1, 0x0);
+	halrf_wreg(dm, 0x4130, BIT(30), 0x1);
 	odm_write_4byte(dm, 0x1b00, 0x00000008);
-	odm_set_bb_reg(dm, 0x4130, BIT(30), 0x1);
+	halrf_wreg(dm, 0x4130, BIT(30), 0x1);
 	odm_write_1byte(dm, 0x1bcc, 0x0);
 	odm_write_4byte(dm, 0x1b00, 0x0000000a);
 	odm_write_1byte(dm, 0x1bcc, 0x0);

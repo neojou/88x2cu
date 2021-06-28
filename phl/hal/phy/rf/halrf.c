@@ -107,7 +107,7 @@ void halrf_dack_recover(void *rf_void,
 }
 #endif //NEO
 
-enum rtw_hal_status halrf_dack_trigger_g6(void *rf_void, bool force)
+enum rtw_hal_status halrf_dack_trigger(void *rf_void, bool force)
 {
 
 	struct rf_info *rf = (struct rf_info *)rf_void;
@@ -120,7 +120,7 @@ enum rtw_hal_status halrf_dack_trigger_g6(void *rf_void, bool force)
 
 	//halrf_btc_rfk_ntfy(rf, (BIT(HW_PHY_0) << 4), RF_BTC_DACK, RFK_START);
 	start_time = _os_get_cur_time_us();
-	halrf_dac_cal_8822c_g6(rf, force);
+	halrf_dac_cal_8822c(rf, force);
 	finish_time = _os_get_cur_time_us();
 	//halrf_btc_rfk_ntfy(rf, (BIT(HW_PHY_0) << 4), RF_BTC_DACK, RFK_STOP);	
 	dack->dack_time = HALRF_ABS(finish_time, start_time) / 1000;

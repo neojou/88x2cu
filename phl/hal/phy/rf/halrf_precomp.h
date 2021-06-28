@@ -55,7 +55,9 @@
 #if 0 //NEO
 #include "halrf_hw_cfg.h"
 #include "halrf_hw_cfg_ex.h"
+#endif //NEO
 #include "halrf_interface.h"
+#if 0 //NEO
 #include "halrf_dbg_cmd.h"
 #endif //NEO
 #include "halrf_dbg.h"

@@ -17,7 +17,8 @@ endif
 path_halrf_d1 := $(phl_path)/phy/rf
 
 halrf-y += $(path_halrf_d1)/halrf.o \
-			$(path_halrf_d1)/halrf_init.o
+			$(path_halrf_d1)/halrf_init.o \
+			$(path_halrf_d1)/halrf_interface.o
 
 #halrf-y += $(path_halrf_d1)/halrf.o \
 			$(path_halrf_d1)/halrf_pmac.o \
