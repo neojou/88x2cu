@@ -491,43 +491,6 @@ void phydm_show_cn_hitogram(void *dm_void)
 }
 #endif
 
-void phydm_show_phy_hitogram(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct odm_phy_dbg_info *dbg_i = &dm->phy_dbg_info;
-	struct phydm_phystatus_statistic *dbg_s = &dbg_i->physts_statistic_info;
-	char buf[PHYDM_SNPRINT_SIZE] = {0};
-	u16 buf_size = PHYDM_SNPRINT_SIZE;
-	u16 th_size = PHY_HIST_SIZE - 1;
-	u8 i = 0;
-
-	PHYDM_DBG(dm, DBG_CMN, "[PHY Histogram] ==============>\n");
-/*@===[Threshold]=============================================================*/
-	phydm_print_hist_2_buf(dm, dbg_i->evm_hist_th, th_size, buf, buf_size);
-	PHYDM_DBG(dm, DBG_CMN, "%-16s=%s\n", "[EVM_TH]", buf);
-
-	phydm_print_hist_2_buf(dm, dbg_i->snr_hist_th, th_size, buf, buf_size);
-	PHYDM_DBG(dm, DBG_CMN, "%-16s=%s\n", "[SNR_TH]", buf);
-/*@===[OFDM]==================================================================*/
-	if (dbg_s->rssi_ofdm_cnt) {
-		phydm_print_hist_2_buf(dm, dbg_s->evm_ofdm_hist, PHY_HIST_SIZE,
-				       buf, buf_size);
-		PHYDM_DBG(dm, DBG_CMN, "%-14s=%s\n", "[OFDM][EVM]", buf);
-
-		phydm_print_hist_2_buf(dm, dbg_s->snr_ofdm_hist, PHY_HIST_SIZE,
-				       buf, buf_size);
-		PHYDM_DBG(dm, DBG_CMN, "%-14s=%s\n", "[OFDM][SNR]", buf);
-	}
-/*@===[1-SS]==================================================================*/
-	if (dbg_s->rssi_1ss_cnt)
-		phydm_nss_hitogram(dm, PDM_1SS);
-/*@===[2-SS]==================================================================*/
-	#if (defined(PHYDM_COMPILE_ABOVE_2SS))
-	if (dbg_s->rssi_2ss_cnt)
-		phydm_nss_hitogram(dm, PDM_2SS);
-	#endif
-}
-
 void phydm_avg_phy_val_nss(void *dm_void, u8 nss)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;

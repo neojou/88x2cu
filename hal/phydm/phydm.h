@@ -893,7 +893,6 @@ struct dm_struct {
 /*@====[ CALL BY VALUE ]===========================================*/
 /*@===========================================================*/
 
-	u8			disable_phydm_watchdog;
 	boolean			is_link_in_process;
 	boolean			is_wifi_direct;
 	boolean			is_wifi_display;

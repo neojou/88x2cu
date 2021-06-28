@@ -170,7 +170,6 @@ void phydm_common_info_self_init(struct dm_struct *dm)
 	dm->is_init_hw_info_by_rfe = false;
 	dm->pre_dbg_priority = DBGPORT_RELEASE;
 	dm->tp_active_th = 5;
-	dm->disable_phydm_watchdog = 0;
 	dm->u8_dummy = 0xf;
 	dm->u16_dummy = 0xffff;
 	dm->u32_dummy = 0xffffffff;
@@ -657,19 +656,6 @@ void phydm_watchdog_mp(struct dm_struct *dm)
 {
 }
 
-void phydm_pause_dm_watchdog(void *dm_void, enum phydm_pause_type pause_type)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-
-	if (pause_type == PHYDM_PAUSE) {
-		dm->disable_phydm_watchdog = 1;
-		PHYDM_DBG(dm, ODM_COMP_API, "PHYDM Stop\n");
-	} else {
-		dm->disable_phydm_watchdog = 0;
-		PHYDM_DBG(dm, ODM_COMP_API, "PHYDM Start\n");
-	}
-}
-
 void phydm_pause_func_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -970,18 +956,6 @@ void phydm_pause_dm_by_asso_pkt(struct dm_struct *dm,
 
 		phydm_pause_func(dm, F13_ADPTVTY, PHYDM_PAUSE,
 				 PHYDM_PAUSE_LEVEL_1, 2, th_buf);
-	}
-}
-
-u8 phydm_stop_dm_watchdog_check(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-
-	if (dm->disable_phydm_watchdog == 1) {
-		PHYDM_DBG(dm, DBG_COMMON_FLOW, "Disable phydm\n");
-		return true;
-	} else {
-		return false;
 	}
 }
 

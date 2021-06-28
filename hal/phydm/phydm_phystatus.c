@@ -2258,10 +2258,6 @@ void phydm_rx_phy_status_init(void *dm_void)
 	dbg->show_phy_sts_cnt = 0;
 
 	phydm_avg_phystatus_init(dm);
-
-	#ifdef PHYDM_PHYSTAUS_AUTO_SWITCH
-	dm->pkt_proc_struct.physts_auto_swch_en = false;
-	#endif
 }
 
 void phydm_physts_dbg(void *dm_void, char input[][16], u32 *_used,

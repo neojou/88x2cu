@@ -436,8 +436,6 @@ void phydm_rx_rate_distribution(void *dm_void);
 
 u16 phydm_rx_avg_phy_rate(void *dm_void);
 
-void phydm_show_phy_hitogram(void *dm_void);
-
 void phydm_get_avg_phystatus_val(void *dm_void);
 
 void phydm_dm_summary(void *dm_void, u8 macid);
