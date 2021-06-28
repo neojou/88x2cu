@@ -1022,19 +1022,12 @@ void halrf_init(void *dm_void)
 		HAL_RF_TXGAPK |
 		0;
 
-	/*power trim, thrmal trim, pa bias*/
-	phydm_config_new_kfree(dm);
-
 	/*TSSI Init*/
-	halrf_tssi_dck(dm, true);
-	halrf_tssi_get_efuse(dm);
-	halrf_tssi_set_de(dm);
-#if (RTL8723F_SUPPORT == 1)
-	halrf_do_tssi(dm);
-#endif
+	//halrf_tssi_dck(dm, true);
+	//halrf_tssi_get_efuse(dm);
 
 	/*TX Gap K*/
-	halrf_txgapk_write_gain_table(dm);
+	//halrf_txgapk_write_gain_table(dm);
 }
 
 void halrf_dpk_trigger(void *dm_void)
@@ -1442,7 +1435,7 @@ void halrf_tssi_get_efuse(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	
-	halrf_tssi_get_efuse_8822c(dm);
+	//halrf_tssi_get_efuse_8822c(dm);
 	halrf_get_efuse_thermal_pwrtype_8822c(dm);
 }
 

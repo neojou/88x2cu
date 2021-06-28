@@ -520,8 +520,19 @@ void phydm_dm_early_init(struct dm_struct *dm)
 enum phydm_init_result odm_dm_init(struct dm_struct *dm)
 {
 	enum phydm_init_result result = PHYDM_INIT_SUCCESS;
+	struct _hal_rf_ *rf = &dm->rf_table;
 
-	halrf_init(dm);
+	rf->rf_supportability =
+		HAL_RF_TX_PWR_TRACK |
+		HAL_RF_IQK |
+		HAL_RF_LCK |
+		HAL_RF_DPK |
+		HAL_RF_DACK |
+		HAL_RF_DPK_TRACK |
+		HAL_RF_RXDCK |
+		HAL_RF_TXGAPK |
+		0;
+
 	phydm_supportability_init(dm);
 	phydm_pause_func_init(dm);
 	phydm_common_info_self_init(dm);
