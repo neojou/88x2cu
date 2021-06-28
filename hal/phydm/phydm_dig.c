@@ -1866,48 +1866,6 @@ void phydm_tdma_dig_para_upd(void *dm_void, enum upd_type type, u8 input)
 }
 
 #ifdef IS_USE_NEW_TDMA
-#if defined(CONFIG_RTL_TRIBAND_SUPPORT) && defined(CONFIG_USB_HCI)
-static void pre_phydm_tdma_dig_cbk(unsigned long task_dm)
-{
-	struct dm_struct *dm = (struct dm_struct *)task_dm;
-	struct rtl8192cd_priv *priv = dm->priv;
-	struct priv_shared_info *pshare = priv->pshare;
-
-	if (!(priv->drv_state & DRV_STATE_OPEN))
-		return;
-
-	if (pshare->bDriverStopped || pshare->bSurpriseRemoved) {
-		printk("[%s] bDriverStopped(%d) OR bSurpriseRemoved(%d)\n",
-		         __FUNCTION__, pshare->bDriverStopped,
-		         pshare->bSurpriseRemoved);
-		return;
-	}
-
-	rtw_enqueue_timer_event(priv, &pshare->tdma_dig_event,
-			           ENQUEUE_TO_TAIL);
-}
-
-void phydm_tdma_dig_timers_usb(void *dm_void, u8 state)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct phydm_dig_struct *dig_t = &dm->dm_dig_table;
-
-	if (state == INIT_TDMA_DIG_TIMMER) {
-		struct rtl8192cd_priv *priv = dm->priv;
-
-		init_timer(&dm->tdma_dig_timer);
-		dm->tdma_dig_timer.data = (unsigned long)dm;
-		dm->tdma_dig_timer.function = pre_phydm_tdma_dig_cbk;
-		INIT_TIMER_EVENT_ENTRY(&priv->pshare->tdma_dig_event,
-					    phydm_tdma_dig_cbk,
-					   (unsigned long)dm);
-	} else if (state == CANCEL_TDMA_DIG_TIMMER) {
-		odm_cancel_timer(dm, &dm->tdma_dig_timer);
-	} else if (state == RELEASE_TDMA_DIG_TIMMER) {
-		odm_release_timer(dm, &dm->tdma_dig_timer);
-	}
-}
-#endif /* defined(CONFIG_RTL_TRIBAND_SUPPORT) && defined(CONFIG_USB_HCI) */
 
 void phydm_tdma_dig_timers(void *dm_void, u8 state)
 {

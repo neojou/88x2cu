@@ -192,8 +192,6 @@ void phydm_cck_pd_init(void *dm_void);
 #ifdef PHYDM_DCC_ENHANCE
 void phydm_cckpd_type4_dcc(void *dm_void);
 
-void phydm_dig_cckpd_coex(void *dm_void);
-
 void phydm_dig_cckpd_coex_init(void *dm_void);
 
 void phydm_dig_cckpd_coex_dbg(void *dm_void, char input[][16], u32 *_used,

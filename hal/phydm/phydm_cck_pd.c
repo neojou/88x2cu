@@ -1629,39 +1629,6 @@ boolean phydm_do_cckpd(void *dm_void)
 	return true;
 }
 
-void phydm_dig_cckpd_coex(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct phydm_dcc_struct	*dcc = &dm->dm_dcc_info;
-
-	if (*dm->channel > 36) {
-		phydm_dig(dm);
-		return;
-	} else if (!dcc->dcc_en) {
-		phydm_dig(dm);
-		phydm_cck_pd_th(dm);
-		return;
-	}
-
-	dcc->dig_execute_cnt++;
-	PHYDM_DBG(dm, DBG_CCKPD, "DCC_cnt: %d\n", dcc->dig_execute_cnt);
-
-	if (dcc->dig_execute_cnt % dcc->dcc_ratio) {
-		PHYDM_DBG(dm, DBG_CCKPD, "DCC: DIG\n");
-		phydm_dig(dm);
-	} else {
-		if (phydm_do_cckpd(dm)) {
-			PHYDM_DBG(dm, DBG_CCKPD, "DCC: CCKPD\n");
-			dcc->dcc_mode = DCC_CCK_PD;
-			phydm_cck_pd_th(dm);
-		} else {
-			PHYDM_DBG(dm, DBG_CCKPD, "DCC: Boost_DIG\n");
-			dcc->dcc_mode = DCC_DIG;
-			phydm_dig(dm);
-		}
-	}
-}
-
 void phydm_dig_cckpd_coex_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
