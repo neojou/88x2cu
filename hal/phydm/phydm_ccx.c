@@ -688,26 +688,6 @@ phydm_nhm_dym_pw_th(void *dm_void)
 	phydm_nhm_set_pw_th(dm, noise, chk_succ);
 }
 
-boolean
-phydm_nhm_dym_pw_th_en(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	struct phydm_iot_center	*iot_table = &dm->iot_table;
-
-	if (ccx->dym_pwth_manual_ctrl)
-		return true;
-
-	if (dm->iot_table.phydm_patch_id == 0x100f0401 ||
-	    iot_table->patch_id_100f0401) {
-		return true;
-	} else if (ccx->nhm_dym_pw_th_en) {
-		phydm_nhm_restore_pw_th(dm);
-		return false;
-	} else {
-		return false;
-	}
-}
 #endif
 
 /*Environment Monitor*/
@@ -768,38 +748,6 @@ phydm_nhm_mntr_chk(void *dm_void, u16 monitor_time /*unit ms*/)
 	#endif
 
 	nhm_chk_result = phydm_nhm_mntr_set(dm, &nhm_para);
-
-	return nhm_chk_result;
-}
-
-boolean
-phydm_nhm_mntr_result(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	boolean nhm_chk_result = false;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-
-	if (phydm_nhm_mntr_racing_chk(dm))
-		return nhm_chk_result;
-
-	/*[NHM get result & calculate Utility]---------------------------*/
-	if (phydm_nhm_get_result(dm)) {
-		PHYDM_DBG(dm, DBG_ENV_MNTR, "Get NHM_rpt success\n");
-		phydm_nhm_get_utility(dm);
-		nhm_chk_result = true;
-	}
-
-	#ifdef NHM_DYM_PW_TH_SUPPORT
-	ccx->nhm_dym_pw_th_en = phydm_nhm_dym_pw_th_en(dm);
-	if (ccx->nhm_dym_pw_th_en) {
-		if (nhm_chk_result)
-			phydm_nhm_dym_pw_th(dm);
-		else
-			phydm_nhm_set_pw_th(dm, 0x0, false);
-	}
-	#endif
 
 	return nhm_chk_result;
 }
@@ -3173,40 +3121,6 @@ void phydm_enhance_mntr_dbg(void *dm_void, char input[][16], u32 *_used,
 	*_used = used;
 	*_out_len = out_len;
 #endif
-}
-
-/*Environment Monitor*/
-void phydm_env_mntr_result_watchdog(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-
-	ccx->ccx_watchdog_result = 0;
-
-	if (!(dm->support_ability & ODM_BB_ENV_MONITOR))
-		return;
-
-	#if (defined(NHM_SUPPORT) && defined(CLM_SUPPORT))
-	if (phydm_nhm_mntr_result(dm))
-		ccx->ccx_watchdog_result |= NHM_SUCCESS;
-
-	if (phydm_clm_mntr_result(dm))
-		ccx->ccx_watchdog_result |= CLM_SUCCESS;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR,
-		  "Summary: nhm_ratio=((%d)) clm_ratio=((%d))\n\n",
-		  ccx->nhm_ratio, ccx->clm_ratio);
-	#endif
-
-	#ifdef FAHM_SUPPORT
-	if (phydm_fahm_mntr_result(dm))
-		ccx->ccx_watchdog_result |= FAHM_SUCCESS;
-	#endif
-
-	#ifdef IFS_CLM_SUPPORT
-	if (phydm_ifs_clm_mntr_result(dm))
-		ccx->ccx_watchdog_result |= IFS_CLM_SUCCESS;
-	#endif
 }
 
 void phydm_env_mntr_set_watchdog(void *dm_void)

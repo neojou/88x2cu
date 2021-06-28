@@ -420,8 +420,6 @@ u8 phydm_enhance_mntr_result(void *dm_void, struct enhance_mntr_rpt *rpt);
 void phydm_enhance_mntr_dbg(void *dm_void, char input[][16], u32 *_used,
 			char *output, u32 *_out_len);
 
-void phydm_env_mntr_result_watchdog(void *dm_void);
-
 void phydm_env_mntr_set_watchdog(void *dm_void);
 
 void phydm_env_monitor_init(void *dm_void);

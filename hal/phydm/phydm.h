@@ -732,7 +732,6 @@ struct	phydm_iot_center {
 	boolean			patch_id_40010700;
 	boolean			patch_id_021f0800;
 	boolean			patch_id_011f0500;
-	u32			phydm_patch_id;		/*temp for CCX IOT */
 };
 
 #if (RTL8822B_SUPPORT)
