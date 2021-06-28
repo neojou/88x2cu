@@ -32,42 +32,7 @@
 
 #ifdef PHYDM_AUTO_DEGBUG
 
-void phydm_check_hang_init(
-	void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct phydm_auto_dbg_struct *atd_t = &dm->auto_dbg_table;
-
-	atd_t->dbg_step = 0;
-	atd_t->auto_dbg_type = AUTO_DBG_STOP;
-}
-
 #if (ODM_IC_11N_SERIES_SUPPORT == 1)
-
-void phydm_bb_auto_check_hang_start_n(
-	void *dm_void,
-	u32 *_used,
-	char *output,
-	u32 *_out_len)
-{
-	u32 value32 = 0;
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct phydm_auto_dbg_struct *atd_t = &dm->auto_dbg_table;
-	u32 used = *_used;
-	u32 out_len = *_out_len;
-
-	PDM_SNPF(out_len, used, output + used, out_len - used,
-		 "PHYDM auto check hang (N-series) is started, Please check the system log\n");
-
-	dm->debug_components |= ODM_COMP_API;
-	atd_t->auto_dbg_type = AUTO_DBG_CHECK_HANG;
-	atd_t->dbg_step = 0;
-
-	phydm_pause_dm_watchdog(dm, PHYDM_PAUSE);
-
-	*_used = used;
-	*_out_len = out_len;
-}
 
 void phydm_dbg_port_dump_n(void *dm_void, u32 *_used, char *output,
 			   u32 *_out_len)
@@ -384,38 +349,4 @@ void phydm_auto_dbg_console(
 	*_out_len = out_len;
 }
 
-void phydm_auto_dbg_engine(void *dm_void)
-{
-	u32 value32 = 0;
-
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct phydm_auto_dbg_struct *atd_t = &dm->auto_dbg_table;
-
-	if (atd_t->auto_dbg_type == AUTO_DBG_STOP)
-		return;
-
-	pr_debug("%s ======>\n", __func__);
-
-	if (atd_t->auto_dbg_type == AUTO_DBG_CHECK_HANG) {
-		pr_debug("Not Support\n");
-
-	} else if (atd_t->auto_dbg_type == AUTO_DBG_CHECK_RA) {
-		pr_debug("Not Support\n");
-	}
-}
-
-void phydm_auto_dbg_engine_init(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct phydm_auto_dbg_struct *atd_t = &dm->auto_dbg_table;
-	u16 dbg_port_table[DBGPORT_CHK_NUM] = {0x0, 0x803, 0x208, 0xab0,
-					       0xab1, 0xab2};
-
-	PHYDM_DBG(dm, ODM_COMP_API, "%s ======>\n", __func__);
-
-	odm_move_memory(dm, &atd_t->dbg_port_table[0],
-			&dbg_port_table[0], (DBGPORT_CHK_NUM * 2));
-
-	phydm_check_hang_init(dm);
-}
 #endif

@@ -82,9 +82,6 @@ struct n_dbgport_803 {
 };
 
 struct phydm_auto_dbg_struct {
-	enum auto_dbg_type_e auto_dbg_type;
-	u8 dbg_step;
-	u16 dbg_port_table[DBGPORT_CHK_NUM];
 	u32 dbg_port_val[DBGPORT_CHK_NUM];
 	u16 ofdm_t_cnt;
 	u16 ofdm_r_cnt;
@@ -108,8 +105,5 @@ void phydm_auto_dbg_console(
 	char *output,
 	u32 *_out_len);
 
-void phydm_auto_dbg_engine(void *dm_void);
-
-void phydm_auto_dbg_engine_init(void *dm_void);
 #endif
 #endif
