@@ -361,20 +361,11 @@ void phydm_avg_phystatus_init(void *dm_void)
 					      29, 32, 35};
 	u16 evm_hist_th[PHY_HIST_TH_SIZE] = {5, 8, 11, 14, 17, 20, 23, 26,
 					      29, 32, 35};
-	#ifdef PHYDM_PHYSTAUS_AUTO_SWITCH
-	u16 cn_hist_th[PHY_HIST_TH_SIZE] = {2, 3, 4, 5, 6, 8, 10,
-					    12, 14, 16, 18};
-	#endif
 	u32 size = PHY_HIST_TH_SIZE * 2;
 	u8 i = 0;
 
 	odm_move_memory(dm, dbg_i->snr_hist_th, snr_hist_th, size);
 	odm_move_memory(dm, dbg_i->evm_hist_th, evm_hist_th, size);
-	#ifdef PHYDM_PHYSTAUS_AUTO_SWITCH
-	dm->pkt_proc_struct.physts_auto_swch_en = false;
-	for (i = 0; i < PHY_HIST_TH_SIZE; i++)
-		dbg_i->cn_hist_th[i] = cn_hist_th[i] << 1;
-	#endif
 }
 
 u8 phydm_get_signal_quality(struct phydm_phyinfo_struct *phy_info,

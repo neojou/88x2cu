@@ -440,8 +440,6 @@ void phydm_show_phy_hitogram(void *dm_void);
 
 void phydm_get_avg_phystatus_val(void *dm_void);
 
-void phydm_get_phy_statistic(void *dm_void);
-
 void phydm_dm_summary(void *dm_void, u8 macid);
 
 void phydm_basic_dbg_message(void *dm_void);

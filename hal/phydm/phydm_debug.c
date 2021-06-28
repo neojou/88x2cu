@@ -767,36 +767,6 @@ void phydm_get_avg_phystatus_val(void *dm_void)
 		phydm_avg_phy_val_nss(dm, i);
 }
 
-void phydm_get_phy_statistic(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct cmn_sta_info *sta = dm->phydm_sta_info[dm->one_entry_macid];
-	enum channel_width bw;
-	u16 avg_phy_rate = 0;
-	u16 utility = 0;
-	u8 rx_ss = 1;
-
-	avg_phy_rate = phydm_rx_avg_phy_rate(dm);
-
-	if (dm->is_one_entry_only && is_sta_active(sta)) {
-		rx_ss = phydm_get_rx_stream_num(dm, sta->mimo_type);
-		bw = sta->bw_mode;
-		utility = phydm_rx_utility(dm, avg_phy_rate, rx_ss, bw);
-	}
-	PHYDM_DBG(dm, DBG_CMN, "Avg_rx_rate = %d, rx_utility=( %d / 1000 )\n",
-		  avg_phy_rate, utility);
-
-	phydm_rx_rate_distribution(dm);
-	phydm_reset_rx_rate_distribution(dm);
-
-	phydm_show_phy_hitogram(dm);
-	#ifdef PHYDM_PHYSTAUS_AUTO_SWITCH
-	phydm_show_cn_hitogram(dm);
-	#endif
-	phydm_get_avg_phystatus_val(dm);
-	phydm_reset_phystatus_statistic(dm);
-};
-
 void phydm_dm_summary(void *dm_void, u8 macid)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
