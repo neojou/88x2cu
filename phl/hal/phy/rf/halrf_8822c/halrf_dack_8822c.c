@@ -908,9 +908,9 @@ static void halrf_bprf_8822c_g6(struct rf_info *rf, u32 *bp_reg, u32 bp[][2])
 
 	for (i = 0; i < DACK_RF_8822C; i++) {
 		bp[i][0] = 
-			odm_get_rf_reg_g6(rf, 0, bp_reg[i]) & 0xFFFFF;
+			odm_get_rf_reg_g6(rf, 0, bp_reg[i], 0xFFFFF);
 		bp[i][1] = 
-			odm_get_rf_reg_g6(rf, 1, bp_reg[i]) & 0xFFFFF;
+			odm_get_rf_reg_g6(rf, 1, bp_reg[i], 0xFFFFF);
 	}
 }
 

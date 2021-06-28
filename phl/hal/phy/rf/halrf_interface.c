@@ -39,18 +39,6 @@ void odm_write_4byte_g6(struct rf_info *rf, u32 addr, u32 data)
 	hal_write32(rf->hal_com, addr, data);
 }
 
-u32 odm_get_rf_reg_g6(struct rf_info *rf, u8 path, u32 addr)
-{
-	u32 offset[2] = {0x3c00, 0x4c00};
-
-	if (path >= 2)
-		return 0xFFFFFFFF;
-
-	addr &= 0xFF;
-	addr = offset[path] + (addr << 2);
-
-	return hal_read32(rf->hal_com, addr);
-}
 
 static void config_phydm_direct_write_rf_reg_8822c(struct rf_info *rf, u8 path, u32 addr, u32 mask, u32 data)
 {
@@ -159,6 +147,20 @@ u32 halrf_rreg(struct rf_info *rf, u32 addr, u32 mask)
 	reg_val = (ori_val & mask) >> bit_shift;
 
 	return reg_val;
+}
+
+u32 odm_get_rf_reg_g6(struct rf_info *rf, u8 path, u32 addr, u32 mask)
+{
+	u32 offset[2] = {0x3c00, 0x4c00};
+	u32 value32;
+
+	if (path >= 2)
+		return 0xFFFFFFFF;
+
+	addr &= 0xFF;
+	addr = offset[path] + (addr << 2);
+
+	return halrf_rreg(rf, addr, mask);
 }
 
 #if 0 //NEO

@@ -1006,11 +1006,6 @@ void halrf_rxdck(void *dm_void)
 	halrf_rxdck_8822c(dm);
 }
 
-void halrf_x2k_check(struct dm_struct *dm)
-{
-	phy_x2_check_8822c(dm);
-}
-
 void halrf_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -1026,10 +1021,6 @@ void halrf_init(void *dm_void)
 		HAL_RF_RXDCK |
 		HAL_RF_TXGAPK |
 		0;
-
-	/*Init all RF funciton*/
-	//halrf_dack_trigger(dm, false);
-	halrf_x2k_check(dm);
 
 	/*power trim, thrmal trim, pa bias*/
 	phydm_config_new_kfree(dm);

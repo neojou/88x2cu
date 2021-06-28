@@ -936,27 +936,6 @@ void _phy_x2_calibrate_8822c(struct dm_struct *dm)
 	RF_DBG(dm, DBG_RF_IQK, "[X2K]X2K end!!!!!!!\n");
 }
 
-void phy_x2_check_8822c(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	u32 X2K_BUSY;
-
-	RF_DBG(dm, DBG_RF_IQK, "[X2K]X2K check start!!!!!!!\n");
-	/*X2K*/
-	//Path A
-	ODM_delay_ms(1);
-	X2K_BUSY = (u8) odm_get_rf_reg(dm, RF_PATH_A, 0xb8, BIT(15));
-	if (X2K_BUSY == 1) {
-		odm_set_rf_reg(dm, RF_PATH_A, 0xb8, RFREGOFFSETMASK, 0xC4440);	
-		odm_set_rf_reg(dm, RF_PATH_A, 0xba, RFREGOFFSETMASK, 0x6840D);
-		odm_set_rf_reg(dm, RF_PATH_A, 0xb8, RFREGOFFSETMASK, 0x80440);		
-		ODM_delay_ms(1);
-	}
-	//Path B
-	// SYN is in the path A
-	RF_DBG(dm, DBG_RF_IQK, "[X2K]X2K check end!!!!!!!\n");
-}
-
 /*LCK VERSION:0x1*/
 void phy_lc_calibrate_8822c(void *dm_void)
 {

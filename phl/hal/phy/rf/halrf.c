@@ -107,6 +107,23 @@ void halrf_dack_recover(void *rf_void,
 }
 #endif //NEO
 
+enum rtw_hal_status halrf_x2_check(struct rf_info *dm)
+{
+	u8 X2K_BUSY;
+
+	ODM_delay_ms(1);
+	X2K_BUSY = (u8) odm_get_rf_reg_g6(dm, RF_PATH_A, 0xb8, BIT(15));
+	if (X2K_BUSY == 1) {
+		odm_set_rf_reg_g6(dm, RF_PATH_A, 0xb8, RFREGOFFSETMASK, 0xC4440);	
+		odm_set_rf_reg_g6(dm, RF_PATH_A, 0xba, RFREGOFFSETMASK, 0x6840D);
+		odm_set_rf_reg_g6(dm, RF_PATH_A, 0xb8, RFREGOFFSETMASK, 0x80440);		
+		ODM_delay_ms(1);
+	}
+
+	return RTW_HAL_STATUS_SUCCESS;
+}
+
+
 enum rtw_hal_status halrf_dack_trigger(void *rf_void, bool force)
 {
 

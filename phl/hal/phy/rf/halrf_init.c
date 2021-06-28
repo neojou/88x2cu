@@ -244,6 +244,7 @@ enum rtw_hal_status halrf_dm_init(void *rf_void)
 	//halrf_gapk_save_tx_gain_8852a(rf);
 #endif //NEO
 	halrf_dack_trigger(rf, false);
+	halrf_x2_check(rf);
 #if 0 //NEO
 	halrf_rx_dck_trigger(rf, HW_PHY_0, true);
 
