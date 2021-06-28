@@ -2,7 +2,6 @@ EXTRA_CFLAGS += -I$(src)/hal/phydm
 
 _PHYDM_FILES := hal/phydm/phydm_debug.o	\
 								hal/phydm/phydm_antdiv.o\
-								hal/phydm/phydm_soml.o\
 								hal/phydm/phydm_smt_ant.o\
 								hal/phydm/phydm_antdect.o\
 								hal/phydm/phydm_interface.o\

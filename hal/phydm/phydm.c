@@ -149,29 +149,10 @@ void phydm_init_hw_info_by_rfe(struct dm_struct *dm)
 
 void phydm_common_info_self_init(struct dm_struct *dm)
 {
-	u32 reg_tmp = 0;
-	u32 mask_tmp = 0;
-
 	dm->run_in_drv_fw = RUN_IN_DRIVER;
-
-	/*@BB IP Generation*/
 	dm->ic_ip_series = PHYDM_IC_JGR3;
-
-	/*@BB phy-status Generation*/
 	dm->ic_phy_sts_type = PHYDM_PHYSTS_TYPE_3;
-
-	reg_tmp = ODM_REG(BB_RX_PATH, dm);
-	mask_tmp = ODM_BIT(BB_RX_PATH, dm);
-	dm->rf_path_rx_enable = (u8)odm_get_bb_reg(dm, reg_tmp, mask_tmp);
-#if (DM_ODM_SUPPORT_TYPE != ODM_CE)
-	dm->is_net_closed = &dm->BOOLEAN_temp;
-
-	phydm_init_debug_setting(dm);
-#endif
-	phydm_init_soft_ml_setting(dm);
-
 	dm->phydm_sys_up_time = 0;
-
 	dm->num_rf_path = 2;
 
 	phydm_trx_antenna_setting_init(dm, dm->num_rf_path);
@@ -200,24 +181,11 @@ void phydm_common_info_self_init(struct dm_struct *dm)
 	dm->u8_dummy = 0xf;
 	dm->u16_dummy = 0xffff;
 	dm->u32_dummy = 0xffffffff;
-#if (RTL8814B_SUPPORT)
-/*@------------For spur detection Default Mode------------@*/
-	dm->dsde_sel = DET_CSI;
-	dm->csi_wgt = 4;
-/*@-------------------------------------------------------@*/
-#endif
 	dm->pre_is_linked = false;
 	dm->is_linked = false;
-/*dym bw thre and it can config by registry*/
 	if (dm->en_auto_bw_th == 0)
 		dm->en_auto_bw_th = 20;
 
-#if (DM_ODM_SUPPORT_TYPE == ODM_WIN)
-	if (!(dm->is_fcs_mode_enable)) {
-		dm->is_fcs_mode_enable = &dm->boolean_dummy;
-		pr_debug("[Warning] is_fcs_mode_enable=NULL\n");
-	}
-#endif
 	/*init IOT table*/
 	odm_memory_set(dm, &dm->iot_table, 0, sizeof(struct phydm_iot_center));
 }
