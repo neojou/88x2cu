@@ -77,8 +77,8 @@
 
 #include "halrf_pwr_table.h"
 
-#if 0 //NEO
 #include "halrf_api.h"
+#if 0 //NEO
 #include "halrf_psd.h"
 #include "halrf_kfree.h"
 #include "halrf_hwimg.h"
@@ -89,8 +89,9 @@
 #include "halrf_ex.h"
 
 #ifdef RF_8822C_SUPPORT
-#include "halrf_8822c/halrf_efuse_8822c.h"
 #include "halrf_8822c/halrf_8822c_api.h"
+#include "halrf_8822c/halrf_efuse_8822c.h"
+#include "halrf_8822c/halrf_dack_8822c.h"
 #endif
 
 #endif  /* __HALRF_PRECOMP_H__ */

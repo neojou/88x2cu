@@ -105,8 +105,9 @@ void halrf_dack_recover(void *rf_void,
 		break;
 	}
 }
+#endif //NEO
 
-enum rtw_hal_status halrf_dack_trigger(void *rf_void, bool force)
+enum rtw_hal_status halrf_dack_trigger_g6(void *rf_void, bool force)
 {
 
 	struct rf_info *rf = (struct rf_info *)rf_void;
@@ -114,48 +115,23 @@ enum rtw_hal_status halrf_dack_trigger(void *rf_void, bool force)
 	struct halrf_dack_info *dack = &rf->dack;
 	u32 start_time, finish_time;
 
-	#if 0
-	if ((rf->phl_com->drv_mode == RTW_DRV_MODE_MP) &
-	    (hal_i->is_con_tx ||
-	    hal_i->is_single_tone ||
-	    hal_i->is_carrier_suppresion))
-			return;
-
-	if (hal_i->rfk_forbidden)
-		return;
-	#endif
-
 	if (!(rf->support_ability & HAL_RF_DACK))
 		return RTW_HAL_STATUS_SUCCESS;
 
-	halrf_btc_rfk_ntfy(rf, (BIT(HW_PHY_0) << 4), RF_BTC_DACK, RFK_START);
+	//halrf_btc_rfk_ntfy(rf, (BIT(HW_PHY_0) << 4), RF_BTC_DACK, RFK_START);
 	start_time = _os_get_cur_time_us();
-	switch (hal_i->chip_id) {
-#ifdef RF_8852A_SUPPORT
-	case CHIP_WIFI6_8852A:
-		if (hal_i->cv == CAV)
-			halrf_dac_cal_8852a(rf, force);
-		else
-			halrf_dac_cal_8852a_b(rf, force);			
-		break;
-#endif
-#ifdef RF_8852B_SUPPORT
-	case CHIP_WIFI6_8852B:
-		halrf_dac_cal_8852b(rf, force);			
-		break;
-#endif
-		default:
-		break;
-	}
+	halrf_dac_cal_8822c_g6(rf, force);
 	finish_time = _os_get_cur_time_us();
-	halrf_btc_rfk_ntfy(rf, (BIT(HW_PHY_0) << 4), RF_BTC_DACK, RFK_STOP);	
+	//halrf_btc_rfk_ntfy(rf, (BIT(HW_PHY_0) << 4), RF_BTC_DACK, RFK_STOP);	
 	dack->dack_time = HALRF_ABS(finish_time, start_time) / 1000;
 	RF_DBG(rf, DBG_RF_RFK, "[RX_DCK] DACK processing time = %d.%dms\n",
 		HALRF_ABS(finish_time, start_time) / 1000,
 		HALRF_ABS(finish_time, start_time) % 1000);
+
 	return RTW_HAL_STATUS_SUCCESS;
 }
 
+#if 0 //NEO
 enum rtw_hal_status halrf_rx_dck_trigger(void *rf_void,
 						enum phl_phy_idx phy_idx, bool is_afe)
 {

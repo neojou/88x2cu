@@ -33,7 +33,7 @@ void halrf_watchdog(void *rf_void);
 enum rtw_hal_status halrf_chl_rfk_trigger(void *rf_void,
 			   enum phl_phy_idx phy_idx,
 			   bool force);
-enum rtw_hal_status halrf_dack_trigger(void *rf_void, bool force);
+enum rtw_hal_status halrf_dack_trigger_g6(void *rf_void, bool force);
 enum rtw_hal_status halrf_rx_dck_trigger(void *rf_void,
 				enum phl_phy_idx phy_idx, bool is_afe);
 enum rtw_hal_status halrf_iqk_trigger(void *rf_void,

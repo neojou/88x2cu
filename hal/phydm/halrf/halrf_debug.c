@@ -35,23 +35,6 @@ void halrf_basic_profile(void *dm_void, u32 *_used, char *output, u32 *_out_len)
 {
 }
 
-void halrf_dack_debug_cmd(void *dm_void, char input[][16])
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct _hal_rf_ *rf = &dm->rf_table;
-	u32 dm_value[10] = {0};
-	u8 i;
-
-	for (i = 0; i < 7; i++)
-		if (input[i + 1])
-			PHYDM_SSCANF(input[i + 2], DCMD_DECIMAL, &dm_value[i]);
-
-	if (dm_value[0] == 1)
-		halrf_dack_trigger(dm, true);
-	else			
-		halrf_dack_trigger(dm, false);	
-}
-
 struct halrf_command {
 	char name[16];
 	u8 id;

@@ -899,24 +899,6 @@ void halrf_dack_restore(void *dm_void)
 		return;
 	halrf_dack_restore_8822c(dm);
 }
-void halrf_dack_trigger(void *dm_void, boolean force)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct _hal_rf_ *rf = &dm->rf_table;
-
-	u64 start_time;
-
-	if (!(rf->rf_supportability & HAL_RF_DACK))
-		return;
-
-	start_time = odm_get_current_time(dm);
-
-	halrf_dac_cal_8822c(dm, force);
-	rf->dpk_progressing_time = odm_get_progressing_time(dm, start_time);
-	RF_DBG(dm, DBG_RF_DACK, "[DACK]DACK progressing_time = %lld ms\n",
-	       rf->dpk_progressing_time);
-}
-
 
 void halrf_dack_dbg(void *dm_void)
 {
@@ -1143,7 +1125,7 @@ void halrf_init(void *dm_void)
 		0;
 
 	/*Init all RF funciton*/
-	halrf_dack_trigger(dm, false);
+	//halrf_dack_trigger(dm, false);
 	halrf_x2k_check(dm);
 
 	/*power trim, thrmal trim, pa bias*/

@@ -135,76 +135,34 @@ void halrf_rfability_init_mp(struct rf_info *rf)
 	}
 }
 
+#endif //NEO
+
 void halrf_rfability_init(struct rf_info *rf)
 {
-
-	switch (rf->ic_type) {
-#ifdef RF_8852A_SUPPORT
-	case RF_RTL8852A:
-		rf->support_ability =
-			HAL_RF_TX_PWR_TRACK |
-			HAL_RF_TSSI_TRK |
-			HAL_RF_IQK |
-			/*HAL_RF_LCK |*/
-			HAL_RF_DPK |
-			HAL_RF_DACK |
-			/*HAL_RF_TXGAPK |*/
-			HAL_RF_DPK_TRACK |
-			HAL_RF_RXDCK |
-			HAL_RF_RXGAINK |
-			HAL_RF_THER_TRIM |
-			HAL_RF_PABIAS_TRIM |
-			HAL_RF_TSSI_TRIM |
-			0;
-		break;
-#endif
-#ifdef RF_8852B_SUPPORT
-	case RF_RTL8852B:
-		rf->support_ability |=
-			HAL_RF_TX_PWR_TRACK |
-			HAL_RF_IQK |
-			/*HAL_RF_LCK |*/
-			HAL_RF_DPK |
-			HAL_RF_DACK |
-			/*HAL_RF_TXGAPK |*/
-			HAL_RF_DPK_TRACK |
-			HAL_RF_RXDCK |
-			/*HAL_RF_RXGAINK |*/
-			/*HAL_RF_THER_TRIM |*/
-			/*HAL_RF_PABIAS_TRIM |*/
-			/*HAL_RF_TSSI_TRIM |*/
-					0;
-		break;
-#endif
-	default:
-		rf->support_ability =
-			/*HAL_RF_TX_PWR_TRACK |*/
-			/*HAL_RF_IQK |*/
-			/*HAL_RF_LCK |*/
-			/*HAL_RF_DPK |*/
-			/*HAL_RF_DACK |*/
-			/*HAL_RF_TXGAPK |*/
-			/*HAL_RF_DPK_TRACK |*/
-			0;
-		break;
-	}
+	rf->support_ability =
+		HAL_RF_TX_PWR_TRACK |
+		HAL_RF_TSSI_TRK |
+		HAL_RF_IQK |
+		/*HAL_RF_LCK |*/
+		HAL_RF_DPK |
+		HAL_RF_DACK |
+		/*HAL_RF_TXGAPK |*/
+		HAL_RF_DPK_TRACK |
+		HAL_RF_RXDCK |
+		HAL_RF_RXGAINK |
+		HAL_RF_THER_TRIM |
+		HAL_RF_PABIAS_TRIM |
+		HAL_RF_TSSI_TRIM |
+		0;
 }
+
 
 void halrf_set_rfability(struct rf_info *rf)
 {
-	if (rf->manual_support_ability &&
-	    rf->manual_support_ability != 0xffffffff)
-		rf->support_ability = rf->manual_support_ability;
-	else if (rf->phl_com->drv_mode == RTW_DRV_MODE_MP)
-		halrf_rfability_init_mp(rf);
-	else
-		halrf_rfability_init(rf);
-
-	PHL_INFO("[PHL]%x\n", rf->dbg_component);
-	RF_DBG(rf, DBG_RF_INIT,
-	       "IC = ((0x%x)), mp=%d,  RF_Supportability Init = ((0x%x))\n",
-	       rf->ic_type, rf->phl_com->drv_mode, rf->support_ability);
+	halrf_rfability_init(rf);
 }
+
+#if 0 //NEO
 
 void halrf_rfe_init(struct rf_info *rf)
 {
@@ -270,7 +228,9 @@ enum rtw_hal_status halrf_dm_init(void *rf_void)
 	halrf_cmn_info_self_init(rf);
 	halrf_dbg_setting_init(rf);
 	halrf_cmd_parser_init(rf);
+#endif //NEO
 	halrf_set_rfability(rf);
+#if 0 //NEO
 	halrf_rfe_init(rf);
 	halrf_rfe_type_gpio_setting(rf);
 	halrf_rfk_self_init(rf);
@@ -282,7 +242,9 @@ enum rtw_hal_status halrf_dm_init(void *rf_void)
 
 	halrf_rck_trigger(rf, HW_PHY_0);
 	//halrf_gapk_save_tx_gain_8852a(rf);
-	halrf_dack_trigger(rf, false);
+#endif //NEO
+	halrf_dack_trigger_g6(rf, false);
+#if 0 //NEO
 	halrf_rx_dck_trigger(rf, HW_PHY_0, true);
 
 	/*RX Gain K Get efuse*/
