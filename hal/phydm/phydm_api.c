@@ -1879,33 +1879,6 @@ void phydm_mcc_h2ccmd(void *dm_void)
 	}
 }
 
-void phydm_mcc_ctrl(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct _phydm_mcc_dm_ *mcc_dm = &dm->mcc_dm;
-	struct phydm_dig_struct *dig_t = &dm->dm_dig_table;
-
-	PHYDM_DBG(dm, DBG_COMP_MCC, "MCC status: %x\n", mcc_dm->mcc_status);
-	/*MCC stage no change*/
-	if (mcc_dm->mcc_status == mcc_dm->mcc_pre_status)
-		return;
-	/*Not in MCC stage*/
-	if (mcc_dm->mcc_status == 0) {
-		/* Enable normal Ant-weighting */
-		dm->is_stop_dym_ant_weighting = 0;
-		/* Enable normal DIG */
-		odm_pause_dig(dm, PHYDM_RESUME, PHYDM_PAUSE_LEVEL_1, 0x20);
-	} else {
-		/* Disable normal Ant-weighting */
-		dm->is_stop_dym_ant_weighting = 1;
-		/* Enable normal DIG */
-		odm_pause_dig(dm, PHYDM_PAUSE_NO_SET, PHYDM_PAUSE_LEVEL_1,
-			      0x20);
-	}
-	if (mcc_dm->mcc_status == 0 && mcc_dm->mcc_pre_status != 0)
-		phydm_mcc_init(dm);
-	mcc_dm->mcc_pre_status = mcc_dm->mcc_status;
-	}
 
 void phydm_fill_mcccmd(void *dm_void, u8 regid, u16 reg_add,
 		       u8 val0, u8 val1)
@@ -1919,33 +1892,6 @@ void phydm_fill_mcccmd(void *dm_void, u8 regid, u16 reg_add,
 	mcc_dm->mcc_dm_val[regid][1] = val1;
 }
 
-void phydm_mcc_switch(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct _phydm_mcc_dm_ *mcc_dm = &dm->mcc_dm;
-	s8 ret;
-
-	phydm_mcc_ctrl(dm);
-	if (mcc_dm->mcc_status == 0) {/*Not in MCC stage*/
-		phydm_mcc_h2ccmd_rst(dm);
-		return;
-	}
-	PHYDM_DBG(dm, DBG_COMP_MCC, "MCC switch\n");
-	ret = phydm_check(dm);
-	if (ret == _FAIL) {
-		PHYDM_DBG(dm, DBG_COMP_MCC, "MCC check fail\n");
-		return;
-	}
-	/* Set IGI*/
-	phydm_mcc_igi_cal(dm);
-
-	/* Set Antenna Gain*/
-#if (RTL8822B_SUPPORT == 1)
-	phydm_dynamic_ant_weighting_mcc_8822b(dm);
-#endif
-	/* Set H2C Cmd*/
-	phydm_mcc_h2ccmd(dm);
-}
 #endif
 
 #if (DM_ODM_SUPPORT_TYPE == ODM_WIN)

@@ -504,37 +504,6 @@ void phydm_set_dig_val(void *dm_void, u32 *val_buf, u8 val_len)
 	odm_write_dig(dm, (u8)(*val_buf));
 }
 
-void odm_pause_dig(void *dm_void, enum phydm_pause_type type,
-		   enum phydm_pause_level lv, u8 igi_input)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	u8 rpt = false;
-	u32 igi = (u32)igi_input;
-
-	PHYDM_DBG(dm, DBG_DIG, "[%s]type=%d, LV=%d, igi=0x%x\n", __func__, type,
-		  lv, igi);
-
-	switch (type) {
-	case PHYDM_PAUSE:
-	case PHYDM_PAUSE_NO_SET: {
-		dm->is_pause_dig = true;
-		rpt = phydm_pause_func(dm, F00_DIG, PHYDM_PAUSE, lv, 1, &igi);
-		break;
-	}
-
-	case PHYDM_RESUME: {
-		rpt = phydm_pause_func(dm, F00_DIG, PHYDM_RESUME, lv, 1, &igi);
-		dm->is_pause_dig = false;
-		break;
-	}
-	default:
-		PHYDM_DBG(dm, DBG_DIG, "Wrong type\n");
-		break;
-	}
-
-	PHYDM_DBG(dm, DBG_DIG, "DIG pause_result=%d\n", rpt);
-}
-
 boolean
 phydm_dig_abort(void *dm_void)
 {

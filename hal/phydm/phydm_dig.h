@@ -312,9 +312,6 @@ u8 phydm_get_igi(void *dm_void, enum bb_path path);
 
 void phydm_set_dig_val(void *dm_void, u32 *val_buf, u8 val_len);
 
-void odm_pause_dig(void *dm_void, enum phydm_pause_type pause_type,
-		   enum phydm_pause_level pause_level, u8 igi_value);
-
 #ifdef PHYDM_HW_IGI
 void phydm_hwigi(void *dm_void);
 
