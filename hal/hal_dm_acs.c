@@ -177,69 +177,6 @@ void rtw_acs_trigger(_adapter *adapter, u16 scan_time_ms, u8 scan_chan, enum NHM
 	RTW_INFO("[ACS] Trigger CH:%d, Times:%d\n", hal_data->acs.trigger_ch, scan_time_ms);
 	#endif
 }
-void rtw_acs_get_rst(_adapter *adapter)
-{
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
-	struct dm_struct *phydm = adapter_to_phydm(adapter);
-	int chan_idx = -1;
-	u8 cur_chan = hal_data->acs.trigger_ch;
-
-	if (cur_chan == 0)
-		return;
-
-	if (!hal_data->acs.triggered)
-		return;
-
-	chan_idx = rtw_chset_search_ch(adapter_to_chset(adapter), cur_chan);
-	if ((chan_idx == -1) || (chan_idx >= MAX_CHANNEL_NUM)) {
-		RTW_ERR("[ACS] %s can't get chan_idx(CH:%d)\n", __func__, cur_chan);
-		return;
-	}
-#if (RTK_ACS_VERSION == 3)
-	if (!(hal_data->acs.trig_rst == (NHM_SUCCESS | CLM_SUCCESS))) {
-		RTW_ERR("[ACS] get_rst return, due to acs trigger failed\n");
-		return;
-	}
-
-	{
-		struct env_mntr_rpt rpt = {0};
-		u8 rst;
-
-		rst = phydm_env_mntr_result(phydm, &rpt);
-		if ((rst == (NHM_SUCCESS | CLM_SUCCESS)) &&
-			(rpt.clm_rpt_stamp == hal_data->acs.trig_rpt.clm_rpt_stamp) &&
-			(rpt.nhm_rpt_stamp == hal_data->acs.trig_rpt.nhm_rpt_stamp)){
-			hal_data->acs.clm_ratio[chan_idx] = rpt.clm_ratio;
-			hal_data->acs.nhm_ratio[chan_idx] =  rpt.nhm_env_ratio;
-			hal_data->acs.env_mntr_rpt[chan_idx] = (rpt.nhm_noise_pwr -100);
-			_rtw_memcpy(&hal_data->acs.nhm[chan_idx][0], rpt.nhm_result, NHM_RPT_NUM);
-
-			/*RTW_INFO("[ACS] get_rst success (rst = 0x%02x, clm_stamp:%d:%d, nhm_stamp:%d:%d)\n",
-			rst,
-			hal_data->acs.trig_rpt.clm_rpt_stamp, rpt.clm_rpt_stamp,
-			hal_data->acs.trig_rpt.nhm_rpt_stamp, rpt.nhm_rpt_stamp);*/
-		} else {
-			RTW_ERR("[ACS] get_rst failed (rst = 0x%02x, clm_stamp:%d:%d, nhm_stamp:%d:%d)\n",
-			rst,
-			hal_data->acs.trig_rpt.clm_rpt_stamp, rpt.clm_rpt_stamp,
-			hal_data->acs.trig_rpt.nhm_rpt_stamp, rpt.nhm_rpt_stamp);
-		}
-	}
-
-#else
-	phydm_ccx_monitor_result(phydm);
-
-	hal_data->acs.clm_ratio[chan_idx] = rtw_phydm_clm_ratio(adapter);
-	hal_data->acs.nhm_ratio[chan_idx] = rtw_phydm_nhm_ratio(adapter);
-#endif
-	hal_data->acs.triggered = _FALSE;
-	#ifdef CONFIG_RTW_ACS_DBG
-	RTW_INFO("[ACS] Result CH:%d, CLM:%d NHM:%d\n",
-		cur_chan, hal_data->acs.clm_ratio[chan_idx], hal_data->acs.nhm_ratio[chan_idx]);
-	RTW_INFO("[ACS] Result NHM(dBm):%d\n",
-		hal_data->acs.env_mntr_rpt[chan_idx] );
-	#endif
-}
 
 void _rtw_phydm_acs_select_best_chan(_adapter *adapter)
 {

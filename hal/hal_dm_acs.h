@@ -134,7 +134,6 @@ u8 rtw_phydm_nhm_noise_pwr(_adapter *adapter);
 
 void rtw_acs_reset(_adapter *adapter);
 void rtw_acs_trigger(_adapter *adapter, u16 scan_time_ms, u8 scan_chan, enum NHM_PID pid);
-void rtw_acs_get_rst(_adapter *adapter);
 void rtw_acs_select_best_chan(_adapter *adapter);
 void rtw_acs_info_dump(void *sel, _adapter *adapter);
 void rtw_acs_update_current_info(_adapter *adapter);
