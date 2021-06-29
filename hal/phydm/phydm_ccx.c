@@ -81,26 +81,6 @@ u8 phydm_ccx_get_rpt_ratio(void *dm_void, u16 rpt, u16 denom)
 
 #ifdef NHM_SUPPORT
 
-void phydm_nhm_racing_release(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u32 value32 = 0;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "lv:(%d)->(0)\n", ccx->nhm_set_lv);
-
-	ccx->nhm_ongoing = false;
-	ccx->nhm_set_lv = NHM_RELEASE;
-
-	if (!(ccx->nhm_app == NHM_BACKGROUND || ccx->nhm_app == NHM_ACS)) {
-		phydm_pause_func(dm, F00_DIG, PHYDM_RESUME,
-				 PHYDM_PAUSE_LEVEL_1, 1, &value32);
-	}
-
-	ccx->nhm_app = NHM_BACKGROUND;
-}
-
 u8 phydm_nhm_racing_ctrl(void *dm_void, enum phydm_nhm_level nhm_lv)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -654,40 +634,6 @@ phydm_nhm_mntr_racing_chk(void *dm_void)
 	return false;
 }
 
-boolean
-phydm_nhm_mntr_chk(void *dm_void, u16 monitor_time /*unit ms*/)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	struct nhm_para_info nhm_para = {0};
-	boolean nhm_chk_result = false;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-
-	if (phydm_nhm_mntr_racing_chk(dm))
-		return nhm_chk_result;
-
-	/*[NHM trigger setting]------------------------------------------*/
-	nhm_para.incld_txon = NHM_EXCLUDE_TXON;
-	nhm_para.incld_cca = NHM_EXCLUDE_CCA;
-	nhm_para.div_opt = NHM_CNT_ALL;
-	nhm_para.nhm_app = NHM_BACKGROUND;
-	nhm_para.nhm_lv = NHM_LV_1;
-	nhm_para.en_1db_mode = false;
-	nhm_para.mntr_time = monitor_time;
-
-	#ifdef NHM_DYM_PW_TH_SUPPORT
-	if (ccx->nhm_dym_pw_th_en) {
-		nhm_para.div_opt = NHM_VALID;
-		nhm_para.mntr_time = monitor_time >> ccx->nhm_period_decre;
-	}
-	#endif
-
-	nhm_chk_result = phydm_nhm_mntr_set(dm, &nhm_para);
-
-	return nhm_chk_result;
-}
-
 void phydm_nhm_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -1148,52 +1094,6 @@ void phydm_clm_dbg(void *dm_void, char input[][16], u32 *_used, char *output,
 }
 
 #endif /*@#ifdef CLM_SUPPORT*/
-
-u8 phydm_env_mntr_trigger(void *dm_void, struct nhm_para_info *nhm_para,
-			  struct clm_para_info *clm_para,
-			  struct env_trig_rpt *trig_rpt)
-{
-	u8 trigger_result = 0;
-#if (defined(NHM_SUPPORT) && defined(CLM_SUPPORT))
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	boolean nhm_set_ok = false;
-	boolean clm_set_ok = false;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s] ======>\n", __func__);
-
-	/*@[NHM]*/
-	nhm_set_ok = phydm_nhm_mntr_set(dm, nhm_para);
-
-	/*@[CLM]*/
-	if (ccx->clm_mntr_mode == CLM_DRIVER_MNTR) {
-		clm_set_ok = phydm_clm_mntr_set(dm, clm_para);
-	} else if (ccx->clm_mntr_mode == CLM_FW_MNTR) {
-		phydm_clm_h2c(dm, CLM_PERIOD_MAX, true);
-		trigger_result |= CLM_SUCCESS;
-	}
-
-	if (nhm_set_ok) {
-		phydm_nhm_trigger(dm);
-		trigger_result |= NHM_SUCCESS;
-	}
-
-	if (clm_set_ok) {
-		phydm_clm_trigger(dm);
-		trigger_result |= CLM_SUCCESS;
-	}
-
-	/*@monitor for the test duration*/
-	ccx->start_time = odm_get_current_time(dm);
-
-	trig_rpt->nhm_rpt_stamp = ccx->nhm_rpt_stamp;
-	trig_rpt->clm_rpt_stamp = ccx->clm_rpt_stamp;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "nhm_rpt_stamp=%d, clm_rpt_stamp=%d,\n\n",
-		  trig_rpt->nhm_rpt_stamp, trig_rpt->clm_rpt_stamp);
-#endif
-	return trigger_result;
-}
 
 #ifdef FAHM_SUPPORT
 
@@ -2531,35 +2431,6 @@ u8 phydm_enhance_mntr_trigger(void *dm_void, struct nhm_para_info *nhm_para,
 
 #endif
 	return trigger_result;
-}
-
-void phydm_env_mntr_set_watchdog(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-
-	if (!(dm->support_ability & ODM_BB_ENV_MONITOR))
-		return;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-
-	#if (defined(NHM_SUPPORT) && defined(CLM_SUPPORT))
-	if (phydm_nhm_mntr_chk(dm, 262))
-		phydm_nhm_trigger(dm);
-
-	if (phydm_clm_mntr_chk(dm, 262))
-		phydm_clm_trigger(dm);
-	#endif
-
-	#ifdef FAHM_SUPPORT
-	if (phydm_fahm_mntr_chk(dm, 262))
-		phydm_fahm_trigger(dm);
-	#endif
-
-	#ifdef IFS_CLM_SUPPORT
-	if (phydm_ifs_clm_mntr_chk(dm, 960))
-		phydm_ifs_clm_trigger(dm);
-	#endif
 }
 
 void phydm_env_monitor_init(void *dm_void)

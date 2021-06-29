@@ -138,46 +138,6 @@ void rtw_acs_adv_reset(_adapter *adapter)
 }
 #endif /*CONFIG_RTW_ACS_DBG*/
 
-void rtw_acs_trigger(_adapter *adapter, u16 scan_time_ms, u8 scan_chan, enum NHM_PID pid)
-{
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
-	struct dm_struct *phydm = adapter_to_phydm(adapter);
-#if (RTK_ACS_VERSION == 3)
-	struct clm_para_info clm_para;
-	struct nhm_para_info nhm_para;
-	struct env_trig_rpt trig_rpt;
-
-	scan_time_ms -= 10;
-
-	init_acs_clm(clm_para, scan_time_ms);
-
-	if (pid == NHM_PID_IEEE_11K_HIGH)
-		init_11K_high_nhm(nhm_para, scan_time_ms);
-	else if (pid == NHM_PID_IEEE_11K_LOW)
-		init_11K_low_nhm(nhm_para, scan_time_ms);
-	else
-		init_acs_nhm(nhm_para, scan_time_ms);
-
-	hal_data->acs.trig_rst = phydm_env_mntr_trigger(phydm, &nhm_para, &clm_para, &trig_rpt);
-	if (hal_data->acs.trig_rst == (NHM_SUCCESS | CLM_SUCCESS)) {
-		hal_data->acs.trig_rpt.clm_rpt_stamp = trig_rpt.clm_rpt_stamp;
-		hal_data->acs.trig_rpt.nhm_rpt_stamp = trig_rpt.nhm_rpt_stamp;
-		/*RTW_INFO("[ACS] trigger success (rst = 0x%02x, clm_stamp:%d, nhm_stamp:%d)\n",
-			hal_data->acs.trig_rst, hal_data->acs.trig_rpt.clm_rpt_stamp, hal_data->acs.trig_rpt.nhm_rpt_stamp);*/
-	} else
-		RTW_ERR("[ACS] trigger failed (rst = 0x%02x)\n", hal_data->acs.trig_rst);
-#else
-	phydm_ccx_monitor_trigger(phydm, scan_time_ms);
-#endif
-
-	hal_data->acs.trigger_ch = scan_chan;
-	hal_data->acs.triggered = _TRUE;
-
-	#ifdef CONFIG_RTW_ACS_DBG
-	RTW_INFO("[ACS] Trigger CH:%d, Times:%d\n", hal_data->acs.trigger_ch, scan_time_ms);
-	#endif
-}
-
 void _rtw_phydm_acs_select_best_chan(_adapter *adapter)
 {
 	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(adapter);
