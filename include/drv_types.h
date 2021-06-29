@@ -152,14 +152,6 @@ typedef struct _ADAPTER _adapter, ADAPTER, *PADAPTER;
 #include <rtw_btcoex_wifionly.h>
 #include <rtw_btcoex.h>
 
-#ifdef CONFIG_MCC_MODE
-	#include <rtw_mcc.h>
-#endif /*CONFIG_MCC_MODE */
-
-#ifdef CONFIG_RTW_REPEATER_SON
-	#include <rtw_rson.h>
-#endif /*CONFIG_RTW_REPEATER_SON */
-
 #include <rtw_roch.h>
 
 #define SPEC_DEV_ID_NONE BIT(0)

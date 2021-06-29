@@ -7410,27 +7410,6 @@ void rtw_reset_drv_rx_counters(_adapter *padapter)
 	padapter->drv_rx_cnt_crcerror = 0;
 	padapter->drv_rx_cnt_drop = precvpriv->rx_drop;
 }
-void rtw_dump_phy_rxcnts_preprocess(_adapter *padapter, u8 rx_cnt_mode)
-{
-	u8 initialgain;
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(padapter);
-
-	if ((!(padapter->dump_rx_cnt_mode & DUMP_PHY_RX_COUNTER)) && (rx_cnt_mode & DUMP_PHY_RX_COUNTER)) {
-		rtw_hal_get_odm_var(padapter, HAL_ODM_INITIAL_GAIN, &initialgain, NULL);
-		RTW_INFO("%s CurIGValue:0x%02x\n", __FUNCTION__, initialgain);
-		rtw_hal_set_odm_var(padapter, HAL_ODM_INITIAL_GAIN, &initialgain, _FALSE);
-		/*disable dynamic functions, such as high power, DIG*/
-		rtw_phydm_ability_backup(padapter);
-		rtw_phydm_func_clr(padapter, (ODM_BB_DIG | ODM_BB_FA_CNT));
-	} else if ((padapter->dump_rx_cnt_mode & DUMP_PHY_RX_COUNTER) && (!(rx_cnt_mode & DUMP_PHY_RX_COUNTER))) {
-		/* turn on phy-dynamic functions */
-		rtw_phydm_ability_restore(padapter);
-		initialgain = 0xff; /* restore RX GAIN */
-		rtw_hal_set_odm_var(padapter, HAL_ODM_INITIAL_GAIN, &initialgain, _FALSE);
-
-	}
-}
-
 void rtw_dump_rx_counters(_adapter *padapter)
 {
 	struct dbg_rx_counter rx_counter;

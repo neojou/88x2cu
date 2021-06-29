@@ -13491,13 +13491,6 @@ u8 join_cmd_hdl(_adapter *padapter, u8 *pbuf)
 		return H2C_SUCCESS;
 	}
 
-	/* disable dynamic functions, such as high power, DIG */
-	/*rtw_phydm_func_disable_all(padapter);*/
-
-	/* config the initial gain under linking, need to write the BB registers */
-	/* initialgain = 0x1E; */
-	/*rtw_hal_set_odm_var(padapter, HAL_ODM_INITIAL_GAIN, &initialgain, _FALSE);*/
-
 	rtw_hal_set_hwreg(padapter, HW_VAR_BSSID, pmlmeinfo->network.MacAddress);
 	if (MLME_IS_STA(padapter))
 		rtw_hal_rcr_set_chk_bssid(padapter, MLME_STA_CONNECTING);

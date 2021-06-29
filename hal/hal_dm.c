@@ -838,15 +838,6 @@ void SetHalODMVar(
 		phydm_adaptivity_info_update(podmpriv, PHYDM_ADAPINFO_DOMAIN_CODE_2G, 0);
 		phydm_adaptivity_info_update(podmpriv, PHYDM_ADAPINFO_DOMAIN_CODE_5G, 0);
 		break;
-	case HAL_ODM_INITIAL_GAIN: {
-		u8 rx_gain = *((u8 *)(pValue1));
-		if (rx_gain == 0xff) {/*restore rx gain*/
-			odm_pause_dig(podmpriv, PHYDM_RESUME, PHYDM_PAUSE_LEVEL_0, rx_gain);
-		} else {
-			odm_pause_dig(podmpriv, PHYDM_PAUSE, PHYDM_PAUSE_LEVEL_0, rx_gain);
-		}
-	}
-	break;
 	case HAL_ODM_RX_INFO_DUMP: {
 		u8 cur_igi = 0;
 		s8 rssi_min;
@@ -919,9 +910,6 @@ void GetHalODMVar(
 	}
 		break;
 #endif
-	case HAL_ODM_INITIAL_GAIN:
-		*((u8 *)pValue1) = rtw_phydm_get_cur_igi(Adapter);
-		break;
 	default:
 		break;
 	}

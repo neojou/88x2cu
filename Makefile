@@ -1747,7 +1747,6 @@ rtk_core :=	core/rtw_cmd.o \
 		core/rtw_mbo.o \
 		core/efuse/rtw_efuse.o \
 		core/rtw_roch.o \
-		core/rtw_rson.o \
 		core/rtw_btcoex_wifionly.o \
 		core/rtw_btcoex.o \
 		core/rtw_odm.o \
