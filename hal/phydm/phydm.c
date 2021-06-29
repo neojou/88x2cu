@@ -412,9 +412,7 @@ void phydm_fwoffload_ability_clear(struct dm_struct *dm,
 
 void phydm_dm_early_init(struct dm_struct *dm)
 {
-#if (DM_ODM_SUPPORT_TYPE == ODM_CE)
 	phydm_init_debug_setting(dm);
-#endif
 }
 
 enum phydm_init_result odm_dm_init(struct dm_struct *dm)
@@ -459,38 +457,12 @@ enum phydm_init_result odm_dm_init(struct dm_struct *dm)
 	phydm_rssi_monitor_init(dm);
 	phydm_cfo_tracking_init(dm);
 	phydm_rf_init(dm);
-#ifdef PHYDM_TXA_CALIBRATION
-	phydm_txcurrentcalibration(dm);
-	phydm_get_pa_bias_offset(dm);
-#endif
-#ifdef CONFIG_PHYDM_ANTENNA_DIVERSITY
-	odm_antenna_diversity_init(dm);
-#endif
-#ifdef CONFIG_ADAPTIVE_SOML
-	phydm_adaptive_soml_init(dm);
-#endif
-#ifdef CONFIG_PATH_DIVERSITY
-	phydm_tx_path_diversity_init(dm);
-#endif
-#ifdef CONFIG_DYNAMIC_TX_TWR
-	phydm_dynamic_tx_power_init(dm);
-#endif
 #if (PHYDM_LA_MODE_SUPPORT)
 	phydm_la_init(dm);
 #endif
 
-#ifdef PHYDM_PRIMARY_CCA
-	phydm_primary_cca_init(dm);
-#endif
 #ifdef CONFIG_PSD_TOOL
 	phydm_psd_init(dm);
-#endif
-
-#ifdef CONFIG_SMART_ANTENNA
-	phydm_smt_ant_init(dm);
-#endif
-#ifdef CONFIG_MCC_DM
-	phydm_mcc_init(dm);
 #endif
 
 #ifdef PHYDM_CCK_RX_PATHDIV_SUPPORT

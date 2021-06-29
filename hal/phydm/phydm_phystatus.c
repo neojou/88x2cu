@@ -533,42 +533,6 @@ static u8 phydm_sq_patch_rt_cid_819x_acer(
 }
 #endif
 
-static u8
-phydm_evm_2_percent(s8 value)
-{
-	/* @-33dB~0dB to 0%~99% */
-	s8 ret_val;
-
-	ret_val = value;
-	ret_val /= 2;
-
-/*@dbg_print("value=%d\n", value);*/
-#ifdef ODM_EVM_ENHANCE_ANTDIV
-	if (ret_val >= 0)
-		ret_val = 0;
-
-	if (ret_val <= -40)
-		ret_val = -40;
-
-	ret_val = 0 - ret_val;
-	ret_val *= 3;
-#else
-	if (ret_val >= 0)
-		ret_val = 0;
-
-	if (ret_val <= -33)
-		ret_val = -33;
-
-	ret_val = 0 - ret_val;
-	ret_val *= 3;
-
-	if (ret_val == 99)
-		ret_val = 100;
-#endif
-
-	return (u8)ret_val;
-}
-
 s8 phydm_cck_rssi_convert(struct dm_struct *dm, u16 lna_idx, u8 vga_idx)
 {
 	/*@phydm_get_cck_rssi_table_from_reg*/
@@ -1246,6 +1210,7 @@ void phydm_get_physts_0_jgr3(struct dm_struct *dm, u8 *phy_status_inf,
 	/* type 0 is used for cck packet */
 	struct phy_sts_rpt_jgr3_type0 *phy_sts = NULL;
 	struct odm_phy_dbg_info *dbg_i = &dm->phy_dbg_info;
+	struct phydm_physts *physts_table = &dm->dm_physts_table;
 	u8 sq = 0, i, rx_cnt = 0;
 	s8 rx_power[4], pwdb;
 	s8 rx_pwr_db_max = -120;
@@ -1257,7 +1222,6 @@ void phydm_get_physts_0_jgr3(struct dm_struct *dm, u8 *phy_status_inf,
 	rx_power[2] = phy_sts->pwdb_c;
 	rx_power[3] = phy_sts->pwdb_d;
 
-	struct phydm_physts *physts_table = &dm->dm_physts_table;
 	if (phy_sts->gain_a < physts_table->cck_gi_l_bnd)
 		rx_power[0] += ((physts_table->cck_gi_l_bnd -
 				phy_sts->gain_a) << 1);

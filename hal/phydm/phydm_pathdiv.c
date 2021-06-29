@@ -183,8 +183,10 @@ void phydm_tx_path_diversity_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 
-	if (!(dm->support_ability & ODM_BB_PATH_DIV))
+	if (!(dm->support_ability & ODM_BB_PATH_DIV)) {
+		pr_info("%s NEO not support\n", __func__);
 		return;
+	}
 
 	phydm_tx_path_diversity_init_v2(dm); /*@ After 8822B*/
 }
