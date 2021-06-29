@@ -310,8 +310,6 @@ void odm_write_dig(void *dm_void, u8 current_igi);
 
 u8 phydm_get_igi(void *dm_void, enum bb_path path);
 
-void phydm_set_dig_val(void *dm_void, u32 *val_buf, u8 val_len);
-
 #ifdef PHYDM_HW_IGI
 void phydm_hwigi(void *dm_void);
 

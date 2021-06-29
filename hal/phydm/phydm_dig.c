@@ -492,18 +492,6 @@ u8 phydm_get_igi(void *dm_void, enum bb_path path)
 	return val;
 }
 
-void phydm_set_dig_val(void *dm_void, u32 *val_buf, u8 val_len)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-
-	if (val_len != 1) {
-		PHYDM_DBG(dm, ODM_COMP_API, "[Error][DIG]Need val_len=1\n");
-		return;
-	}
-
-	odm_write_dig(dm, (u8)(*val_buf));
-}
-
 boolean
 phydm_dig_abort(void *dm_void)
 {
