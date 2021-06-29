@@ -219,61 +219,6 @@ void phydm_psd_init(void *dm_void)
 	phydm_psd_para_setting(dm, 1, 2, 3, 128, 0, 0, 7, 0);
 }
 
-void phydm_psd_debug(void *dm_void, char input[][16], u32 *_used,
-		     char *output, u32 *_out_len)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	char help[] = "-h";
-	u32 var1[10] = {0};
-	u32 used = *_used;
-	u32 out_len = *_out_len;
-	u8 i = 0;
-
-	if ((strcmp(input[1], help) == 0)) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "{0} {sw_avg} {hw_avg 0:3} {1:I,2:Q,3:IQ} {fft_point: 128*(1:4)} {path_sel 0~3} {0:ADC, 1:RXIQC} {CH} {noise_k}\n");
-
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "{1} {IGI(hex)} {start_point} {stop_point}\n");
-		goto out;
-	}
-
-	PHYDM_SSCANF(input[1], DCMD_DECIMAL, &var1[0]);
-
-	if (var1[0] == 0) {
-		for (i = 1; i < 10; i++) {
-			PHYDM_SSCANF(input[i + 1], DCMD_DECIMAL,
-				     &var1[i]);
-		}
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "sw_avg_time=((%d)), hw_avg_time=((%d)), IQ=((%d)), fft=((%d)), path=((%d)), input =((%d)) ch=((%d)), noise_k=((%d))\n",
-			 var1[1], var1[2], var1[3], var1[4], var1[5],
-			 var1[6], (u8)var1[7], (u8)var1[8]);
-		phydm_psd_para_setting(dm, (u8)var1[1], (u8)var1[2],
-				       (u8)var1[3], (u16)var1[4],
-				       (u8)var1[5], (u8)var1[6],
-				       (u8)var1[7], (u8)var1[8]);
-
-	} else if (var1[0] == 1) {
-		PHYDM_SSCANF(input[2], DCMD_HEX, &var1[1]);
-		PHYDM_SSCANF(input[3], DCMD_DECIMAL, &var1[2]);
-		PHYDM_SSCANF(input[4], DCMD_DECIMAL, &var1[3]);
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "IGI=((0x%x)), start_point=((%d)), stop_point=((%d))\n",
-			 var1[1], var1[2], var1[3]);
-		dm->debug_components |= ODM_COMP_API;
-		if (phydm_psd(dm, var1[1], (u16)var1[2], (u16)var1[3]) ==
-		    PHYDM_SET_FAIL)
-			PDM_SNPF(out_len, used, output + used, out_len - used,
-				 "PSD_SET_FAIL\n");
-		dm->debug_components &= ~(ODM_COMP_API);
-	}
-
-out:
-	*_used = used;
-	*_out_len = out_len;
-}
-
 u8 phydm_get_psd_result_table(void *dm_void, int index)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;

@@ -51,9 +51,6 @@ struct psd_info {
 
 u32 phydm_get_psd_data(void *dm_void, u32 psd_tone_idx, u32 igi);
 
-void phydm_psd_debug(void *dm_void, char input[][16], u32 *_used,
-		     char *output, u32 *_out_len);
-
 u8 phydm_psd(void *dm_void, u32 igi, u16 start_point, u16 stop_point);
 
 void phydm_psd_para_setting(void *dm_void, u8 sw_avg_time, u8 hw_avg_time,
