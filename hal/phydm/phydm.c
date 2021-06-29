@@ -451,9 +451,6 @@ enum phydm_init_result odm_dm_init(struct dm_struct *dm)
 
 	phydm_dig_init(dm);
 #ifdef PHYDM_SUPPORT_CCKPD
-#ifdef PHYDM_DCC_ENHANCE
-	phydm_dig_cckpd_coex_init(dm);
-#endif
 	phydm_cck_pd_init(dm);
 #endif
 	phydm_env_monitor_init(dm);

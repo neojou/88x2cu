@@ -97,9 +97,6 @@ void rtw_phydm_read_efuse(_adapter *adapter);
 #ifdef CONFIG_LPS_PG
 void rtw_phydm_lps_pg_hdl(_adapter *adapter, struct sta_info *sta, bool in_lpspg);
 #endif
-#ifdef CONFIG_LPS_PWR_TRACKING
-void rtw_phydm_pwr_tracking_directly(_adapter *adapter);
-#endif
 
 #ifdef CONFIG_CTRL_TXSS_BY_TP
 void rtw_phydm_trx_cfg(_adapter *adapter, bool tx_1ss);

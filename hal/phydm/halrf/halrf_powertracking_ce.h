@@ -81,8 +81,6 @@ extern u8 delta_swing_table_idx_2ga_p_8188e[];
 extern u8 delta_swing_table_idx_2ga_n_8188e[];
 #endif
 
-#define dm_check_txpowertracking odm_txpowertracking_check
-
 struct iqk_matrix_regs_setting {
 	boolean is_iqk_done;
 	s32 value[3][iqk_matrix_reg_num];
@@ -293,39 +291,10 @@ struct dm_rf_calibration_struct {
 	u8 rf_kfree_enable; /*for efuse enable check*/
 };
 
-void odm_txpowertracking_check(void *dm_void);
-
 void odm_txpowertracking_init(void *dm_void);
-
-void odm_txpowertracking_check_ap(void *dm_void);
 
 void odm_txpowertracking_thermal_meter_init(void *dm_void);
 
-void odm_txpowertracking_init(void *dm_void);
-
-void odm_txpowertracking_check_mp(void *dm_void);
-
-void odm_txpowertracking_check_ce(void *dm_void);
-
 void odm_txpowertracking_direct_ce(void *dm_void);
-
-#if (DM_ODM_SUPPORT_TYPE & (ODM_WIN))
-
-void odm_txpowertracking_callback_thermal_meter92c(
-	void *adapter);
-
-void odm_txpowertracking_callback_rx_gain_thermal_meter92d(
-	void *adapter);
-
-void odm_txpowertracking_callback_thermal_meter92d(
-	void *adapter);
-
-void odm_txpowertracking_direct_call92c(
-	void *adapter);
-
-void odm_txpowertracking_thermal_meter_check(
-	void *adapter);
-
-#endif
 
 #endif /*__HALRF_POWER_TRACKING_H__*/

@@ -471,8 +471,6 @@ void halrf_cmn_info_set(void *dm_void, u32 cmn_info, u64 value);
 
 u64 halrf_cmn_info_get(void *dm_void, u32 cmn_info);
 
-void halrf_watchdog(void *dm_void);
-
 void halrf_iqk_trigger(void *dm_void, boolean is_recovery);
 
 void halrf_rfk_handshake(void *dm_void, boolean is_before_k);

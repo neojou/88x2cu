@@ -1491,21 +1491,3 @@ void rtw_phydm_read_efuse(_adapter *adapter)
 	phydm_get_power_trim_offset(phydm);
 }
 
-#ifdef CONFIG_LPS_PWR_TRACKING
-void rtw_phydm_pwr_tracking_directly(_adapter *adapter)
-{
-	PHAL_DATA_TYPE hal_data = GET_HAL_DATA(adapter);
-	u8 rfk_forbidden = _TRUE;
-	u8 is_linked = _FALSE;
-
-	if (rtw_mi_check_status(adapter, MI_ASSOC))
-		is_linked = _TRUE;
-
-	rfk_forbidden = (_rtw_phydm_rfk_condition_check(adapter, hal_data->bScanInProcess, is_linked) == _TRUE) ? _FALSE : _TRUE;
-	halrf_cmn_info_set(&hal_data->odmpriv, HALRF_CMNINFO_RFK_FORBIDDEN, rfk_forbidden);
-
-	odm_txpowertracking_direct_ce(&hal_data->odmpriv);
-}
-#endif
-
-

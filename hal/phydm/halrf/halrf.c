@@ -690,19 +690,6 @@ void halrf_supportability_init_mp(void *dm_void)
 		0;
 }
 
-void halrf_watchdog(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct _hal_rf_ *rf = &dm->rf_table;
-
-	if (rf->is_dpk_in_progress || dm->rf_calibrate_info.is_iqk_in_progress ||
-		rf->is_tssi_in_progress)
-		return;
-	phydm_rf_watchdog(dm);
-	halrf_dpk_track(dm);
-	halrf_xtal_thermal_track(dm);
-}
-
 void halrf_rfk_power_save(void *dm_void, boolean is_power_save)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -710,8 +697,6 @@ void halrf_rfk_power_save(void *dm_void, boolean is_power_save)
 
 	halrf_rfk_power_save_8822c(dm, is_power_save);
 }
-
-
 
 void halrf_reload_iqk(void *dm_void, boolean reset)
 {

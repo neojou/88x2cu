@@ -123,15 +123,6 @@ enum phydm_cck_pd_trend {
 
 #ifdef PHYDM_SUPPORT_CCKPD
 
-#ifdef PHYDM_DCC_ENHANCE
-struct phydm_dcc_struct { /*DIG CCK_PD coexistence*/
-	boolean		dcc_en;
-	enum dcc_mode	dcc_mode;
-	u32		dig_execute_cnt;
-	u8		dcc_ratio;
-};
-#endif
-
 struct phydm_cckpd_struct {
 	u8		cckpd_hw_type;
 	u8		cur_cck_cca_thres; /*@current cck_pd value 0xa0a*/
@@ -189,12 +180,4 @@ void phydm_cck_pd_th(void *dm_void);
 
 void phydm_cck_pd_init(void *dm_void);
 
-#ifdef PHYDM_DCC_ENHANCE
-void phydm_cckpd_type4_dcc(void *dm_void);
-
-void phydm_dig_cckpd_coex_init(void *dm_void);
-
-void phydm_dig_cckpd_coex_dbg(void *dm_void, char input[][16], u32 *_used,
-			      char *output, u32 *_out_len);
-#endif
 #endif

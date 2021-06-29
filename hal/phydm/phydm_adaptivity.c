@@ -451,26 +451,6 @@ void phydm_adaptivity_init(void *dm_void)
 		return;
 	}
 
-#if (DM_ODM_SUPPORT_TYPE & ODM_WIN)
-	if (!dm->carrier_sense_enable) {
-		if (dm->th_l2h_ini == 0 &&
-		    !adaptivity->switch_th_l2h_ini_in_band)
-			phydm_set_l2h_th_ini(dm);
-	} else {
-		phydm_set_l2h_th_ini_carrier_sense(dm);
-	}
-
-	if (dm->th_edcca_hl_diff == 0)
-		dm->th_edcca_hl_diff = 7;
-
-	if (dm->wifi_test & RT_WIFI_LOGO)
-		dm->support_ability &= ~ODM_BB_ADAPTIVITY;
-
-	if (*dm->edcca_mode == PHYDM_EDCCA_ADAPT_MODE)
-		adaptivity->mode_cvrt_en = true;
-	else
-		adaptivity->mode_cvrt_en = false;
-#elif (DM_ODM_SUPPORT_TYPE & ODM_CE)
 	if (!dm->carrier_sense_enable) {
 		if (dm->th_l2h_ini == 0)
 			phydm_set_l2h_th_ini(dm);
@@ -483,25 +463,6 @@ void phydm_adaptivity_init(void *dm_void)
 
 	if (dm->wifi_test || *dm->mp_mode)
 		dm->support_ability &= ~ODM_BB_ADAPTIVITY;
-#elif (DM_ODM_SUPPORT_TYPE & ODM_AP)
-	if (dm->carrier_sense_enable) {
-		phydm_set_l2h_th_ini_carrier_sense(dm);
-		dm->th_edcca_hl_diff = 7;
-	} else {
-		dm->th_l2h_ini = dm->TH_L2H_default; /*set by mib*/
-		dm->th_edcca_hl_diff = dm->th_edcca_hl_diff_default;
-	}
-#elif (DM_ODM_SUPPORT_TYPE & ODM_IOT)
-	if (!dm->carrier_sense_enable) {
-		if (dm->th_l2h_ini == 0)
-			phydm_set_l2h_th_ini(dm);
-	} else {
-		phydm_set_l2h_th_ini_carrier_sense(dm);
-	}
-
-	if (dm->th_edcca_hl_diff == 0)
-		dm->th_edcca_hl_diff = 7;
-#endif
 
 	adaptivity->debug_mode = false;
 	adaptivity->th_l2h_ini_backup = dm->th_l2h_ini;
@@ -531,11 +492,7 @@ void phydm_adaptivity_init(void *dm_void)
 	/*@EDCCA behavior based on maximum or mean power*/
 	phydm_edcca_decision_opt(dm);
 
-#if (DM_ODM_SUPPORT_TYPE == ODM_AP)
-	adaptivity->igi_up_bound_lmt_val = 180;
-#else
 	adaptivity->igi_up_bound_lmt_val = 90;
-#endif
 	adaptivity->igi_up_bound_lmt_cnt = 0;
 	adaptivity->igi_lmt_en = false;
 #endif

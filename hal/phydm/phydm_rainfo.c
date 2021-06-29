@@ -654,18 +654,6 @@ void phydm_rate_adaptive_mask_init(void *dm_void)
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	struct ra_table *ra_t = &dm->dm_ra_table;
 
-#if (DM_ODM_SUPPORT_TYPE == ODM_WIN)
-	PADAPTER adapter = dm->adapter;
-	PMGNT_INFO mgnt_info = &(adapter->MgntInfo);
-	HAL_DATA_TYPE *hal_data = GET_HAL_DATA(((PADAPTER)dm->adapter));
-
-	if (mgnt_info->DM_Type == dm_type_by_driver)
-		hal_data->bUseRAMask = true;
-	else
-		hal_data->bUseRAMask = false;
-
-#endif
-
 	ra_t->ldpc_thres = 35;
 	ra_t->up_ramask_cnt = 0;
 	ra_t->up_ramask_cnt_tmp = 0;
