@@ -406,13 +406,6 @@ void phydm_ifs_clm_dbg(void *dm_void, char input[][16], u32 *_used,
 		       char *output, u32 *_out_len);
 #endif
 
-u8 phydm_enhance_mntr_trigger(void *dm_void,
-			      struct nhm_para_info *nhm_para,
-			      struct clm_para_info *clm_para,
-			      struct fahm_para_info *fahm_para,
-			      struct ifs_clm_para_info *ifs_clm_para,
-			      struct enhance_mntr_trig_rpt *trig_rpt);
-
 u8 phydm_enhance_mntr_result(void *dm_void, struct enhance_mntr_rpt *rpt);
 
 void phydm_enhance_mntr_dbg(void *dm_void, char input[][16], u32 *_used,
