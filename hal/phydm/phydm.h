@@ -1431,11 +1431,6 @@ phydm_watchdog_mp(struct dm_struct *dm);
 void
 phydm_pause_func_init(void *dm_void);
 
-u8
-phydm_pause_func(void *dm_void, enum phydm_func_idx pause_func,
-		 enum phydm_pause_type pause_type,
-		 enum phydm_pause_level pause_lv, u8 val_lehgth, u32 *val_buf);
-
 void phydm_fw_dm_ctrl_en(void *dm_void, enum phydm_func_idx fun_idx,
 			 boolean enable);
 
