@@ -376,9 +376,6 @@ u8 phydm_env_mntr_get_802_11_k_rsni(void *dm_void, s8 rcpi, s8 anpi);
 
 #ifdef FAHM_SUPPORT
 void phydm_fahm_init(void *dm_void);
-
-void phydm_fahm_dbg(void *dm_void, char input[][16], u32 *_used, char *output,
-		    u32 *_out_len);
 #endif
 
 #ifdef NHM_SUPPORT
