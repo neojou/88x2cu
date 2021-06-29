@@ -510,9 +510,6 @@ void halrf_dpk_reload(void *dm_void);
 
 void halrf_dpk_switch(void *dm_void, u8 enable);
 
-void halrf_dpk_debug_cmd(void *dm_void, char input[][16], u32 *_used,
-			 char *output, u32 *_out_len);
-
 void halrf_dpk_c2h_report_transfer(void	*dm_void, boolean is_ok, u8 *buf, u8 buf_size);
 
 void halrf_dpk_info_rsvd_page(void *dm_void, u8 *buf, u32 *buf_size);

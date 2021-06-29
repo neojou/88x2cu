@@ -5518,6 +5518,7 @@ u8 SetHwReg(_adapter *adapter, u8 variable, u8 *val)
 	}
 	break;
 	case HW_VAR_DO_IQK:
+		pr_info("%s NEO DO_IQK val=%d\n", __func__, *val);
 		if (*val)
 			hal_data->bNeedIQK = _TRUE;
 		else

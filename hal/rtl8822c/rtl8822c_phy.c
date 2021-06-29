@@ -517,6 +517,7 @@ void rtl8822c_switch_chnl_and_set_bw(PADAPTER adapter)
 	odm_clear_txpowertracking_state(p_dm_odm);
 	rtw_hal_set_tx_power_level(adapter, hal->current_channel);
 
+	pr_info("%s NEO need IQK:%d\n", __func__, hal->bNeedIQK);
 	/* IQK */
 	if ((hal->bNeedIQK == _TRUE)
 	    || (adapter->registrypriv.mp_mode == 1)) {

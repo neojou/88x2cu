@@ -13484,34 +13484,6 @@ u8 join_cmd_hdl(_adapter *padapter, u8 *pbuf)
 
 	rtw_adjust_chbw(padapter, pmlmeext->cur_channel, &pmlmeext->cur_bwmode, &pmlmeext->cur_ch_offset);
 
-#if 0
-	if (padapter->registrypriv.wifi_spec) {
-		/* for WiFi test, follow WMM test plan spec */
-		acparm = 0x002F431C; /* VO */
-		rtw_hal_set_hwreg(padapter, HW_VAR_AC_PARAM_VO, (u8 *)(&acparm));
-		acparm = 0x005E541C; /* VI */
-		rtw_hal_set_hwreg(padapter, HW_VAR_AC_PARAM_VI, (u8 *)(&acparm));
-		acparm = 0x0000A525; /* BE */
-		rtw_hal_set_hwreg(padapter, HW_VAR_AC_PARAM_BE, (u8 *)(&acparm));
-		acparm = 0x0000A549; /* BK */
-		rtw_hal_set_hwreg(padapter, HW_VAR_AC_PARAM_BK, (u8 *)(&acparm));
-
-		/* for WiFi test, mixed mode with intel STA under bg mode throughput issue */
-		if (padapter->mlmepriv.htpriv.ht_option == _FALSE) {
-			acparm = 0x00004320;
-			rtw_hal_set_hwreg(padapter, HW_VAR_AC_PARAM_BE, (u8 *)(&acparm));
-		}
-	} else {
-		acparm = 0x002F3217; /* VO */
-		rtw_hal_set_hwreg(padapter, HW_VAR_AC_PARAM_VO, (u8 *)(&acparm));
-		acparm = 0x005E4317; /* VI */
-		rtw_hal_set_hwreg(padapter, HW_VAR_AC_PARAM_VI, (u8 *)(&acparm));
-		acparm = 0x00105320; /* BE */
-		rtw_hal_set_hwreg(padapter, HW_VAR_AC_PARAM_BE, (u8 *)(&acparm));
-		acparm = 0x0000A444; /* BK */
-		rtw_hal_set_hwreg(padapter, HW_VAR_AC_PARAM_BK, (u8 *)(&acparm));
-	}
-#endif
 
 	/* check channel, bandwidth, offset and switch */
 	if (rtw_chk_start_clnt_join(padapter, &u_ch, &u_bw, &u_offset) == _FAIL) {
@@ -13540,6 +13512,7 @@ u8 join_cmd_hdl(_adapter *padapter, u8 *pbuf)
 	doiqk = _TRUE;
 	rtw_hal_set_hwreg(padapter , HW_VAR_DO_IQK , &doiqk);
 
+	pr_info("%s NEO IQK start to set_channel_bwmode\n", __func__);
 	set_channel_bwmode(padapter, u_ch, u_offset, u_bw);
 
 	doiqk = _FALSE;

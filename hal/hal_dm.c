@@ -86,8 +86,6 @@ void rtw_hal_update_iqk_fw_offload_cap(_adapter *adapter)
 	}
 }
 
-#if ((RTL8822B_SUPPORT == 1) || (RTL8821C_SUPPORT == 1) || (RTL8814B_SUPPORT == 1) || (RTL8822C_SUPPORT == 1) \
-	|| (RTL8723F_SUPPORT == 1))
 void rtw_phydm_iqk_trigger(_adapter *adapter)
 {
 	struct dm_struct *p_dm_odm = adapter_to_phydm(adapter);
@@ -96,16 +94,8 @@ void rtw_phydm_iqk_trigger(_adapter *adapter)
 	u8 rfk_forbidden = _FALSE;
 
 	halrf_cmn_info_set(p_dm_odm, HALRF_CMNINFO_RFK_FORBIDDEN, rfk_forbidden);
-#if (RTL8822C_SUPPORT == 1) || (RTL8814B_SUPPORT == 1) || (RTL8723F_SUPPORT == 1)
-	/* halrf_cmn_info_set(p_dm_odm, HALRF_CMNINFO_IQK_SEGMENT, segment); to do */
 	halrf_rf_k_connect_trigger(p_dm_odm, _TRUE, SEGMENT_FREE);
-#else
-	/*segment = _rtw_phydm_iqk_segment_chk(adapter);*/
-	halrf_cmn_info_set(p_dm_odm, HALRF_CMNINFO_IQK_SEGMENT, segment);
-	halrf_segment_iqk_trigger(p_dm_odm, clear, segment);
-#endif
 }
-#endif
 
 void rtw_phydm_iqk_trigger_all(_adapter *adapter)
 {

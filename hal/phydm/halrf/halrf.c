@@ -737,8 +737,11 @@ void halrf_rf_k_connect_trigger(void *dm_void, boolean is_recovery,
 	struct dm_dpk_info *dpk_info = &dm->dpk_info;
 	struct _hal_rf_ *rf = &dm->rf_table;
 
-	if (!dm->mp_mode)
+	pr_info("%s NEO IQK : mp_mode=%p\n", __func__, dm->mp_mode);
+	if (!dm->mp_mode) {
+		pr_info("%s NEO mode mode pointer is NULL, return\n", __func__);
 		return;
+	}
 
 	if (dm->mp_mode && rf->is_con_tx && rf->is_single_tone &&
 		rf->is_carrier_suppresion) {
@@ -757,18 +760,12 @@ void halrf_rf_k_connect_trigger(void *dm_void, boolean is_recovery,
 	/*[TSSI Trk]*/
 	halrf_tssi_trigger(dm);
 	/*[DPK]*/
-#if 1
 	if(dpk_info->is_dpk_by_channel == true)
 		halrf_dpk_trigger(dm);
 	else
 		halrf_dpk_reload(dm);
-#endif
 	//ADDA restore to MP_UI setting;
 	config_halrf_path_adda_setting_trigger(dm);
-
-#if (RTL8723F_SUPPORT == 1)
-	halrf_spur_compensation_8723f(dm);
-#endif
 	halrf_bbreset(dm);
 }
 
@@ -1198,136 +1195,6 @@ void _halrf_dpk_info_by_chip(void *dm_void, u32 *_used, char *output, u32 *_out_
 
 	*_used = used;
 	*_out_len = out_len;
-}
-
-void _halrf_display_dpk_info(void *dm_void, u32 *_used, char *output, u32 *_out_len)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct dm_dpk_info *dpk_info = &dm->dpk_info;
-	struct _hal_rf_ *rf = &(dm->rf_table);
-
-	u32 used = *_used;
-	u32 out_len = *_out_len;
-	char *ic_name = NULL;
-	u8 path;
-
-	ic_name = "8822C";
-
-	PDM_SNPF(out_len, used, output + used, out_len - used,
-		 "\n===============[ DPK info %s ]===============\n", ic_name);
-
-	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = %s %s\n",
-		 "DPK type", (dm->fw_offload_ability & PHYDM_RF_DPK_OFFLOAD) ? "FW" : "Driver",
-		 (dpk_info->is_dpk_by_channel) ? "(By channel)" : "(By group)");
-
-	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = %s\n",
-		 "DPK Ver", HALRF_DPK_VER);
-
-	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = %s\n",
-		 "RFK init ver", HALRF_RFK_INIT_VER);
-
-	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = %d / %d (RFE type:%d)\n",
-		 "Ext_PA 2G / 5G", dm->ext_pa, dm->ext_pa_5g, dm->rfe_type);
-
-	if ((dpk_info->dpk_ch == 0) && (dpk_info->thermal_dpk[0] == 0)) {
-		PDM_SNPF(out_len, used, output + used, out_len - used, "\n %-25s\n",
-			 "No DPK had been done before!!!");
-		return;
-	}
-
-	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = %d / %d / %d\n",
-		 "DPK Cal / OK / Reload", dpk_info->dpk_cal_cnt, dpk_info->dpk_ok_cnt,
-		 dpk_info->dpk_reload_cnt);
-
-	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = %s\n",
-		 "RFK H2C timeout", (rf->is_rfk_h2c_timeout) ? "Yes" : "No");
-
-	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = %s\n",
-		 "DPD Reload", (dpk_info->dpk_status & BIT(0)) ? "Yes" : "No");
-
-	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = %s\n",
-		 "DPD status", dpk_info->is_dpk_enable ? "Enable" : "Disable");
-
-	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = %s\n",
-		 "DPD track status", (rf->rf_supportability & HAL_RF_DPK_TRACK) ? "Enable" : "Disable");
-
-	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = %s / %s / %d / %s\n",
-		 "TSSI / Band / CH / BW", dpk_info->is_tssi_mode == 1 ? "On" : "Off",
-		 dpk_info->dpk_band == 0 ? "2G" : "5G", dpk_info->dpk_ch,
-		 dpk_info->dpk_bw == 3 ? "20M" : (dpk_info->dpk_bw == 2 ? "40M" : "80M"));
-
-	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = ",
-		 "DPK thermal (path)");
-	for (path = 0; path < KPATH; path++) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 path == (KPATH - 1) ? "%d\n" : "%d / ",
-			 dpk_info->thermal_dpk[path]);
-	}
-
-	PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = 0x%x\n",
-		 "DPK bkup GNT control", dpk_info->gnt_control);
-
-		PDM_SNPF(out_len, used, output + used, out_len - used, " %-25s = 0x%x\n",
-		 "DPK bkup GNT value", dpk_info->gnt_value);
-
-	_halrf_dpk_info_by_chip(dm, &used, output, &out_len);
-
-	*_used = used;
-	*_out_len = out_len;
-}
-
-void halrf_dpk_debug_cmd(void *dm_void, char input[][16], u32 *_used,
-				char *output, u32 *_out_len)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct dm_dpk_info *dpk_info = &dm->dpk_info;
-	struct _hal_rf_ *rf = &(dm->rf_table);
-
-	char *cmd[5] = {"-h", "on", "off", "info", "switch"};
-	u32 used = *_used;
-	u32 out_len = *_out_len;
-	u8 i;
-
-	if ((strcmp(input[2], cmd[4]) != 0)) {
-		if (!(rf->rf_supportability & HAL_RF_DPK)) {
-			PDM_SNPF(out_len, used, output + used, out_len - used,
-				 "DPK is Unsupported!!!\n");
-			return;
-		}
-	}
-
-	if ((strcmp(input[2], cmd[0]) == 0)) {
-		for (i = 1; i < 4; i++) {
-			PDM_SNPF(out_len, used, output + used, out_len - used,
-				 "  %s\n", cmd[i]);
-		}
-	} else if ((strcmp(input[2], cmd[1]) == 0)) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "DPK is Enabled!!\n");
-		dpk_info->is_dpk_enable = true;
-		halrf_dpk_enable_disable(dm);
-	} else if ((strcmp(input[2], cmd[2]) == 0)){
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "DPK is Disabled!!\n");
-		dpk_info->is_dpk_enable = false;
-		halrf_dpk_enable_disable(dm);
-	} else if ((strcmp(input[2], cmd[3]) == 0))
-		_halrf_display_dpk_info(dm, &used, output, &out_len);
-	else if ((strcmp(input[2], cmd[4]) == 0) && (strcmp(input[3], cmd[1]) == 0)) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "DPK Switch on!!\n");
-		halrf_dpk_switch(dm, 1);
-	} else if ((strcmp(input[2], cmd[4]) == 0) && (strcmp(input[3], cmd[2]) == 0)) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "DPK Switch off!!\n");
-		halrf_dpk_switch(dm, 0);
-	} else {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "DPK Trigger start!!\n");
-		halrf_dpk_trigger(dm);
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "DPK Trigger finish!!\n");
-	}
 }
 
 void halrf_dpk_c2h_report_transfer(void	*dm_void, boolean is_ok, u8 *buf, u8 buf_size)
