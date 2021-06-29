@@ -494,53 +494,6 @@ void halrf_support_ability_debug(void *dm_void, char input[][16], u32 *_used,
 	*_out_len = out_len;
 }
 
-#ifdef CONFIG_2G_BAND_SHIFT
-void halrf_support_band_shift_debug(void *dm_void, char input[][16], u32 *_used,
-				    char *output, u32 *_out_len)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct _hal_rf_ *rf = &dm->rf_table;
-	//u32 band_value[2] = {00};
-	u32 dm_value[10] = {0};
-	u32 used = *_used;
-	u32 out_len = *_out_len;
-	u8 i;
-
-#if (RTL8192F_SUPPORT == 1)
-	for (i = 0; i < 7; i++)
-		if (input[i + 1])
-			PHYDM_SSCANF(input[i + 2], DCMD_DECIMAL, &dm_value[i]);
-
-	if (!(rf->rf_supportability & HAL_2GBAND_SHIFT)) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "\nCurr-RF_supportability[07. (( . ))HAL_2GBAND_SHIFT]\nNo RF Band Shift,default: 2.4G!\n");
-	} else {
-		if (dm_value[0] == 01) {
-			rf->rf_shift_band = HAL_RF_2P3;
-			halrf_lck_trigger(dm);
-			PDM_SNPF(out_len, used, output + used, out_len - used,
-				 "\n[rf_shift_band] = %d\nRF Band Shift to 2.3G!\n",
-				 rf->rf_shift_band);
-		} else if (dm_value[0] == 02) {
-			rf->rf_shift_band = HAL_RF_2P5;
-			halrf_lck_trigger(dm);
-			PDM_SNPF(out_len, used, output + used, out_len - used,
-				 "\n[rf_shift_band] = %d\nRF Band Shift to 2.5G!\n",
-				 rf->rf_shift_band);
-		} else {
-			rf->rf_shift_band = HAL_RF_2P4;
-			halrf_lck_trigger(dm);
-			PDM_SNPF(out_len, used, output + used, out_len - used,
-				 "\n[rf_shift_band] = %d\nNo RF Band Shift,default: 2.4G!\n",
-				 rf->rf_shift_band);
-		}
-	}
-	*_used = used;
-	*_out_len = out_len;
-#endif
-}
-#endif
-
 void halrf_cmn_info_init(void *dm_void, enum halrf_cmninfo_init cmn_info,
 			 u32 value)
 {
@@ -752,18 +705,20 @@ void halrf_rf_k_connect_trigger(void *dm_void, boolean is_recovery,
 	}
 
 	/*[TX GAP K]*/
-	halrf_txgapk_trigger(dm);
+	//halrf_txgapk_trigger(dm);
 
 	/*[LOK, IQK]*/
 	halrf_segment_iqk_trigger(dm, true, seg_time);
 
 	/*[TSSI Trk]*/
-	halrf_tssi_trigger(dm);
+	//halrf_tssi_trigger(dm);
+
 	/*[DPK]*/
 	if(dpk_info->is_dpk_by_channel == true)
 		halrf_dpk_trigger(dm);
 	else
 		halrf_dpk_reload(dm);
+
 	//ADDA restore to MP_UI setting;
 	config_halrf_path_adda_setting_trigger(dm);
 	halrf_bbreset(dm);
@@ -922,61 +877,6 @@ void halrf_iqk_trigger(void *dm_void, boolean is_recovery)
 	}
 }
 
-void halrf_lck_trigger(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct dm_iqk_info *iqk_info = &dm->IQK_info;
-	struct _hal_rf_ *rf = &dm->rf_table;
-	u64 start_time;
-
-#if (DM_ODM_SUPPORT_TYPE & (ODM_WIN))
-	if (odm_check_power_status(dm) == false)
-		return;
-#endif
-
-	if (!dm->mp_mode)
-		return;
-
-	if (dm->mp_mode && rf->is_con_tx && rf->is_single_tone &&
-		rf->is_carrier_suppresion) {
-		if (*dm->mp_mode & 
-			(*rf->is_con_tx || *rf->is_single_tone ||
-			*rf->is_carrier_suppresion))
-			return;
-	}
-
-	if (!(rf->rf_supportability & HAL_RF_LCK))
-		return;
-
-#if DISABLE_BB_RF
-	return;
-#endif
-	if (iqk_info->rfk_forbidden)
-		return;
-	while (*dm->is_scan_in_process) {
-		RF_DBG(dm, DBG_RF_LCK, "[LCK]scan is in process, bypass LCK\n");
-		return;
-	}
-
-	if (!dm->rf_calibrate_info.is_lck_in_progress) {
-		odm_acquire_spin_lock(dm, RT_IQK_SPINLOCK);
-		dm->rf_calibrate_info.is_lck_in_progress = true;
-		odm_release_spin_lock(dm, RT_IQK_SPINLOCK);
-		start_time = odm_get_current_time(dm);
-		phy_lc_calibrate_8822c(dm);
-		dm->rf_calibrate_info.lck_progressing_time =
-				odm_get_progressing_time(dm, start_time);
-		RF_DBG(dm, DBG_RF_LCK, "[LCK]LCK progressing_time = %lld ms\n",
-		       dm->rf_calibrate_info.lck_progressing_time);
-		odm_acquire_spin_lock(dm, RT_IQK_SPINLOCK);
-		dm->rf_calibrate_info.is_lck_in_progress = false;
-		odm_release_spin_lock(dm, RT_IQK_SPINLOCK);
-	} else {
-		RF_DBG(dm, DBG_RF_LCK,
-		       "[LCK]= Return the LCK CMD, because RFK is in Progress =\n");
-	}
-}
-
 void halrf_rxdck(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -1003,13 +903,6 @@ void halrf_init(void *dm_void)
 		HAL_RF_RXDCK |
 		HAL_RF_TXGAPK |
 		0;
-
-	/*TSSI Init*/
-	//halrf_tssi_dck(dm, true);
-	//halrf_tssi_get_efuse(dm);
-
-	/*TX Gap K*/
-	//halrf_txgapk_write_gain_table(dm);
 }
 
 void halrf_dpk_trigger(void *dm_void)

@@ -87,9 +87,6 @@ struct txpwrtrack_cfg {
 	u8 rf_path_count;
 	u32 thermal_reg_addr;
 	func_set_pwr odm_tx_pwr_track_set_pwr;
-	func_iqk do_iqk;
-	func_lck phy_lc_calibrate;
-	func_tssi_dck do_tssi_dck;
 	func_swing get_delta_swing_table;
 	func_swing8814only get_delta_swing_table8814only;
 	func_swing_xtal get_delta_swing_xtal_table;

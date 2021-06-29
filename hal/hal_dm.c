@@ -125,17 +125,7 @@ void rtw_phydm_iqk_trigger_dbg(_adapter *adapter, bool recovery, bool clear, boo
 {
 	struct dm_struct *p_dm_odm = adapter_to_phydm(adapter);
 
-#if ((RTL8822B_SUPPORT == 1) || (RTL8821C_SUPPORT == 1) || (RTL8814B_SUPPORT == 1) || (RTL8822C_SUPPORT == 1))
-		halrf_segment_iqk_trigger(p_dm_odm, clear, segment);
-#else
-		halrf_iqk_trigger(p_dm_odm, recovery);
-#endif
-}
-void rtw_phydm_lck_trigger(_adapter *adapter)
-{
-	struct dm_struct *p_dm_odm = adapter_to_phydm(adapter);
-
-	halrf_lck_trigger(p_dm_odm);
+	halrf_segment_iqk_trigger(p_dm_odm, clear, segment);
 }
 
 void rtw_hal_phydm_cal_trigger(_adapter *adapter)

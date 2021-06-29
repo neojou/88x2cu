@@ -957,9 +957,6 @@ void configure_txpower_track_8822c(struct txpwrtrack_cfg *config)
 	config->thermal_reg_addr = RF_T_METER_8822C;
 
 	config->odm_tx_pwr_track_set_pwr = odm_tx_pwr_track_set_pwr8822c;
-	config->do_iqk = do_iqk_8822c;
-	config->phy_lc_calibrate = halrf_lck_trigger;
-	config->do_tssi_dck = halrf_tssi_dck;
 	config->get_delta_swing_table = get_delta_swing_table_8822c;
 }
 

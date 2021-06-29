@@ -293,35 +293,6 @@ void phydm_get_read_counter_8822c(struct dm_struct *dm)
 	RF_DBG(dm, DBG_RF_IQK, "[IQK]counter = %d\n", counter);
 }
 
-#if !(DM_ODM_SUPPORT_TYPE & ODM_AP)
-void do_iqk_8822c(
-	void *dm_void,
-	u8 delta_thermal_index,
-	u8 thermal_value,
-	u8 threshold)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct dm_iqk_info *iqk_info = &dm->IQK_info;
-
-	dm->rf_calibrate_info.thermal_value_iqk = thermal_value;
-	halrf_segment_iqk_trigger(dm, true, false);
-}
-#else
-/*Originally config->do_iqk is hooked phy_iq_calibrate_8822C, but do_iqk_8822C and phy_iq_calibrate_8822C have different arguments*/
-void do_iqk_8822c(
-	void *dm_void,
-	u8 delta_thermal_index,
-	u8 thermal_value,
-	u8 threshold)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct dm_iqk_info *iqk_info = &dm->IQK_info;
-	boolean is_recovery = (boolean)delta_thermal_index;
-
-	halrf_segment_iqk_trigger(dm, true, false);
-}
-#endif
-
 void iqk_power_save_8822c(
 	void *dm_void,
 	boolean is_power_save)
