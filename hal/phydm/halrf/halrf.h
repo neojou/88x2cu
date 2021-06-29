@@ -506,8 +506,6 @@ void halrf_dpk_sram_read(void *dm_void);
 
 void halrf_dpk_enable_disable(void *dm_void);
 
-void halrf_dpk_track(void *dm_void);
-
 void halrf_dpk_reload(void *dm_void);
 
 void halrf_dpk_switch(void *dm_void, u8 enable);

@@ -63,9 +63,6 @@ u8 dpk_reload_8822c(
 void do_dpk_8822c(
 	void *dm_void);
 
-void dpk_track_8822c(
-	void *dm_void);
-
 void dpk_info_by_8822c(
 	void *dm_void,
 	u32 *_used,

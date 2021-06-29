@@ -72,7 +72,6 @@ struct dm_dpk_info {
 	/*@BIT(15)~BIT(12) : 5G reserved, BIT(11)~BIT(8) 5G_S3~5G_S0*/
 	/*@BIT(7)~BIT(4) : 2G reserved, BIT(3)~BIT(0) 2G_S3~2G_S0*/
 	u8	thermal_dpk[KPATH];					/*path*/	
-	u8	thermal_dpk_avg[KPATH][AVG_THERMAL_NUM_DPK];	/*path*/
 	u8	pre_pwsf[KPATH];
 	u8	thermal_dpk_avg_index;
 	u32	gnt_control;

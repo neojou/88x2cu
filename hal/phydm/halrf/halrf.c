@@ -1152,26 +1152,6 @@ void halrf_dpk_enable_disable(void *dm_void)
 	}
 }
 
-void halrf_dpk_track(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct dm_dpk_info *dpk_info = &dm->dpk_info;
-	struct _hal_rf_ *rf = &dm->rf_table;
-
-	if (rf->is_dpk_in_progress || dm->rf_calibrate_info.is_iqk_in_progress ||
-	    dm->is_psd_in_process || (dpk_info->dpk_path_ok == 0) ||
-	    !(rf->rf_supportability & HAL_RF_DPK_TRACK) || rf->is_tssi_in_progress
-	    || rf->is_txgapk_in_progress)
-		return;
-
-#if (DM_ODM_SUPPORT_TYPE == ODM_WIN)
-	if (*dm->is_fcs_mode_enable)
-		return;
-#endif
-
-	dpk_track_8822c(dm);
-}
-
 void halrf_set_dpk_track(void *dm_void, u8 enable)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
