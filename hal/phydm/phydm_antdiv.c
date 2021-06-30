@@ -1944,8 +1944,6 @@ void odm_antenna_diversity(void *dm_void)
 	}
 
 	if (dm->pause_ability & ODM_BB_ANT_DIV) {
-		PHYDM_DBG(dm, DBG_ANT_DIV, "Return: Pause AntDIv in LV=%d\n",
-			  dm->pause_lv_table.lv_antdiv);
 		return;
 	}
 

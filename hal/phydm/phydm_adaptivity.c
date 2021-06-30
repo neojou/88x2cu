@@ -297,8 +297,6 @@ boolean phydm_edcca_abort(void *dm_void)
 	}
 
 	if (dm->pause_ability & ODM_BB_ADAPTIVITY) {
-		PHYDM_DBG(dm, DBG_ADPTVTY, "Return: Pause ADPTVTY in LV=%d\n",
-			  dm->pause_lv_table.lv_adapt);
 		return true;
 	}
 

@@ -505,8 +505,6 @@ phydm_dig_abort(void *dm_void)
 	}
 
 	if (dm->pause_ability & ODM_BB_DIG) {
-		PHYDM_DBG(dm, DBG_DIG, "Return: Pause DIG in LV=%d\n",
-			  dm->pause_lv_table.lv_dig);
 		return true;
 	}
 

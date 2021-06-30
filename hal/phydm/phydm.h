@@ -1291,7 +1291,6 @@ struct dm_struct {
 	struct	phydm_auto_dbg_struct	auto_dbg_table;
 #endif
 
-	struct	phydm_pause_lv		pause_lv_table;
 	struct	phydm_api_stuc		api_table;
 #ifdef PHYDM_POWER_TRAINING_SUPPORT
 	struct	phydm_pow_train_stuc	pow_train_table;

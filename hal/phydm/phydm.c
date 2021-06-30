@@ -443,7 +443,6 @@ enum phydm_init_result odm_dm_init(struct dm_struct *dm)
 			ODM_BB_CFO_TRACKING |
 			ODM_BB_ENV_MONITOR;
 
-	phydm_pause_func_init(dm);
 	phydm_common_info_self_init(dm);
 	phydm_rx_phy_status_init(dm);
 
@@ -608,18 +607,6 @@ void phydm_supportability_en(void *dm_void, char input[][16], u32 *_used,
 
 void phydm_watchdog_mp(struct dm_struct *dm)
 {
-}
-
-void phydm_pause_func_init(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-
-	dm->pause_lv_table.lv_cckpd = PHYDM_PAUSE_RELEASE;
-	dm->pause_lv_table.lv_dig = PHYDM_PAUSE_RELEASE;
-	dm->pause_lv_table.lv_antdiv = PHYDM_PAUSE_RELEASE;
-	dm->pause_lv_table.lv_dig = PHYDM_PAUSE_RELEASE;
-	dm->pause_lv_table.lv_adapt = PHYDM_PAUSE_RELEASE;
-	dm->pause_lv_table.lv_adsl = PHYDM_PAUSE_RELEASE;
 }
 
 void phydm_fw_dm_ctrl_en(void *dm_void, enum phydm_func_idx fun_idx,

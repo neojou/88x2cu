@@ -1429,8 +1429,6 @@ phydm_stop_cck_pd_th(void *dm_void)
 	}
 
 	if (dm->pause_ability & ODM_BB_CCK_PD) {
-		PHYDM_DBG(dm, DBG_CCKPD, "Return: Pause CCKPD in LV=%d\n",
-			  dm->pause_lv_table.lv_cckpd);
 		return true;
 	}
 
