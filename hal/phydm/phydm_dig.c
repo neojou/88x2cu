@@ -612,9 +612,6 @@ void phydm_dig_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	struct phydm_dig_struct *dig_t = &dm->dm_dig_table;
-#if (DM_ODM_SUPPORT_TYPE & (ODM_AP))
-	struct phydm_fa_struct *false_alm_cnt = &dm->false_alm_cnt;
-#endif
 	struct phydm_bb_ram_ctrl *bb_ctrl = &dm->p_bb_ram_ctrl;
 	u32 ret_value = 0;
 	u8 i;
@@ -634,27 +631,8 @@ void phydm_dig_init(void *dm_void)
 	dig_t->fw_dig_enable = false;
 	dig_t->fa_source = 0;
 
-#if (DM_ODM_SUPPORT_TYPE & (ODM_AP))
-	/* @For RTL8881A */
-	false_alm_cnt->cnt_ofdm_fail_pre = 0;
-#endif
-
 	dig_t->rx_gain_range_max = DIG_MAX_BALANCE_MODE;
 	dig_t->rx_gain_range_min = dig_t->cur_ig_value;
-
-#ifdef PHYDM_TDMA_DIG_SUPPORT
-	#if (DM_ODM_SUPPORT_TYPE & (ODM_WIN | ODM_CE))
-		dm->original_dig_restore = true;
-		dm->tdma_dig_state_number = DIG_NUM_OF_TDMA_STATES;
-		dm->tdma_dig_timer_ms = DIG_TIMER_MS;
-	#endif
-	dig_t->tdma_force_l_igi = 0xff;
-	dig_t->tdma_force_h_igi = 0xff;
-#endif
-#ifdef CFG_DIG_DAMPING_CHK
-	phydm_dig_recorder_reset(dm);
-	dig_t->dig_dl_en = 1;
-#endif
 
 #ifdef PHYDM_HW_IGI
 	bb_ctrl->hwigi_watchdog_en = false;

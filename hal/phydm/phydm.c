@@ -448,6 +448,7 @@ enum phydm_init_result odm_dm_init(struct dm_struct *dm)
 
 	phydm_dig_init(dm);
 #ifdef PHYDM_SUPPORT_CCKPD
+aa
 	phydm_cck_pd_init(dm);
 #endif
 	phydm_env_monitor_init(dm);

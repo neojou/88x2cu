@@ -783,11 +783,6 @@ void phydm_dm_summary(void *dm_void, u8 macid)
 		 dtp->sta_tx_high_power_lvl);
 #endif
 
-	pr_debug("05.(%s) %-12s: cck_pd_lv=%d\n",
-		 ((comp & ODM_BB_CCK_PD) ?
-		 ((pause_comp & ODM_BB_CCK_PD) ? "P" : "V") : "."),
-		 "CCK_PD", dm->dm_cckpd_table.cck_pd_lv);
-
 #ifdef CONFIG_PHYDM_ANTENNA_DIVERSITY
 	pr_debug("06.(%s) %-12s: div_type=%d, curr_ant=%s\n",
 		 ((comp & ODM_BB_ANT_DIV) ?
