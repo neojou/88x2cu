@@ -38,7 +38,9 @@
 #include "halbb_api_ex.h"
 #include "halbb_interface_ex.h"
 #include "halbb_dfs_ex.h"
+#endif //NEO
 #include "halbb_dig_ex.h"
+#if 0 //NEO
 #include "halbb_mp_ex.h"
 #include "halbb_plcp_tx_ex.h"
 #include "halbb_pmac_setting_ex.h"

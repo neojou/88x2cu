@@ -273,9 +273,13 @@ struct bb_info {
 #ifdef HALBB_STATISTICS_SUPPORT
 	struct bb_stat_info	bb_stat_i;
 #endif
+
+#endif //NEO
 #ifdef HALBB_DIG_SUPPORT
 	struct bb_dig_info	bb_dig_i;
 #endif
+
+#if 0 //NEO
 #ifdef HALBB_CFO_TRK_SUPPORT
 	struct bb_cfo_trk_info	bb_cfo_trk_i;
 #endif
@@ -302,7 +306,9 @@ struct bb_info {
 #if 0 //NEO
 	struct bb_api_info	bb_api_i;
 	struct bb_iot_info	bb_iot_i;
+#endif //NEO
 	struct bb_dbg_info	bb_dbg_i;
+#if 0 //NEO
 	struct bb_c2h_fw_tx_rpt	bb_fwtx_c2h_i;
 	struct bb_h2c_fw_tx_setting	bb_fwtx_h2c_i;
 	struct bb_h2c_fw_edcca	bb_fw_edcca_i;

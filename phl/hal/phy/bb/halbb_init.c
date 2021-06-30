@@ -327,7 +327,6 @@ enum rtw_hal_status halbb_dm_init(struct bb_info *bb)
 {
 	enum rtw_hal_status hal_status = RTW_HAL_STATUS_SUCCESS;
 
-	pr_info("%s NEO enter\n", __func__);
 	if (!bb) {
 		BB_WARNING("[%s] *bb = NULL", __func__);
 		return RTW_HAL_STATUS_FAILURE;
@@ -375,9 +374,11 @@ enum rtw_hal_status halbb_dm_init(struct bb_info *bb)
 	#ifdef HALBB_DFS_SUPPORT
 	halbb_dfs_init(bb);
 	#endif
+#endif //NEO
 	#ifdef HALBB_DIG_SUPPORT
 	halbb_dig_init(bb);
 	#endif
+#if 0 //NEO
 	#ifdef HALBB_CFO_TRK_SUPPORT
 	halbb_cfo_trk_init(bb);
 	#endif

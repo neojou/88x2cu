@@ -18,7 +18,9 @@ path_halbb_d1 := $(phl_path)/phy/bb
 
 halbb-y += $(path_halbb_d1)/halbb.o \
 		$(path_halbb_d1)/halbb_init.o \
-		$(path_halbb_d1)/halbb_dbg.o
+		$(path_halbb_d1)/halbb_dbg.o \
+		$(path_halbb_d1)/halbb_dig.o  \
+		$(path_halbb_d1)/halbb_interface.o
 
 #halbb-y += $(path_halbb_d1)/halbb.o \
 			$(path_halbb_d1)/halbb_api.o \
@@ -34,7 +36,6 @@ halbb-y += $(path_halbb_d1)/halbb.o \
 			$(path_halbb_d1)/halbb_env_mntr.o \
 			$(path_halbb_d1)/halbb_hw_cfg.o \
 			$(path_halbb_d1)/halbb_init.o \
-			$(path_halbb_d1)/halbb_interface.o \
 			$(path_halbb_d1)/halbb_la_mode.o \
 			$(path_halbb_d1)/halbb_math_lib.o \
 			$(path_halbb_d1)/halbb_mp.o \
@@ -47,7 +48,6 @@ halbb-y += $(path_halbb_d1)/halbb.o \
 			$(path_halbb_d1)/halbb_ra.o \
 			$(path_halbb_d1)/halbb_statistics.o \
 			$(path_halbb_d1)/halbb_ant_div.o \
-			$(path_halbb_d1)/halbb_dig.o \
 			$(path_halbb_d1)/halbb_fwofld.o \
 			$(path_halbb_d1)/halbb_dyn_csi_rsp.o
 

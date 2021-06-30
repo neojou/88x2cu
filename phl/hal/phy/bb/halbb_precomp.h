@@ -95,8 +95,12 @@
 #include "halbb_edcca_ex.h"
 #include "halbb_env_mntr_ex.h"
 #include "halbb_env_mntr.h"
+#endif // NEO
+
 #include "halbb_dig_ex.h"
 #include "halbb_dig.h"
+
+#if 0 //NEO
 #include "halbb_dyn_csi_rsp.h"
 #include "halbb_dyn_csi_rsp_ex.h"
 #include "halbb_ant_div.h"
