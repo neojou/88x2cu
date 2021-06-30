@@ -468,22 +468,6 @@ void phydm_rst_hwigi(void *dm_void)
 	odm_set_bb_reg(dm, R_0x1e84, MASKDWORD, 0x0);
 }
 
-void phydm_hwigi_init(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct phydm_bb_ram_ctrl *bb_ctrl = &dm->p_bb_ram_ctrl;
-	u8 igi_ofst = 0x0;
-	u8 t1 = 0x0;
-	u8 t2 = 0x0;
-	u8 t3 = 0x0;
-
-	t1 = 0x55; /*34 us*/
-	t3 = 0x55; /*34 us*/
-
-	bb_ctrl->hwigi_watchdog_en = false;
-	phydm_set_hwigi_pre_setting(dm, igi_ofst, t1, t2, t3);
-}
-
 void phydm_hwigi(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -631,6 +615,7 @@ void phydm_dig_init(void *dm_void)
 #if (DM_ODM_SUPPORT_TYPE & (ODM_AP))
 	struct phydm_fa_struct *false_alm_cnt = &dm->false_alm_cnt;
 #endif
+	struct phydm_bb_ram_ctrl *bb_ctrl = &dm->p_bb_ram_ctrl;
 	u32 ret_value = 0;
 	u8 i;
 
@@ -672,7 +657,7 @@ void phydm_dig_init(void *dm_void)
 #endif
 
 #ifdef PHYDM_HW_IGI
-	phydm_hwigi_init(dm);
+	bb_ctrl->hwigi_watchdog_en = false;
 #endif
 }
 void phydm_dig_abs_boundary_decision(struct dm_struct *dm, boolean is_dfs_band)

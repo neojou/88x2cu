@@ -36,7 +36,9 @@
 #include "halbb_dbg_cmd_ex.h"
 #include "halbb_physts_ex.h"
 #include "halbb_api_ex.h"
+#endif //NEO
 #include "halbb_interface_ex.h"
+#if 0 //NEO
 #include "halbb_dfs_ex.h"
 #endif //NEO
 #include "halbb_dig_ex.h"

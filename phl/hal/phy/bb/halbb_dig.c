@@ -1070,45 +1070,23 @@ void halbb_dig_reset(struct bb_info *bb)
 
 #endif //NEO
 
+static void halbb_dig_igi_init(struct bb_info *bb)
+{
+	u8 t1 = 0x55; /* 34 us */
+	u8 t3 = 0x55; /* 34 us */
+	u32 value32;
+
+	value32 = (t1 << 8) + (t3 << 24);
+	halbb_set_reg(bb, 0x1e80, MASKDWORD, value32);
+}
+
 void halbb_dig_init(struct bb_info *bb)
 {
 	struct bb_dig_info *bb_dig = &bb->bb_dig_i;
 	u8 igi_new;
 
 	pr_info("%s NEO start\n", __func__);
-
-#if 0 //NEO
-	if (bb->phl_com->drv_mode != RTW_DRV_MODE_NORMAL)
-		return;
-
-	BB_DIG_DBG(bb, DIG_DBG_LV0, "[%s]=========>\n", __func__);
-
-	/* DIG sub-DM configurations */
-	halbb_dig_mode_update(bb, DIG_ORIGIN);
-	bb_dig->igi_pause_cnt = 0;
-	bb_dig->le_igi_ofst = 10;
-	bb_dig->dbg_lv = DIG_DBG_LV2;
-	bb_dig->dig_state_h_i.state_num_lmt = 3;
-	bb_dig->dig_state_h_i.sdagc_follow_pagc_en = false;
-#ifdef HALBB_DIG_TDMA_SUPPORT
-	bb_dig->dig_state_l_i.state_num_lmt = 1;
-	bb_dig->dig_state_l_i.sdagc_follow_pagc_en = false;
-	bb_dig->tdma_timer_ms = 50;
-	BB_DIG_DBG(bb, DIG_DBG_LV0, "Init dig timer");
-	halbb_dig_timers(bb, BB_INIT_TIMER);
-#endif
-	halbb_dig_ifs_clm_para_init(bb);
-	halbb_dig_gain_para_init(bb);
-	halbb_dig_reset(bb);
-	bb_dig->dig_state_h_i.igi_fa_rssi = 1; /*init state*/
-	halbb_dig_para_update(bb);
-
-#ifdef HALBB_DIG_DAMPING_CHK
-	halbb_dig_damping_chk_init(bb);
-#endif
-	igi_new = halbb_dig_igi_by_ofst(bb, IGI_NOLINK, 0);
-	halbb_dig_cfg_bbcr(bb, igi_new);
-#endif //NEO
+	halbb_dig_igi_init(bb);
 }
 
 #if 0 //NEO
