@@ -364,10 +364,10 @@ enum rtw_hal_status hal_start_8822c(struct rtw_phl_com_t *phl_com,
 	/* After mac/bb/rf initialized, set btc config */
 	rtw_hal_btc_init_coex_cfg_ntfy(hal);
 #endif
-	/* start watchdog/dm */
-	rtw_hal_bb_dm_init(hal);
 #endif // if 0 NEO
+	/* start watchdog/dm */
 	rtw_hal_rf_dm_init(hal);
+	rtw_hal_bb_dm_init(hal);
 
 	/* Temporarily read hardware setting for RX
 	 * ToDo: driver control MAC setting.

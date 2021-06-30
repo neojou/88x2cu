@@ -23,7 +23,7 @@
  
  /*@--------------------------[Prptotype]-------------------------------------*/
 void halbb_dm_deinit(struct rtw_phl_com_t *phl_com, void *bb_phy_0);
-enum rtw_hal_status halbb_dm_init(struct bb_info *bb, enum phl_phy_idx phy_idx);
+enum rtw_hal_status halbb_dm_init(struct bb_info *bb);
 
 void halbb_buffer_deinit(struct rtw_phl_com_t *phl_com,
 			 struct rtw_hal_com_t *hal_com, void *bb_phy_0);

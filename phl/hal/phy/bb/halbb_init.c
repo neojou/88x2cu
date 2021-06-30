@@ -321,16 +321,20 @@ void halbb_dm_deinit(struct rtw_phl_com_t *phl_com, void *bb_phy_0)
 
 	bb->bb_dm_init_ready = false;
 }
+#endif //NEO
 
-enum rtw_hal_status halbb_dm_init(struct bb_info *bb, enum phl_phy_idx phy_idx)
+enum rtw_hal_status halbb_dm_init(struct bb_info *bb)
 {
 	enum rtw_hal_status hal_status = RTW_HAL_STATUS_SUCCESS;
 
+	pr_info("%s NEO enter\n", __func__);
 	if (!bb) {
 		BB_WARNING("[%s] *bb = NULL", __func__);
 		return RTW_HAL_STATUS_FAILURE;
 	}
 
+	pr_info("%s NEO start\n", __func__);
+#if 0 //NEO
 	if (!bb->bb_cmn_info_init_ready) {
 		BB_WARNING("bb_cmn_info_init_ready = false");
 		return RTW_HAL_STATUS_FAILURE;
@@ -396,12 +400,14 @@ enum rtw_hal_status halbb_dm_init(struct bb_info *bb, enum phl_phy_idx phy_idx)
 	halbb_ch_info_init(bb);
 	#endif
 	halbb_reset_adc(bb);
-
+#endif //NEO
 	bb->bb_dm_init_ready = true;
 	BB_DBG(bb, DBG_INIT, "bb_init_ready = %d\n", bb->bb_dm_init_ready);
 
 	return hal_status;
 }
+
+#if 0 //NEO
 
 void halbb_cr_cfg_init(struct bb_info *bb)
 {

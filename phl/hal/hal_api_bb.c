@@ -89,12 +89,14 @@ void rtw_hal_bb_fw_edcca(struct hal_info_t *hal_info)
 
 	halbb_fw_edcca(hal_info->bb);
 }
+#endif // if 0 NEO
 
 void rtw_hal_bb_dm_init(struct hal_info_t *hal_info)
 {
 	halbb_dm_init(hal_info->bb);
 }
 
+#if 0 // NEO TODO
 enum rtw_hal_status rtw_hal_bb_ctrl_rx_cca(struct hal_info_t *hal_info,
 	bool cca_en, enum phl_phy_idx phy_idx)
 {
