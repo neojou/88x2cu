@@ -1123,147 +1123,6 @@ void phydm_dig_fa_source(void *dm_void, u8 fa_source, u32 *fa_metrics)
 		  fa_source, fa->cnt_all, fa->time_fa_exp, *fa_metrics);
 }
 
-void phydm_dig(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct phydm_dig_struct *dig_t = &dm->dm_dig_table;
-	struct phydm_fa_struct *fa = &dm->false_alm_cnt;
-#ifdef PHYDM_TDMA_DIG_SUPPORT
-	struct phydm_fa_acc_struct *falm_cnt_acc = &dm->false_alm_cnt_acc;
-#endif
-	u8 igi = dig_t->cur_ig_value;
-	u8 new_igi = 0x20;
-	u32 fa_metrics = fa->cnt_all;
-	boolean dfs_mode_en = false;
-
-	PHYDM_DBG(dm, DBG_DIG, "%s Start===>\n", __func__);
-
-	#ifdef PHYDM_DCC_ENHANCE
-	if (dm->dm_dcc_info.dcc_en) {
-		fa_metrics = fa->cnt_ofdm_fail; /*OFDM FA only*/
-		dig_t->fa_source = 0;
-	}
-	#endif
-
-	#ifdef PHYDM_TDMA_DIG_SUPPORT
-	if (!(dm->original_dig_restore)) {
-		if (dig_t->cur_ig_value_tdma == 0)
-			dig_t->cur_ig_value_tdma = dig_t->cur_ig_value;
-
-		igi = dig_t->cur_ig_value_tdma;
-		fa_metrics = falm_cnt_acc->cnt_all_1sec;
-		dig_t->fa_source = 0;
-	}
-	#endif
-
-	if (phydm_dig_abort(dm)) {
-		dig_t->cur_ig_value = phydm_get_igi(dm, BB_PATH_A);
-		return;
-	}
-
-	if (dig_t->fa_source)
-		phydm_dig_fa_source(dm, dig_t->fa_source, &fa_metrics);
-
-	PHYDM_DBG(dm, DBG_DIG,
-		  "is_linked=%d, RSSI=%d, 1stConnect=%d, 1stDisconnect=%d\n",
-		  dm->is_linked, dm->rssi_min,
-		  dm->first_connect, dm->first_disconnect);
-
-	PHYDM_DBG(dm, DBG_DIG, "DIG ((%s)) mode\n",
-		  (*dm->bb_op_mode ? "Balance" : "Performance"));
-
-	/*@DFS mode enable check*/
-	dfs_mode_en = phydm_dig_dfs_mode_en(dm);
-
-#ifdef CFG_DIG_DAMPING_CHK
-	/*Record IGI History*/
-	phydm_dig_recorder(dm, igi, fa_metrics);
-
-	/*@DIG Damping Check*/
-	phydm_dig_damping_chk(dm);
-#endif
-
-	/*@Absolute Boundary Decision */
-	phydm_dig_abs_boundary_decision(dm, dfs_mode_en);
-
-	/*@Dynamic Boundary Decision*/
-	phydm_dig_dym_boundary_decision(dm, dfs_mode_en);
-
-	/*@Abnormal case check*/
-	phydm_dig_abnormal_case(dm);
-
-	/*@FA threshold decision */
-	phydm_fa_threshold_check(dm, dfs_mode_en);
-
-	/*Select new IGI by FA */
-	new_igi = phydm_get_new_igi(dm, igi, fa_metrics, dfs_mode_en);
-
-	/* @1 Update status */
-	#ifdef PHYDM_TDMA_DIG_SUPPORT
-	if (!(dm->original_dig_restore)) {
-		dig_t->cur_ig_value_tdma = new_igi;
-		/*@It is possible fa_acc_1sec_tsf >= */
-		/*@1sec while tdma_dig_state == 0*/
-		if (dig_t->tdma_dig_state != 0)
-			odm_write_dig(dm, dig_t->cur_ig_value_tdma);
-	} else
-	#endif
-		odm_write_dig(dm, new_igi);
-}
-
-void phydm_dig_lps_32k(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	u8 current_igi = dm->rssi_min;
-
-	odm_write_dig(dm, current_igi);
-}
-
-void phydm_dig_by_rssi_lps(void *dm_void)
-{
-#if (DM_ODM_SUPPORT_TYPE & (ODM_WIN | ODM_CE | ODM_IOT))
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct phydm_fa_struct *falm_cnt;
-
-	u8 rssi_lower = DIG_MIN_LPS; /* @0x1E or 0x1C */
-	u8 current_igi = dm->rssi_min;
-
-	falm_cnt = &dm->false_alm_cnt;
-	if (phydm_dig_abort(dm))
-		return;
-
-	current_igi = current_igi + RSSI_OFFSET_DIG_LPS;
-	PHYDM_DBG(dm, DBG_DIG, "%s==>\n", __func__);
-
-	/* Using FW PS mode to make IGI */
-	/* @Adjust by  FA in LPS MODE */
-	if (falm_cnt->cnt_all > DM_DIG_FA_TH2_LPS)
-		current_igi = current_igi + 4;
-	else if (falm_cnt->cnt_all > DM_DIG_FA_TH1_LPS)
-		current_igi = current_igi + 2;
-	else if (falm_cnt->cnt_all < DM_DIG_FA_TH0_LPS)
-		current_igi = current_igi - 2;
-
-	/* @Lower bound checking */
-
-	/* RSSI Lower bound check */
-	if ((dm->rssi_min - 10) > DIG_MIN_LPS)
-		rssi_lower = (dm->rssi_min - 10);
-	else
-		rssi_lower = DIG_MIN_LPS;
-
-	/* Upper and Lower Bound checking */
-	if (current_igi > DIG_MAX_LPS)
-		current_igi = DIG_MAX_LPS;
-	else if (current_igi < rssi_lower)
-		current_igi = rssi_lower;
-
-	PHYDM_DBG(dm, DBG_DIG, "fa_cnt_all=%d, rssi_min=%d, curr_igi=0x%x\n",
-		  falm_cnt->cnt_all, dm->rssi_min, current_igi);
-	odm_write_dig(dm, current_igi);
-#endif
-}
-
 void phydm_get_dig_coverage(void *dm_void, u8 *max, u8 *min)
 {
 	*min = DIG_MIN_COVERAGE;
@@ -1824,29 +1683,6 @@ void phydm_tdma_dig_para_upd(void *dm_void, enum upd_type type, u8 input)
 
 #ifdef IS_USE_NEW_TDMA
 
-void phydm_tdma_dig_timers(void *dm_void, u8 state)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct phydm_dig_struct *dig_t = &dm->dm_dig_table;
-#if defined(CONFIG_RTL_TRIBAND_SUPPORT) && defined(CONFIG_USB_HCI)
-	struct rtl8192cd_priv *priv = dm->priv;
-
-	if (priv->hci_type == RTL_HCI_USB) {
-		phydm_tdma_dig_timers_usb(dm_void, state);
-		return;
-	}
-#endif /* defined(CONFIG_RTL_TRIBAND_SUPPORT) && defined(CONFIG_USB_HCI) */
-
-	if (state == INIT_TDMA_DIG_TIMMER)
-		odm_initialize_timer(dm, &dm->tdma_dig_timer,
-				     (void *)phydm_tdma_dig_cbk,
-				     NULL, "phydm_tdma_dig_timer");
-	else if (state == CANCEL_TDMA_DIG_TIMMER)
-		odm_cancel_timer(dm, &dm->tdma_dig_timer);
-	else if (state == RELEASE_TDMA_DIG_TIMMER)
-		odm_release_timer(dm, &dm->tdma_dig_timer);
-}
-
 u8 get_new_igi_bound(struct dm_struct *dm, u8 igi, u32 fa_cnt, u8 *rx_gain_max,
 		     u8 *rx_gain_min, boolean is_dfs_band)
 {
@@ -1939,56 +1775,6 @@ void phydm_write_tdma_dig(void *dm_void, u8 new_igi)
 		  new_igi);
 }
 
-/*@callback function triggered by SW timer*/
-void phydm_tdma_dig_cbk(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	void *padapter = dm->adapter;
-
-	if (dm->support_interface == ODM_ITRF_PCIE)
-		phydm_tdma_dig_workitem_callback(dm);
-	/* @Can't do I/O in timer callback*/
-	else
-		phydm_run_in_thread_cmd(dm, phydm_tdma_dig_workitem_callback,
-					dm);
-}
-
-void phydm_tdma_dig_workitem_callback(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct phydm_dig_struct *dig_t = &dm->dm_dig_table;
-
-	if (phydm_dig_abort(dm) || (dm->original_dig_restore))
-		return;
-	/*@
-	 *PHYDM_DBG(dm, DBG_DIG, "timer callback =======> tdma_dig_state=%d\n");
-	 *	  dig_t->tdma_dig_state);
-	 *PHYDM_DBG(dm, DBG_DIG, "tdma_h_igi=0x%x, tdma_l_igi=0x%x\n",
-	 *	  dig_t->cur_ig_value_tdma,
-	 *	  dig_t->low_ig_value);
-	 */
-	phydm_tdma_fa_cnt_chk(dm);
-
-	/*@prevent dumb*/
-	if (dm->tdma_dig_state_number < 2)
-		dm->tdma_dig_state_number = 2;
-
-	/*@update state*/
-	dig_t->tdma_dig_cnt++;
-	dig_t->tdma_dig_state = dig_t->tdma_dig_cnt % dm->tdma_dig_state_number;
-
-	/*@
-	 *PHYDM_DBG(dm, DBG_DIG, "enter state %d, dig count %d\n",
-	 *	  dig_t->tdma_dig_state, dig_t->tdma_dig_cnt);
-	 */
-
-	if (dig_t->tdma_dig_state == TDMA_DIG_LOW_STATE)
-		odm_write_dig(dm, dig_t->low_ig_value);
-	else if (dig_t->tdma_dig_state >= TDMA_DIG_HIGH_STATE)
-		odm_write_dig(dm, dig_t->cur_ig_value_tdma);
-
-	odm_set_timer(dm, &dm->tdma_dig_timer, dm->tdma_dig_timer_ms);
-}
 /*@============================================================*/
 /*@FASLE ALARM CHECK*/
 /*@============================================================*/
@@ -2252,9 +2038,6 @@ void phydm_tdma_low_dig(void *dm_void)
 			dig_t->low_ig_value = dig_t->tdma_force_l_igi;
 		dig_t->tdma_rx_gain_min[TDMA_DIG_LOW_STATE] = tdma_l_dym_min;
 		dig_t->tdma_rx_gain_max[TDMA_DIG_LOW_STATE] = tdma_l_dym_max;
-#if 0
-		/*odm_write_dig(dm, tdma_l_igi);*/
-#endif
 	} else {
 		odm_write_dig(dm, new_igi);
 	}
@@ -2424,9 +2207,6 @@ void phydm_tdma_high_dig(void *dm_void)
 			dig_t->cur_ig_value_tdma = dig_t->tdma_force_h_igi;
 		dig_t->tdma_rx_gain_min[TDMA_DIG_HIGH_STATE] = tdma_h_dym_min;
 		dig_t->tdma_rx_gain_max[TDMA_DIG_HIGH_STATE] = tdma_h_dym_max;
-#if 0
-		/*odm_write_dig(dm, tdma_h_igi);*/
-#endif
 	} else {
 		odm_write_dig(dm, new_igi);
 	}

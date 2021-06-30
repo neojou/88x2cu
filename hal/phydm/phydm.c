@@ -606,16 +606,6 @@ void phydm_supportability_en(void *dm_void, char input[][16], u32 *_used,
 	*_out_len = out_len;
 }
 
-void phydm_watchdog_lps_32k(struct dm_struct *dm)
-{
-	PHYDM_DBG(dm, DBG_COMMON_FLOW, "%s ======>\n", __func__);
-
-	phydm_common_info_self_update(dm);
-	phydm_rssi_monitor_check(dm);
-	phydm_dig_lps_32k(dm);
-	phydm_common_info_self_reset(dm);
-}
-
 void phydm_watchdog_mp(struct dm_struct *dm)
 {
 }
@@ -1339,63 +1329,15 @@ void odm_free_all_work_items(struct dm_struct *dm)
 
 void odm_init_all_timers(struct dm_struct *dm)
 {
-#if (defined(CONFIG_PHYDM_ANTENNA_DIVERSITY))
-	odm_ant_div_timers(dm, INIT_ANTDIV_TIMMER);
-#endif
-#if (defined(PHYDM_TDMA_DIG_SUPPORT))
-#ifdef IS_USE_NEW_TDMA
-	phydm_tdma_dig_timers(dm, INIT_TDMA_DIG_TIMMER);
-#endif
-#endif
 }
 
 void odm_cancel_all_timers(struct dm_struct *dm)
 {
-#if (DM_ODM_SUPPORT_TYPE == ODM_WIN)
-	/* @2012/01/12 MH Temp BSOD fix. We need to find NIC allocate mem fail reason in win7*/
-	if (dm->adapter == NULL)
-		return;
-#endif
-
-#if (defined(CONFIG_PHYDM_ANTENNA_DIVERSITY))
-	odm_ant_div_timers(dm, CANCEL_ANTDIV_TIMMER);
-#endif
-#ifdef PHYDM_TDMA_DIG_SUPPORT
-#ifdef IS_USE_NEW_TDMA
-	phydm_tdma_dig_timers(dm, CANCEL_TDMA_DIG_TIMMER);
-#endif
-#endif
 }
 
 void odm_release_all_timers(struct dm_struct *dm)
 {
-#if (defined(CONFIG_PHYDM_ANTENNA_DIVERSITY))
-	odm_ant_div_timers(dm, RELEASE_ANTDIV_TIMMER);
-#endif
-#ifdef PHYDM_TDMA_DIG_SUPPORT
-#ifdef IS_USE_NEW_TDMA
-	phydm_tdma_dig_timers(dm, RELEASE_TDMA_DIG_TIMMER);
-#endif
-#endif
 }
-
-#if (DM_ODM_SUPPORT_TYPE == ODM_AP)
-void odm_init_all_threads(
-	struct dm_struct *dm)
-{
-#ifdef TPT_THREAD
-	k_tpt_task_init(dm->priv);
-#endif
-}
-
-void odm_stop_all_threads(
-	struct dm_struct *dm)
-{
-#ifdef TPT_THREAD
-	k_tpt_task_stop(dm->priv);
-#endif
-}
-#endif
 
 #if (DM_ODM_SUPPORT_TYPE == ODM_CE)
 /* @Justin: According to the current RRSI to adjust Response Frame TX power,

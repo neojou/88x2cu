@@ -319,12 +319,6 @@ void phydm_hwigi_dbg(void *dm_void, char input[][16], u32 *_used,
 
 void phydm_dig_init(void *dm_void);
 
-void phydm_dig(void *dm_void);
-
-void phydm_dig_lps_32k(void *dm_void);
-
-void phydm_dig_by_rssi_lps(void *dm_void);
-
 void phydm_get_dig_coverage(void *dm_void, u8 *max, u8 *min);
 
 u8 phydm_get_igi_for_target_pin_scan(void *dm_void, u8 rssi);
@@ -351,8 +345,6 @@ void phydm_false_alarm_counter_acc_reset(void *dm_void);
 void phydm_tdma_dig_para_upd(void *dm_void, enum upd_type type, u8 input);
 
 #ifdef IS_USE_NEW_TDMA
-void phydm_tdma_dig_timers(void *dm_void, u8 state);
-
 void phydm_tdma_dig_cbk(void *dm_void);
 
 void phydm_tdma_dig_workitem_callback(void *dm_void);
