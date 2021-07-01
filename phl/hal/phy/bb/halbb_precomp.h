@@ -95,10 +95,9 @@
 #include "halbb_cfo_trk.h"
 #include "halbb_edcca.h"
 #include "halbb_edcca_ex.h"
+#endif // NEO
 #include "halbb_env_mntr_ex.h"
 #include "halbb_env_mntr.h"
-#endif // NEO
-
 #include "halbb_dig_ex.h"
 #include "halbb_dig.h"
 

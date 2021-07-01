@@ -259,11 +259,12 @@ struct bb_info {
 	struct bb_ra_info	bb_ra_i[PHL_MAX_STA_NUM];
 #endif
 
-#if 0 //NEO
 
 #ifdef HALBB_ENV_MNTR_SUPPORT
 	struct bb_env_mntr_info bb_env_mntr_i;
 #endif
+
+#if 0 //NEO
 #ifdef HALBB_EDCCA_SUPPORT
 	struct bb_edcca_info	bb_edcca_i;
 #endif
@@ -273,8 +274,8 @@ struct bb_info {
 #ifdef HALBB_STATISTICS_SUPPORT
 	struct bb_stat_info	bb_stat_i;
 #endif
-
 #endif //NEO
+
 #ifdef HALBB_DIG_SUPPORT
 	struct bb_dig_info	bb_dig_i;
 #endif

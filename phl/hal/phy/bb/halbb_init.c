@@ -385,9 +385,11 @@ enum rtw_hal_status halbb_dm_init(struct bb_info *bb)
 	#ifdef HALBB_RA_SUPPORT
 	halbb_ra_init(bb);
 	#endif
+#endif //NEO
 	#ifdef HALBB_ENV_MNTR_SUPPORT
 	halbb_env_mntr_init(bb);
 	#endif
+#if 0 //NEO
 	#ifdef HALBB_PWR_CTRL_SUPPORT
 	halbb_pwr_ctrl_init(bb);
 	#endif

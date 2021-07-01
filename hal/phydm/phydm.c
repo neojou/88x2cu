@@ -447,10 +447,6 @@ enum phydm_init_result odm_dm_init(struct dm_struct *dm)
 	phydm_rx_phy_status_init(dm);
 
 	phydm_dig_init(dm);
-#ifdef PHYDM_SUPPORT_CCKPD
-aa
-	phydm_cck_pd_init(dm);
-#endif
 	phydm_env_monitor_init(dm);
 	phydm_adaptivity_init(dm);
 	phydm_ra_info_init(dm);

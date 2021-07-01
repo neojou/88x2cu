@@ -54,7 +54,9 @@
 #include "halbb_edcca_ex.h"
 #include "halbb_dbcc_ex.h"
 #include "halbb_rua_tbl_ex.h"
+#endif //NEO
 #include "halbb_env_mntr_ex.h"
+#if 0 //NEO
 #include "halbb_pwr_ctrl_ex.h"
 #include "halbb_dyn_csi_rsp_ex.h"
 #ifdef BB_8852A_CAV_SUPPORT
