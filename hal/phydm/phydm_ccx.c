@@ -100,22 +100,6 @@ phydm_nhm_check_rdy(void *dm_void)
 	return is_ready;
 }
 
-void phydm_nhm_cal_wgt(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u8 i = 0;
-
-	for (i = 0; i < NHM_RPT_NUM; i++) {
-		if (i == 0)
-			ccx->nhm_wgt[0] = (u8)(MAX_2(ccx->nhm_th[0] - 2, 0));
-		else if (i == (NHM_RPT_NUM - 1))
-			ccx->nhm_wgt[NHM_RPT_NUM - 1] = (u8)(ccx->nhm_th[NHM_TH_NUM - 1] + 2);
-		else
-			ccx->nhm_wgt[i] = (u8)((ccx->nhm_th[i - 1] + ccx->nhm_th[i]) >> 1);
-	}
-}
-
 u8 phydm_nhm_cal_wgt_avg(void *dm_void, u8 start_i, u8 end_i, u8 n_sum)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -181,192 +165,6 @@ u8 phydm_nhm_cal_nhm_env(void *dm_void)
 		  first_idx, nhm_env);
 
 	return nhm_env;
-}
-
-void phydm_nhm_get_utility(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u8 nhm_rpt_non_0 = 0;
-	u8 nhm_rpt_non_11 = 0;
-	u8 nhm_env = 0;
-
-	if (ccx->nhm_rpt_sum >= ccx->nhm_result[0]) {
-		phydm_nhm_cal_wgt(dm);
-
-		nhm_rpt_non_0 = ccx->nhm_rpt_sum - ccx->nhm_result[0];
-		nhm_rpt_non_11 = ccx->nhm_rpt_sum - ccx->nhm_result[11];
-		/*exclude nhm_r[0] above -80dBm or first cluster under -80dBm*/
-		nhm_env = phydm_nhm_cal_nhm_env(dm);
-		ccx->nhm_ratio = phydm_ccx_get_rpt_ratio(dm, nhm_rpt_non_0,
-				 NHM_RPT_MAX);
-		ccx->nhm_env_ratio = phydm_ccx_get_rpt_ratio(dm, nhm_env,
-				     NHM_RPT_MAX);
-		ccx->nhm_level_valid = phydm_ccx_get_rpt_ratio(dm,
-				       nhm_rpt_non_11, NHM_RPT_MAX);
-		ccx->nhm_level = phydm_nhm_cal_wgt_avg(dm, 0, NHM_RPT_NUM - 2,
-						     nhm_rpt_non_11);
-		ccx->nhm_pwr = phydm_nhm_cal_wgt_avg(dm, 0, NHM_RPT_NUM - 1,
-						     ccx->nhm_rpt_sum);
-	} else {
-		PHYDM_DBG(dm, DBG_ENV_MNTR, "[warning] nhm_rpt_sum invalid\n");
-		ccx->nhm_ratio = 0;
-		ccx->nhm_env_ratio = 0;
-	}
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR,
-		  "nhm_ratio=%d, nhm_env_ratio=%d, nhm_level=%d, nhm_pwr=%d\n",
-		  ccx->nhm_ratio, ccx->nhm_env_ratio, ccx->nhm_level,
-		  ccx->nhm_pwr);
-}
-
-void phydm_nhm_set_th_reg(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u32 reg1 = 0, reg2 = 0, reg3 = 0, reg4 = 0, reg4_bit = 0;
-	u32 val = 0;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-
-	reg1 = R_0x1e60;
-	reg2 = R_0x1e44;
-	reg3 = R_0x1e48;
-	reg4 = R_0x1e5c;
-	reg4_bit = MASKBYTE2;
-
-	/*Set NHM threshold*/ /*Unit: PWdB U(8,1)*/
-	val = BYTE_2_DWORD(ccx->nhm_th[3], ccx->nhm_th[2],
-			   ccx->nhm_th[1], ccx->nhm_th[0]);
-	pdm_set_reg(dm, reg2, MASKDWORD, val);
-	val = BYTE_2_DWORD(ccx->nhm_th[7], ccx->nhm_th[6],
-			   ccx->nhm_th[5], ccx->nhm_th[4]);
-	pdm_set_reg(dm, reg3, MASKDWORD, val);
-	pdm_set_reg(dm, reg4, reg4_bit, ccx->nhm_th[8]);
-	val = BYTE_2_DWORD(0, 0, ccx->nhm_th[10], ccx->nhm_th[9]);
-	pdm_set_reg(dm, reg1, 0xffff0000, val);
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR,
-		  "Update NHM_th[H->L]=[%d %d %d %d %d %d %d %d %d %d %d]\n",
-		  ccx->nhm_th[10], ccx->nhm_th[9], ccx->nhm_th[8],
-		  ccx->nhm_th[7], ccx->nhm_th[6], ccx->nhm_th[5],
-		  ccx->nhm_th[4], ccx->nhm_th[3], ccx->nhm_th[2],
-		  ccx->nhm_th[1], ccx->nhm_th[0]);
-}
-
-boolean
-phydm_nhm_th_update_chk(void *dm_void, enum nhm_application nhm_app, u8 *nhm_th,
-			u32 *igi_new, boolean en_1db_mode, u8 nhm_th0_manual)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	boolean is_update = false;
-	u8 igi_curr = phydm_get_igi(dm, BB_PATH_A);
-	u8 nhm_igi_th_11k_low[NHM_TH_NUM] = {0x12, 0x15, 0x18, 0x1b, 0x1e,
-					     0x23, 0x28, 0x2c, 0x78,
-					     0x78, 0x78};
-	u8 nhm_igi_th_11k_high[NHM_TH_NUM] = {0x1e, 0x23, 0x28, 0x2d, 0x32,
-					      0x37, 0x78, 0x78, 0x78, 0x78,
-					      0x78};
-	u8 nhm_igi_th_xbox[NHM_TH_NUM] = {0x1a, 0x2c, 0x2e, 0x30, 0x32, 0x34,
-					  0x36, 0x38, 0x3a, 0x3c, 0x3d};
-	u8 i = 0;
-	u8 th_tmp = igi_curr - CCA_CAP;
-	u8 th_step = 2;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "App=%d, nhm_igi=0x%x, igi_curr=0x%x\n",
-		  nhm_app, ccx->nhm_igi, igi_curr);
-
-	if (igi_curr < 0x10) /* Protect for invalid IGI*/
-		return false;
-
-	switch (nhm_app) {
-	case NHM_BACKGROUND: /* @Get IGI form driver parameter(cur_ig_value)*/
-		if (ccx->nhm_igi != igi_curr || ccx->nhm_app != nhm_app) {
-			is_update = true;
-			*igi_new = (u32)igi_curr;
-
-			#ifdef NHM_DYM_PW_TH_SUPPORT
-			if (ccx->nhm_dym_pw_th_en) {
-				th_tmp = MAX_2(igi_curr - DYM_PWTH_CCA_CAP, 0);
-				th_step = 3;
-			}
-			#endif
-
-			nhm_th[0] = (u8)IGI_2_NHM_TH(th_tmp);
-
-			for (i = 1; i <= 10; i++)
-				nhm_th[i] = nhm_th[0] +
-					    IGI_2_NHM_TH(th_step * i);
-
-		}
-		break;
-
-	case NHM_ACS:
-		if (ccx->nhm_igi != igi_curr || ccx->nhm_app != nhm_app) {
-			is_update = true;
-			*igi_new = (u32)igi_curr;
-			nhm_th[0] = (u8)IGI_2_NHM_TH(igi_curr - CCA_CAP);
-			for (i = 1; i <= 10; i++)
-				nhm_th[i] = nhm_th[0] + IGI_2_NHM_TH(2 * i);
-		}
-		break;
-
-	case IEEE_11K_HIGH:
-		is_update = true;
-		*igi_new = 0x2c;
-		for (i = 0; i < NHM_TH_NUM; i++)
-			nhm_th[i] = IGI_2_NHM_TH(nhm_igi_th_11k_high[i]);
-		break;
-
-	case IEEE_11K_LOW:
-		is_update = true;
-		*igi_new = 0x20;
-		for (i = 0; i < NHM_TH_NUM; i++)
-			nhm_th[i] = IGI_2_NHM_TH(nhm_igi_th_11k_low[i]);
-		break;
-
-	case INTEL_XBOX:
-		is_update = true;
-		*igi_new = 0x36;
-		for (i = 0; i < NHM_TH_NUM; i++)
-			nhm_th[i] = IGI_2_NHM_TH(nhm_igi_th_xbox[i]);
-		break;
-
-	case NHM_DBG: /*@Get IGI form register*/
-		igi_curr = phydm_get_igi(dm, BB_PATH_A);
-		if (ccx->nhm_igi != igi_curr || ccx->nhm_app != nhm_app) {
-			is_update = true;
-			*igi_new = (u32)igi_curr;
-			if (en_1db_mode) {
-				nhm_th[0] = (u8)IGI_2_NHM_TH(nhm_th0_manual +
-							     10);
-				th_step = 1;
-			} else {
-				nhm_th[0] = (u8)IGI_2_NHM_TH(igi_curr -
-							     CCA_CAP);
-			}
-
-			for (i = 1; i <= 10; i++)
-				nhm_th[i] = nhm_th[0] + IGI_2_NHM_TH(th_step *
-					    i);
-		}
-		break;
-	}
-
-	if (is_update) {
-		PHYDM_DBG(dm, DBG_ENV_MNTR, "[Update NHM_TH] igi_RSSI=%d\n",
-			  IGI_2_RSSI(*igi_new));
-
-		for (i = 0; i < NHM_TH_NUM; i++) {
-			PHYDM_DBG(dm, DBG_ENV_MNTR, "NHM_th[%d](RSSI) = %d\n",
-				  i, NTH_TH_2_RSSI(nhm_th[i]));
-		}
-	} else {
-		PHYDM_DBG(dm, DBG_ENV_MNTR, "No need to update NHM_TH\n");
-	}
-	return is_update;
 }
 
 #ifdef NHM_DYM_PW_TH_SUPPORT
@@ -499,10 +297,20 @@ void phydm_nhm_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	struct ccx_info *ccx = &dm->dm_ccx_info;
+	boolean is_update = false;
+	u8 igi_curr = phydm_get_igi(dm, BB_PATH_A);
+	u8 nhm_igi_th_11k_low[NHM_TH_NUM] = {0x12, 0x15, 0x18, 0x1b, 0x1e,
+					     0x23, 0x28, 0x2c, 0x78,
+					     0x78, 0x78};
+	u8 nhm_igi_th_11k_high[NHM_TH_NUM] = {0x1e, 0x23, 0x28, 0x2d, 0x32,
+					      0x37, 0x78, 0x78, 0x78, 0x78,
+					      0x78};
+	u8 nhm_igi_th_xbox[NHM_TH_NUM] = {0x1a, 0x2c, 0x2e, 0x30, 0x32, 0x34,
+					  0x36, 0x38, 0x3a, 0x3c, 0x3d};
+	u8 i = 0;
+	u8 th_tmp = igi_curr - CCA_CAP;
+	u8 th_step = 2;
 
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "cur_igi=0x%x\n",
-		  dm->dm_dig_table.cur_ig_value);
 
 	ccx->nhm_app = NHM_BACKGROUND;
 	ccx->nhm_igi = 0xff;
@@ -511,9 +319,48 @@ void phydm_nhm_init(void *dm_void)
 	ccx->nhm_ongoing = false;
 	ccx->nhm_set_lv = NHM_RELEASE;
 
-	if (phydm_nhm_th_update_chk(dm, ccx->nhm_app, &ccx->nhm_th[0],
-				    (u32 *)&ccx->nhm_igi, false, 0))
-		phydm_nhm_set_th_reg(dm);
+	if (igi_curr >= 0x10) { /* Protect for invalid IGI*/
+		if (ccx->nhm_igi != igi_curr) {
+			is_update = true;
+			ccx->nhm_igi = (u32)igi_curr;
+
+			#ifdef NHM_DYM_PW_TH_SUPPORT
+			if (ccx->nhm_dym_pw_th_en) {
+				th_tmp = MAX_2(igi_curr - DYM_PWTH_CCA_CAP, 0);
+				th_step = 3;
+			}
+			#endif
+
+			ccx->nhm_th[0] = (u8)IGI_2_NHM_TH(th_tmp);
+
+			for (i = 1; i <= 10; i++)
+				ccx->nhm_th[i] = ccx->nhm_th[0] +
+					    IGI_2_NHM_TH(th_step * i);
+
+		}
+	}
+
+	if (is_update) {
+		u32 reg1 = 0, reg2 = 0, reg3 = 0, reg4 = 0, reg4_bit = 0;
+		u32 val = 0;
+
+		reg1 = R_0x1e60;
+		reg2 = R_0x1e44;
+		reg3 = R_0x1e48;
+		reg4 = R_0x1e5c;
+		reg4_bit = MASKBYTE2;
+
+		/*Set NHM threshold*/ /*Unit: PWdB U(8,1)*/
+		val = BYTE_2_DWORD(ccx->nhm_th[3], ccx->nhm_th[2],
+			   	   ccx->nhm_th[1], ccx->nhm_th[0]);
+		pdm_set_reg(dm, reg2, MASKDWORD, val);
+		val = BYTE_2_DWORD(ccx->nhm_th[7], ccx->nhm_th[6],
+				   ccx->nhm_th[5], ccx->nhm_th[4]);
+		pdm_set_reg(dm, reg3, MASKDWORD, val);
+		pdm_set_reg(dm, reg4, reg4_bit, ccx->nhm_th[8]);
+		val = BYTE_2_DWORD(0, 0, ccx->nhm_th[10], ccx->nhm_th[9]);
+		pdm_set_reg(dm, reg1, 0xffff0000, val);
+	}
 
 	ccx->nhm_period = 0;
 
