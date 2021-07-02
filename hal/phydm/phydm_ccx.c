@@ -783,15 +783,28 @@ void phydm_ifs_clm_get_result(void *dm_void)
 	return;
 }
 
-void phydm_ifs_clm_set_th_reg(void *dm_void)
+#define IFS_CLM_NUM 4
+void phydm_ifs_clm_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	struct ccx_info *ccx = &dm->dm_ccx_info;
 	u8 i = 0;
-	
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
+	u16 ifs_clm_th_low_bg[IFS_CLM_NUM] = {12, 5, 2, 0};
+	u16 ifs_clm_th_high_bg[IFS_CLM_NUM] = {64, 12, 5, 2};
 
-	/*Set IFS period TH*/
+
+	ccx->ifs_clm_app = IFS_CLM_BACKGROUND;
+
+	/*Set IFS threshold*/
+	ccx->ifs_clm_ongoing = false;
+	ccx->ifs_clm_set_lv = IFS_CLM_RELEASE;
+
+	for (i = 0; i < IFS_CLM_NUM; i++) {
+		ccx->ifs_clm_th_en[i] = true;
+		ccx->ifs_clm_th_low[i] = ifs_clm_th_low_bg[i];
+		ccx->ifs_clm_th_high[i] = ifs_clm_th_high_bg[i];
+	}
+
 	odm_set_bb_reg(dm, R_0x1ed4, BIT(31), ccx->ifs_clm_th_en[0]);
 	odm_set_bb_reg(dm, R_0x1ed8, BIT(31), ccx->ifs_clm_th_en[1]);
 	odm_set_bb_reg(dm, R_0x1edc, BIT(31), ccx->ifs_clm_th_en[2]);
@@ -804,140 +817,6 @@ void phydm_ifs_clm_set_th_reg(void *dm_void)
 	odm_set_bb_reg(dm, R_0x1ed8, MASKLWORD, ccx->ifs_clm_th_high[1]);
 	odm_set_bb_reg(dm, R_0x1edc, MASKLWORD, ccx->ifs_clm_th_high[2]);
 	odm_set_bb_reg(dm, R_0x1ee0, MASKLWORD, ccx->ifs_clm_th_high[3]);
-
-	for (i = 0; i < IFS_CLM_NUM; i++)
-		PHYDM_DBG(dm, DBG_ENV_MNTR,
-			  "Update IFS_CLM_th%d[High Low] : [%d %d]\n", i + 1,
-		  	  ccx->ifs_clm_th_high[i], ccx->ifs_clm_th_low[i]);
-}
-
-boolean phydm_ifs_clm_th_update_chk(void *dm_void,
-				    enum ifs_clm_application ifs_clm_app,
-				    boolean *ifs_clm_th_en, u16 *ifs_clm_th_low,
-				    u16 *ifs_clm_th_high, s16 th_shift)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	boolean is_update = false;
-	u16 ifs_clm_th_low_bg[IFS_CLM_NUM] = {12, 5, 2, 0};
-	u16 ifs_clm_th_high_bg[IFS_CLM_NUM] = {64, 12, 5, 2};
-	u8 i = 0;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "App=%d, th_shift=%d\n", ifs_clm_app,
-		  th_shift);
-
-	switch (ifs_clm_app) {
-	case IFS_CLM_BACKGROUND:
-	case IFS_CLM_ACS:
-	case IFS_CLM_HP_TAS:
-		if (ccx->ifs_clm_app != ifs_clm_app || th_shift != 0) {
-			is_update = true;
-
-			for (i = 0; i < IFS_CLM_NUM; i++) {
-				ifs_clm_th_en[i] = true;
-				ifs_clm_th_low[i] = ifs_clm_th_low_bg[i];
-				ifs_clm_th_high[i] = ifs_clm_th_high_bg[i];
-			}
-		}
-		break;
-	case IFS_CLM_DBG:
-		if (ccx->ifs_clm_app != ifs_clm_app || th_shift != 0) {
-			is_update = true;
-
-			for (i = 0; i < IFS_CLM_NUM; i++) {
-				ifs_clm_th_en[i] = true;
-				ifs_clm_th_low[i] = MAX_2(ccx->ifs_clm_th_low[i] +
-						    th_shift, 0);
-				ifs_clm_th_high[i] = MAX_2(ccx->ifs_clm_th_high[i] +
-						     th_shift, 0);
-			}
-		}
-		break;
-	default:
-		break;
-	}
-
-	if (is_update)
-		PHYDM_DBG(dm, DBG_ENV_MNTR, "[Update IFS_TH]\n");
-	else
-		PHYDM_DBG(dm, DBG_ENV_MNTR, "No need to update IFS_TH\n");
-
-	return is_update;
-}
-
-void phydm_ifs_clm_set(void *dm_void, enum ifs_clm_application ifs_clm_app,
-		       u16 period, u8 ctrl_unit, s16 th_shift)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	boolean ifs_clm_th_en[IFS_CLM_NUM] =  {0};
-	u16 ifs_clm_th_low[IFS_CLM_NUM] =  {0};
-	u16 ifs_clm_th_high[IFS_CLM_NUM] =  {0};
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "period=%d, ctrl_unit=%d\n", period,
-		  ctrl_unit);
-
-	/*Set Unit*/
-	if (ctrl_unit != ccx->ifs_clm_ctrl_unit) {	
-		odm_set_bb_reg(dm, R_0x1ee4, 0xc0000000, ctrl_unit);
-		PHYDM_DBG(dm, DBG_ENV_MNTR,
-			  "Update IFS_CLM unit ((%d)) -> ((%d))\n",
-			  ccx->ifs_clm_ctrl_unit, ctrl_unit);
-		ccx->ifs_clm_ctrl_unit = ctrl_unit;
-	}
-
-	/*Set Duration*/
-	if (period != ccx->ifs_clm_period) {
-		odm_set_bb_reg(dm, R_0x1eec, 0xc0000000, (period & 0x3));
-		odm_set_bb_reg(dm, R_0x1ef0, 0xfe000000, ((period >> 2) &
-			       0x7f));
-		odm_set_bb_reg(dm, R_0x1ef4, 0xc0000000, ((period >> 9) &
-			       0x3));
-		odm_set_bb_reg(dm, R_0x1ef8, 0x3e000000, ((period >> 11) &
-			       0x1f));
-		PHYDM_DBG(dm, DBG_ENV_MNTR,
-			  "Update IFS_CLM period ((%d)) -> ((%d))\n",
-			  ccx->ifs_clm_period, period);
-		ccx->ifs_clm_period = period;
-	}
-
-	/*Set IFS CLM threshold*/
-	if (phydm_ifs_clm_th_update_chk(dm, ifs_clm_app, &ifs_clm_th_en[0],
-					&ifs_clm_th_low[0], &ifs_clm_th_high[0],
-					th_shift)) {
-
-		ccx->ifs_clm_app = ifs_clm_app;
-		odm_move_memory(dm, &ccx->ifs_clm_th_en[0], &ifs_clm_th_en,
-				IFS_CLM_NUM);
-		odm_move_memory(dm, &ccx->ifs_clm_th_low[0], &ifs_clm_th_low,
-				IFS_CLM_NUM);
-		odm_move_memory(dm, &ccx->ifs_clm_th_high[0], &ifs_clm_th_high,
-				IFS_CLM_NUM);
-
-		phydm_ifs_clm_set_th_reg(dm);
-	}
-}
-
-void phydm_ifs_clm_init(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-
-	ccx->ifs_clm_app = IFS_CLM_BACKGROUND;
-
-	/*Set IFS threshold*/
-	ccx->ifs_clm_ongoing = false;
-	ccx->ifs_clm_set_lv = IFS_CLM_RELEASE;
-
-	if (phydm_ifs_clm_th_update_chk(dm, ccx->ifs_clm_app,
-					&ccx->ifs_clm_th_en[0],
-					&ccx->ifs_clm_th_low[0],
-					&ccx->ifs_clm_th_high[0], 0xffff))
-		phydm_ifs_clm_set_th_reg(dm);
 
 	ccx->ifs_clm_period = 0;
 	ccx->ifs_clm_ctrl_unit = IFS_CLM_INIT;
