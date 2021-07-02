@@ -634,10 +634,6 @@ void phydm_fahm_init(void *dm_void)
 	struct ccx_info *ccx = &dm->dm_ccx_info;
 	boolean is_update = false;
 	u32 reg = 0;
-	u8 igi_curr = phydm_get_igi(dm, BB_PATH_A);
-	u8 i = 0;
-	u8 th_tmp = igi_curr - CCA_CAP;
-	u8 th_step = 2;
 
 
 	ccx->fahm_app = FAHM_BACKGROUND;
@@ -646,59 +642,13 @@ void phydm_fahm_init(void *dm_void)
 	/*Set FAHM threshold*/
 	ccx->fahm_ongoing = false;
 	ccx->fahm_set_lv = FAHM_RELEASE;
-
-
-	if (igi_curr >= 0x10) {
-		if (ccx->fahm_igi != igi_curr) {
-			is_update = true;
-			ccx->fahm_igi = (u32)igi_curr;
-
-			ccx->fahm_th[0] = (u8)IGI_2_NHM_TH(th_tmp);
-
-			for (i = 1; i <= 10; i++)
-				ccx->fahm_th[i] = ccx->fahm_th[0] +
-					    IGI_2_NHM_TH(th_step * i);
-
-		}
-	}
-
-	if (is_update) {
-		u32 val = 0;
-
-		val = BYTE_2_DWORD(ccx->fahm_th[3], ccx->fahm_th[2],
-				   ccx->fahm_th[1], ccx->fahm_th[0]);
-		odm_set_bb_reg(dm, R_0x1e50, MASKDWORD, val);
-		val = BYTE_2_DWORD(ccx->fahm_th[7], ccx->fahm_th[6],
-				   ccx->fahm_th[5], ccx->fahm_th[4]);
-		odm_set_bb_reg(dm, R_0x1e54, MASKDWORD, val);
-		val = BYTE_2_DWORD(0, ccx->fahm_th[10], ccx->fahm_th[9],
-				   ccx->fahm_th[8]);
-		odm_set_bb_reg(dm, R_0x1e58, 0xffffff, val);
-	}
-
+	ccx->fahm_igi = phydm_get_igi(dm, BB_PATH_A);
 	ccx->fahm_period = 0;
 	ccx->fahm_numer_opt = 0;
 	ccx->fahm_denom_opt = 0;
 	ccx->fahm_manual_ctrl = 0;
 	ccx->fahm_rpt_stamp = 0;
 	ccx->fahm_inclu_cck = false;
-
-	switch (dm->ic_ip_series) {
-	case PHYDM_IC_JGR3:
-		reg = R_0x1e60;
-		break;
-	case PHYDM_IC_AC:
-		reg = R_0x994;
-		break;
-	case PHYDM_IC_N:
-		reg = R_0x890;
-		break;
-	default:
-		break;
-	}
-
-	/*Counting OFDM pkt*/
-	odm_set_bb_reg(dm, reg, BIT(3), 1);
 }
 
 #endif /*#ifdef FAHM_SUPPORT*/

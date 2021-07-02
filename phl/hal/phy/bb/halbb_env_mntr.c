@@ -1431,8 +1431,6 @@ void halbb_ifs_clm_dbg(struct bb_info *bb, char input[][16], u32 *_used,
 }
 #endif
 
-#ifdef FAHM_SUPPORT
-
 u8 halbb_fahm_cal_wgt_avg(struct bb_info *bb, u8 start_i, u8 end_i, u16 n_sum)
 {
 	struct bb_env_mntr_info *env = &bb->bb_env_mntr_i;
@@ -1747,11 +1745,20 @@ bool halbb_fahm_set(struct bb_info *bb, struct ccx_para_info *para)
 	return HALBB_SET_SUCCESS;
 }
 
+#endif //NEO
+
 void halbb_fahm_init(struct bb_info *bb)
 {
 	struct bb_env_mntr_info *env = &bb->bb_env_mntr_i;
 	struct bb_env_mntr_cr_info *cr = &env->bb_env_mntr_cr_i;
 	struct ccx_para_info para = {0};
+	bool is_update = false;
+	u8 igi;
+	u8 fahm_th[11];
+	u8 th_tmp;
+	u8 th_step = 2;
+	u8 i;
+	u32 value32;
 
 	BB_DBG(bb, DBG_ENV_MNTR, "[%s]===>\n", __func__);
 	env->fahm_app = FAHM_INIT;
@@ -1759,18 +1766,32 @@ void halbb_fahm_init(struct bb_info *bb)
 	env->fahm_denom_opt = 0;
 	env->fahm_mntr_time = 0;
 
-	/*r_fahm_en_ofdm = r_fahm_en_cck = 1, or fahm report will be 0.*/
-	halbb_set_reg_phy0_1(bb, cr->fahm_ofdm_en, cr->fahm_ofdm_en_m, true);
-	halbb_set_reg_phy0_1(bb, cr->fahm_cck_en, cr->fahm_cck_en_m, true);
+	igi = halbb_get_reg(bb, 0x1d70, 0x7F);
+	th_tmp = igi - 14;
+	if (igi >= 0x10) {
+		is_update = true;
+		fahm_th[0] = th_tmp << 1;
 
-	/*r_fahm_pwdb_sel = 1:select max path*/
-	halbb_set_reg_phy0_1(bb, cr->fahm_method_sel, cr->fahm_method_sel_m,
-			     0x1);
+		for (i = 1; i <= 10; i++)
+			fahm_th[i] = fahm_th[0] + ((th_step * i) << 1);
+	}
 
-	/*r_fahm_dis_count_each_mpdu = 1, or fa report will abnormal*/
-	halbb_set_reg_phy0_1(bb, cr->fahm_dis_count_each_mpdu,
-			     cr->fahm_dis_count_each_mpdu_m, true);
+	if (is_update) {
+		value32 = BYTE_2_DWORD(fahm_th[3], fahm_th[2], fahm_th[1], fahm_th[0]);
+		halbb_set_reg(bb, 0x1e50, MASKDWORD, value32);
+
+		value32 = BYTE_2_DWORD(fahm_th[7], fahm_th[6], fahm_th[5], fahm_th[4]);
+		halbb_set_reg(bb, 0x1e54, MASKDWORD, value32);
+
+		value32 = BYTE_2_DWORD(0, fahm_th[10], fahm_th[9], fahm_th[8]);
+		halbb_set_reg(bb, 0x1e58, 0xffff0000, value32);
+	}
+
+	/* Counting OFDM pkt */
+	halbb_set_reg(bb, 0x1e60, BIT(3), 1);
 }
+
+#if 0 //NEO
 
 void halbb_fahm_dbg(struct bb_info *bb, char input[][16], u32 *_used,
 		    char *output, u32 *_out_len)
@@ -1894,7 +1915,6 @@ void halbb_fahm_dbg(struct bb_info *bb, char input[][16], u32 *_used,
 	*_out_len = out_len;
 }
 
-#endif
 #ifdef EDCCA_CLM_SUPPORT
 
 void halbb_edcca_clm_get_utility(struct bb_info *bb)
@@ -2501,7 +2521,9 @@ void halbb_env_mntr_init(struct bb_info *bb)
 	halbb_nhm_init(bb);
 #if 0 //NEO
 	halbb_ifs_clm_init(bb);
+#endif //NEO
 	halbb_fahm_init(bb);
+#if 0 //NEO
 	halbb_edcca_clm_init(bb);
 	env->idle_pwr_physts= 0;
 #endif //NEO
