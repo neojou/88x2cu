@@ -601,208 +601,6 @@ phydm_fahm_check_rdy(void *dm_void)
 	return is_ready;
 }
 
-u8 phydm_fahm_cal_wgt_avg(void *dm_void, u8 start_i, u8 end_i, u16 r_sum,
-			  u16 period)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u8 i = 0;
-	u32 pwr_tmp = 0;
-	u8 pwr = 0;
-	u32 fahm_valid = 0;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-
-	if (r_sum == 0) {
-		PHYDM_DBG(dm, DBG_ENV_MNTR,
-			  "rpt_sum = 0, don't need to update\n");
-		return 0x0;
-	} else if (end_i > FAHM_RPT_NUM - 1) {
-		PHYDM_DBG(dm, DBG_ENV_MNTR,
-			  "[WARNING]end_i is larger than 11!!\n");
-		return 0x0;
-	}
-
-	for (i = start_i; i <= end_i; i++) {
-		if (i == 0)
-			pwr_tmp += ccx->fahm_result[0] *
-				   MAX_2(ccx->fahm_th[0] - 2, 0);
-		else if (i == (FAHM_RPT_NUM - 1))
-			pwr_tmp += ccx->fahm_result[FAHM_RPT_NUM - 1] *
-				   (ccx->fahm_th[FAHM_TH_NUM - 1] + 2);
-		else
-			pwr_tmp += ccx->fahm_result[i] *
-				   (ccx->fahm_th[i - 1] + ccx->fahm_th[i]) >> 1;
-	}
-
-	/* protection for the case of minus pwr(RSSI)*/
-	pwr = (u8)(NTH_TH_2_RSSI(MAX_2(PHYDM_DIV(pwr_tmp, r_sum), 20)));
-	fahm_valid = PHYDM_DIV(r_sum * 100, period);
-	PHYDM_DBG(dm, DBG_ENV_MNTR,
-		  "valid: ((%d)) percent, pwr(RSSI)=((%d))\n",
-		  fahm_valid, pwr);
-
-	return pwr;
-}
-
-void phydm_fahm_get_utility(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-
-	if (ccx->fahm_result_sum >= ccx->fahm_result[0]) {
-		ccx->fahm_pwr = phydm_fahm_cal_wgt_avg(dm, 0, FAHM_RPT_NUM - 1,
-						       ccx->fahm_result_sum,
-						       ccx->fahm_period);
-		ccx->fahm_ratio = phydm_ccx_get_rpt_ratio(dm,
-				  ccx->fahm_result_sum, ccx->fahm_period);
-		ccx->fahm_denom_ratio = phydm_ccx_get_rpt_ratio(dm,
-					ccx->fahm_denom_result,
-					ccx->fahm_period);
-	} else {
-		PHYDM_DBG(dm, DBG_ENV_MNTR,
-			  "[warning] fahm_result_sum invalid\n");
-		ccx->fahm_pwr = 0;
-		ccx->fahm_ratio = 0;
-		ccx->fahm_denom_ratio = 0;
-	}
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR,
-		  "fahm_pwr=%d, fahm_ratio=%d, fahm_denom_ratio=%d\n",
-		  ccx->fahm_pwr, ccx->fahm_ratio, ccx->fahm_denom_ratio);
-}
-
-void phydm_fahm_set_th_reg(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u32 val = 0;
-
-	/*Set FAHM threshold*/ /*Unit: PWdB U(8,1)*/
-	switch (dm->ic_ip_series) {
-	case PHYDM_IC_JGR3:
-		val = BYTE_2_DWORD(ccx->fahm_th[3], ccx->fahm_th[2],
-				   ccx->fahm_th[1], ccx->fahm_th[0]);
-		odm_set_bb_reg(dm, R_0x1e50, MASKDWORD, val);
-		val = BYTE_2_DWORD(ccx->fahm_th[7], ccx->fahm_th[6],
-				   ccx->fahm_th[5], ccx->fahm_th[4]);
-		odm_set_bb_reg(dm, R_0x1e54, MASKDWORD, val);
-		val = BYTE_2_DWORD(0, ccx->fahm_th[10], ccx->fahm_th[9],
-				   ccx->fahm_th[8]);
-		odm_set_bb_reg(dm, R_0x1e58, 0xffffff, val);
-		break;
-	case PHYDM_IC_AC:
-		val = BYTE_2_DWORD(0, ccx->fahm_th[2], ccx->fahm_th[1],
-				   ccx->fahm_th[0]);
-		odm_set_bb_reg(dm, R_0x1c38, 0xffffff00, val);
-		val = BYTE_2_DWORD(0, ccx->fahm_th[5], ccx->fahm_th[4],
-				   ccx->fahm_th[3]);
-		odm_set_bb_reg(dm, R_0x1c78, 0xffffff00, val);
-		val = BYTE_2_DWORD(0, 0, ccx->fahm_th[7], ccx->fahm_th[6]);
-		odm_set_bb_reg(dm, R_0x1c7c, 0xffff0000, val);
-		val = BYTE_2_DWORD(0, ccx->fahm_th[10], ccx->fahm_th[9],
-				   ccx->fahm_th[8]);
-		odm_set_bb_reg(dm, R_0x1cb8, 0xffffff00, val);
-		break;
-	case PHYDM_IC_N:
-		val = BYTE_2_DWORD(ccx->fahm_th[3], ccx->fahm_th[2],
-				   ccx->fahm_th[1], ccx->fahm_th[0]);
-		odm_set_bb_reg(dm, R_0x970, MASKDWORD, val);
-		val = BYTE_2_DWORD(ccx->fahm_th[7], ccx->fahm_th[6],
-				   ccx->fahm_th[5], ccx->fahm_th[4]);
-		odm_set_bb_reg(dm, R_0x974, MASKDWORD, val);
-		val = BYTE_2_DWORD(0, ccx->fahm_th[10], ccx->fahm_th[9],
-				   ccx->fahm_th[8]);
-		odm_set_bb_reg(dm, R_0x978, 0xffffff, val);
-		break;
-	default:
-		break;
-	}
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR,
-		  "Update FAHM_th[H->L]=[%d %d %d %d %d %d %d %d %d %d %d]\n",
-		  ccx->fahm_th[10], ccx->fahm_th[9], ccx->fahm_th[8],
-		  ccx->fahm_th[7], ccx->fahm_th[6], ccx->fahm_th[5],
-		  ccx->fahm_th[4], ccx->fahm_th[3], ccx->fahm_th[2],
-		  ccx->fahm_th[1], ccx->fahm_th[0]);
-}
-
-boolean
-phydm_fahm_th_update_chk(void *dm_void, enum fahm_application fahm_app,
-			 u8 *fahm_th, u32 *igi_new, boolean en_1db_mode,
-			 u8 fahm_th0_manual)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	boolean is_update = false;
-	u8 igi_curr = phydm_get_igi(dm, BB_PATH_A);
-	u8 i = 0;
-	u8 th_tmp = igi_curr - CCA_CAP;
-	u8 th_step = 2;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "fahm_th_update_chk : App=%d, fahm_igi=0x%x, igi_curr=0x%x\n",
-		  fahm_app, ccx->fahm_igi, igi_curr);
-
-	if (igi_curr < 0x10) /* Protect for invalid IGI*/
-		return false;
-
-	switch (fahm_app) {
-	case FAHM_BACKGROUND: /*Get IGI from driver parameter(cur_ig_value)*/
-		if (ccx->fahm_igi != igi_curr || ccx->fahm_app != fahm_app) {
-			is_update = true;
-			*igi_new = (u32)igi_curr;
-
-			fahm_th[0] = (u8)IGI_2_NHM_TH(th_tmp);
-
-			for (i = 1; i <= 10; i++)
-				fahm_th[i] = fahm_th[0] +
-					    IGI_2_NHM_TH(th_step * i);
-
-		}
-		break;
-	case FAHM_ACS:
-		if (ccx->fahm_igi != igi_curr || ccx->fahm_app != fahm_app) {
-			is_update = true;
-			*igi_new = (u32)igi_curr;
-			fahm_th[0] = (u8)IGI_2_NHM_TH(igi_curr - CCA_CAP);
-			for (i = 1; i <= 10; i++)
-				fahm_th[i] = fahm_th[0] + IGI_2_NHM_TH(2 * i);
-		}
-		break;
-	case FAHM_DBG: /*Get IGI from register*/
-		igi_curr = phydm_get_igi(dm, BB_PATH_A);
-		if (ccx->fahm_igi != igi_curr || ccx->fahm_app != fahm_app) {
-			is_update = true;
-			*igi_new = (u32)igi_curr;
-			if (en_1db_mode) {
-				fahm_th[0] = (u8)IGI_2_NHM_TH(fahm_th0_manual +
-							      10);
-				th_step = 1;
-			} else {
-				fahm_th[0] = (u8)IGI_2_NHM_TH(igi_curr -
-							      CCA_CAP);
-			}
-
-			for (i = 1; i <= 10; i++)
-				fahm_th[i] = fahm_th[0] +
-					     IGI_2_NHM_TH(th_step * i);
-		}
-		break;
-	}
-
-	if (is_update) {
-		PHYDM_DBG(dm, DBG_ENV_MNTR, "[Update FAHM_TH] igi_RSSI=%d\n",
-			  IGI_2_RSSI(*igi_new));
-
-		for (i = 0; i < FAHM_TH_NUM; i++)
-			PHYDM_DBG(dm, DBG_ENV_MNTR, "FAHM_th[%d](RSSI) = %d\n",
-				  i, NTH_TH_2_RSSI(fahm_th[i]));
-	} else {
-		PHYDM_DBG(dm, DBG_ENV_MNTR, "No need to update FAHM_TH\n");
-	}
-	return is_update;
-}
-
 boolean
 phydm_fahm_mntr_racing_chk(void *dm_void)
 {
@@ -834,9 +632,13 @@ void phydm_fahm_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	struct ccx_info *ccx = &dm->dm_ccx_info;
+	boolean is_update = false;
 	u32 reg = 0;
+	u8 igi_curr = phydm_get_igi(dm, BB_PATH_A);
+	u8 i = 0;
+	u8 th_tmp = igi_curr - CCA_CAP;
+	u8 th_step = 2;
 
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
 
 	ccx->fahm_app = FAHM_BACKGROUND;
 	ccx->fahm_igi = 0xff;
@@ -845,9 +647,34 @@ void phydm_fahm_init(void *dm_void)
 	ccx->fahm_ongoing = false;
 	ccx->fahm_set_lv = FAHM_RELEASE;
 
-	if (phydm_fahm_th_update_chk(dm, ccx->fahm_app, &ccx->fahm_th[0],
-				    (u32 *)&ccx->fahm_igi, false, 0))
-		phydm_fahm_set_th_reg(dm);
+
+	if (igi_curr >= 0x10) {
+		if (ccx->fahm_igi != igi_curr) {
+			is_update = true;
+			ccx->fahm_igi = (u32)igi_curr;
+
+			ccx->fahm_th[0] = (u8)IGI_2_NHM_TH(th_tmp);
+
+			for (i = 1; i <= 10; i++)
+				ccx->fahm_th[i] = ccx->fahm_th[0] +
+					    IGI_2_NHM_TH(th_step * i);
+
+		}
+	}
+
+	if (is_update) {
+		u32 val = 0;
+
+		val = BYTE_2_DWORD(ccx->fahm_th[3], ccx->fahm_th[2],
+				   ccx->fahm_th[1], ccx->fahm_th[0]);
+		odm_set_bb_reg(dm, R_0x1e50, MASKDWORD, val);
+		val = BYTE_2_DWORD(ccx->fahm_th[7], ccx->fahm_th[6],
+				   ccx->fahm_th[5], ccx->fahm_th[4]);
+		odm_set_bb_reg(dm, R_0x1e54, MASKDWORD, val);
+		val = BYTE_2_DWORD(0, ccx->fahm_th[10], ccx->fahm_th[9],
+				   ccx->fahm_th[8]);
+		odm_set_bb_reg(dm, R_0x1e58, 0xffffff, val);
+	}
 
 	ccx->fahm_period = 0;
 	ccx->fahm_numer_opt = 0;
