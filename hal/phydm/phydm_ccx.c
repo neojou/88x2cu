@@ -55,21 +55,6 @@ u8 phydm_env_mntr_get_802_11_k_rsni(void *dm_void, s8 rcpi, s8 anpi)
 	return rsni;
 }
 
-void phydm_ccx_hw_restart(void *dm_void)
-			  /*@Will Restart NHM/CLM/FAHM simultaneously*/
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	u32 reg1 = 0;
-
-	reg1 = R_0x1e60;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-	/*@disable NHM,CLM, FAHM*/
-	odm_set_bb_reg(dm, reg1, 0x7, 0x0);
-	odm_set_bb_reg(dm, reg1, BIT(8), 0x0);
-	odm_set_bb_reg(dm, reg1, BIT(8), 0x1);
-}
-
 u8 phydm_ccx_get_rpt_ratio(void *dm_void, u16 rpt, u16 denom)
 {
 	u32 numer = 0;
@@ -80,31 +65,6 @@ u8 phydm_ccx_get_rpt_ratio(void *dm_void, u16 rpt, u16 denom)
 }
 
 #ifdef NHM_SUPPORT
-
-u8 phydm_nhm_racing_ctrl(void *dm_void, enum phydm_nhm_level nhm_lv)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u8 set_result = PHYDM_SET_SUCCESS;
-	/*@acquire to control NHM API*/
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "nhm_ongoing=%d, lv:(%d)->(%d)\n",
-		  ccx->nhm_ongoing, ccx->nhm_set_lv, nhm_lv);
-	if (ccx->nhm_ongoing) {
-		if (nhm_lv <= ccx->nhm_set_lv) {
-			set_result = PHYDM_SET_FAIL;
-		} else {
-			phydm_ccx_hw_restart(dm);
-			ccx->nhm_ongoing = false;
-		}
-	}
-
-	if (set_result)
-		ccx->nhm_set_lv = nhm_lv;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "nhm racing success=%d\n", set_result);
-	return set_result;
-}
 
 void phydm_nhm_trigger(void *dm_void)
 {
@@ -592,31 +552,6 @@ void phydm_clm_racing_release(void *dm_void)
 	ccx->clm_app = CLM_BACKGROUND;
 }
 
-u8 phydm_clm_racing_ctrl(void *dm_void, enum phydm_clm_level clm_lv)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u8 set_result = PHYDM_SET_SUCCESS;
-	/*@acquire to control CLM API*/
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "clm_ongoing=%d, lv:(%d)->(%d)\n",
-		  ccx->clm_ongoing, ccx->clm_set_lv, clm_lv);
-	if (ccx->clm_ongoing) {
-		if (clm_lv <= ccx->clm_set_lv) {
-			set_result = PHYDM_SET_FAIL;
-		} else {
-			phydm_ccx_hw_restart(dm);
-			ccx->clm_ongoing = false;
-		}
-	}
-
-	if (set_result)
-		ccx->clm_set_lv = clm_lv;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "clm racing success=%d\n", set_result);
-	return set_result;
-}
-
 void phydm_clm_c2h_report_handler(void *dm_void, u8 *cmd_buf, u8 cmd_len)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -761,37 +696,6 @@ phydm_clm_get_result(void *dm_void)
 }
 
 boolean
-phydm_clm_mntr_set(void *dm_void, struct clm_para_info *clm_para)
-{
-	/*@Driver Monitor CLM*/
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u16 clm_period = 0;
-
-	if (clm_para->mntr_time == 0)
-		return false;
-
-	if (clm_para->clm_lv >= CLM_MAX_NUM) {
-		PHYDM_DBG(dm, DBG_ENV_MNTR, "[WARNING] Wrong LV=%d\n",
-			  clm_para->clm_lv);
-		return false;
-	}
-
-	if (phydm_clm_racing_ctrl(dm, clm_para->clm_lv) == PHYDM_SET_FAIL)
-		return false;
-
-	if (clm_para->mntr_time >= 262)
-		clm_period = CLM_PERIOD_MAX;
-	else
-		clm_period = clm_para->mntr_time * MS_TO_4US_RATIO;
-
-	ccx->clm_app = clm_para->clm_app;
-	phydm_clm_setting(dm, clm_period);
-
-	return true;
-}
-
-boolean
 phydm_clm_mntr_racing_chk(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -816,37 +720,6 @@ phydm_clm_mntr_racing_chk(void *dm_void)
 	}
 
 	return false;
-}
-
-boolean
-phydm_clm_mntr_chk(void *dm_void, u16 monitor_time /*unit ms*/)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	struct clm_para_info clm_para = {0};
-	boolean clm_chk_result = false;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s] ======>\n", __func__);
-
-	if (phydm_clm_mntr_racing_chk(dm))
-		return clm_chk_result;
-
-	clm_para.clm_app = CLM_BACKGROUND;
-	clm_para.clm_lv = CLM_LV_1;
-	clm_para.mntr_time = monitor_time;
-	if (ccx->clm_mntr_mode == CLM_DRIVER_MNTR) {
-		if (phydm_clm_mntr_set(dm, &clm_para))
-			clm_chk_result = true;
-	} else {
-		if (monitor_time >= 262)
-			ccx->clm_period = 65535;
-		else
-			ccx->clm_period = monitor_time * MS_TO_4US_RATIO;
-
-		phydm_clm_h2c(dm, ccx->clm_period, true);
-	}
-
-	return clm_chk_result;
 }
 
 boolean
@@ -890,20 +763,6 @@ phydm_clm_mntr_result(void *dm_void)
 	return clm_chk_result;
 }
 
-void phydm_set_clm_mntr_mode(void *dm_void, enum clm_monitor_mode mode)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx_info = &dm->dm_ccx_info;
-
-	if (ccx_info->clm_mntr_mode != mode) {
-		ccx_info->clm_mntr_mode = mode;
-		phydm_ccx_hw_restart(dm);
-
-		if (mode == CLM_DRIVER_MNTR)
-			phydm_clm_h2c(dm, CLM_PERIOD_MAX, 0);
-	}
-}
-
 void phydm_clm_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -918,110 +777,9 @@ void phydm_clm_init(void *dm_void)
 	phydm_clm_setting(dm, 65535);
 }
 
-void phydm_clm_dbg(void *dm_void, char input[][16], u32 *_used, char *output,
-		   u32 *_out_len)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	char help[] = "-h";
-	u32 var1[10] = {0};
-	u32 used = *_used;
-	u32 out_len = *_out_len;
-	struct clm_para_info clm_para = {0};
-	u32 i;
-
-	for (i = 0; i < 4; i++) {
-		PHYDM_SSCANF(input[i + 1], DCMD_DECIMAL, &var1[i]);
-	}
-
-	if ((strcmp(input[1], help) == 0)) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "CLM Driver Basic-Trigger 262ms: {1}\n");
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "CLM Driver Adv-Trigger: {2} {app} {LV} {0~262ms}\n");
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "CLM FW Trigger: {3} {1:drv, 2:fw}\n");
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "CLM Get Result: {100}\n");
-	} else if (var1[0] == 100) { /* @Get CLM results */
-
-		if (phydm_clm_get_result(dm))
-			phydm_clm_get_utility(dm);
-
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "clm_rpt_stamp=%d\n", ccx->clm_rpt_stamp);
-
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "clm_ratio:((%d percent)) = (%d us/ %d us)\n",
-			 ccx->clm_ratio, ccx->clm_result << 2,
-			 ccx->clm_period << 2);
-
-		ccx->clm_manual_ctrl = 0;
-	} else if (var1[0] == 3) {
-		phydm_set_clm_mntr_mode(dm, (enum clm_monitor_mode)var1[1]);
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "CLM mode: %s mode\n",
-			 ((ccx->clm_mntr_mode == CLM_FW_MNTR) ? "FW" : "Drv"));
-	} else { /* Set & trigger CLM */
-		ccx->clm_manual_ctrl = 1;
-
-		if (var1[0] == 1) {
-			clm_para.clm_app = CLM_BACKGROUND;
-			clm_para.clm_lv = CLM_LV_4;
-			clm_para.mntr_time = 262;
-			ccx->clm_mntr_mode = CLM_DRIVER_MNTR;
-		} else if (var1[0] == 2) {
-			clm_para.clm_app = (enum clm_application)var1[1];
-			clm_para.clm_lv = (enum phydm_clm_level)var1[2];
-			ccx->clm_mntr_mode = CLM_DRIVER_MNTR;
-			clm_para.mntr_time = (u16)var1[3];
-		}
-
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "app=%d, lv=%d, mode=%s, time=%d ms\n",
-			 clm_para.clm_app, clm_para.clm_lv,
-			 ((ccx->clm_mntr_mode == CLM_FW_MNTR) ? "FW" :
-			 "driver"), clm_para.mntr_time);
-
-		if (phydm_clm_mntr_set(dm, &clm_para))
-			phydm_clm_trigger(dm);
-
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "clm_rpt_stamp=%d\n", ccx->clm_rpt_stamp);
-	}
-
-	*_used = used;
-	*_out_len = out_len;
-}
-
 #endif /*@#ifdef CLM_SUPPORT*/
 
 #ifdef FAHM_SUPPORT
-
-u8 phydm_fahm_racing_ctrl(void *dm_void, enum phydm_fahm_level lv)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u8 set_result = PHYDM_SET_SUCCESS;
-	/*acquire to control FAHM API*/
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "fahm_ongoing=%d, lv:(%d)->(%d)\n",
-		  ccx->fahm_ongoing, ccx->fahm_set_lv, lv);
-	if (ccx->fahm_ongoing) {
-		if (lv <= ccx->fahm_set_lv) {
-			set_result = PHYDM_SET_FAIL;
-		} else {
-			phydm_ccx_hw_restart(dm);
-			ccx->fahm_ongoing = false;
-		}
-	}
-
-	if (set_result)
-		ccx->fahm_set_lv = lv;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "fahm racing success=%d\n", set_result);
-	return set_result;
-}
 
 void phydm_fahm_trigger(void *dm_void)
 { /*@unit (4us)*/
@@ -1900,7 +1658,6 @@ void phydm_env_monitor_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	#if (defined(NHM_SUPPORT) && defined(CLM_SUPPORT))
-	phydm_ccx_hw_restart(dm);
 	phydm_nhm_init(dm);
 	phydm_clm_init(dm);
 	#endif

@@ -2461,12 +2461,20 @@ void halbb_env_mntr(struct bb_info *bb)
 
 #endif //NEO
 
+static void halbb_env_monitor_init(struct bb_info *bb)
+{
+	halbb_set_reg(bb, 0x1e60, 0x7, 0x0);
+	halbb_set_reg(bb, 0x1e60, BIT(8), 0x0);
+	halbb_set_reg(bb, 0x1e60, BIT(8), 0x1);
+}
+
 void halbb_env_mntr_init(struct bb_info *bb)
 {
 	struct bb_env_mntr_info *env = &bb->bb_env_mntr_i;
 
 	pr_info("%s NEO start\n", __func__);
 
+	halbb_env_monitor_init(bb);
 #if 0 //NEO
 	halbb_ccx_top_setting_init(bb);
 	halbb_clm_init(bb);

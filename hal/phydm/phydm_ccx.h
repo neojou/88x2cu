@@ -384,9 +384,6 @@ u8 phydm_get_igi(void *dm_void, enum bb_path path);
 
 #ifdef CLM_SUPPORT
 void phydm_clm_c2h_report_handler(void *dm_void, u8 *cmd_buf, u8 cmd_len);
-
-void phydm_clm_dbg(void *dm_void, char input[][16], u32 *_used, char *output,
-		   u32 *_out_len);
 #endif
 
 u8 phydm_env_mntr_trigger(void *dm_void, struct nhm_para_info *nhm_para,
