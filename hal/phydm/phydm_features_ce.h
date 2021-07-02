@@ -102,7 +102,7 @@
 #define PHYDM_HW_IGI
 #endif
 /* #define PHYDM_SUPPORT_CCKPD */
-#define PHYDM_SUPPORT_ADAPTIVITY
+/* #define PHYDM_SUPPORT_ADAPTIVITY */
 
 /*@Antenna Diversity*/
 #ifdef CONFIG_ANTENNA_DIVERSITY

@@ -438,6 +438,7 @@ void phydm_adaptivity_info_update(void *dm_void, enum phydm_adapinfo cmn_info,
 void phydm_adaptivity_init(void *dm_void)
 {
 #ifdef PHYDM_SUPPORT_ADAPTIVITY
+aa
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	struct phydm_adaptivity_struct *adaptivity = &dm->adaptivity;
 
