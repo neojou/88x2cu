@@ -654,17 +654,6 @@ void phydm_fahm_init(void *dm_void)
 #endif /*#ifdef FAHM_SUPPORT*/
 
 #ifdef IFS_CLM_SUPPORT
-void phydm_ifs_clm_restart(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-
-	/*restart IFS_CLM*/
-	odm_set_bb_reg(dm, R_0x1ee4, BIT(29), 0x0);
-	odm_set_bb_reg(dm, R_0x1ee4, BIT(29), 0x1);
-}
-
 void phydm_ifs_clm_racing_release(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -677,31 +666,6 @@ void phydm_ifs_clm_racing_release(void *dm_void)
 	ccx->ifs_clm_ongoing = false;
 	ccx->ifs_clm_set_lv = IFS_CLM_RELEASE;
 	ccx->ifs_clm_app = IFS_CLM_BACKGROUND;
-}
-
-u8 phydm_ifs_clm_racing_ctrl(void *dm_void, enum phydm_ifs_clm_level ifs_clm_lv)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u8 set_result = PHYDM_SET_SUCCESS;
-	/*acquire to control IFS CLM API*/
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "ifs clm_ongoing=%d, lv:(%d)->(%d)\n",
-		  ccx->ifs_clm_ongoing, ccx->ifs_clm_set_lv, ifs_clm_lv);
-	if (ccx->ifs_clm_ongoing) {
-		if (ifs_clm_lv <= ccx->ifs_clm_set_lv) {
-			set_result = PHYDM_SET_FAIL;
-		} else {
-			phydm_ifs_clm_restart(dm);
-			ccx->ifs_clm_ongoing = false;
-		}
-	}
-
-	if (set_result)
-		ccx->ifs_clm_set_lv = ifs_clm_lv;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "ifs clm racing success=%d\n", set_result);
-	return set_result;
 }
 
 void phydm_ifs_clm_trigger(void *dm_void)
@@ -956,121 +920,6 @@ void phydm_ifs_clm_set(void *dm_void, enum ifs_clm_application ifs_clm_app,
 	}
 }
 
-boolean
-phydm_ifs_clm_mntr_set(void *dm_void, struct ifs_clm_para_info *ifs_clm_para)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	u16 ifs_clm_time = 0; /*unit: 4/8/12/16us*/
-	u8 unit = 0;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-
-	if (ifs_clm_para->mntr_time == 0)
-		return false;
-
-	if (ifs_clm_para->ifs_clm_lv >= IFS_CLM_MAX_NUM) {
-		PHYDM_DBG(dm, DBG_ENV_MNTR, "Wrong LV=%d\n",
-			  ifs_clm_para->ifs_clm_lv);
-		return false;
-	}
-
-	if (phydm_ifs_clm_racing_ctrl(dm, ifs_clm_para->ifs_clm_lv) == PHYDM_SET_FAIL)
-		return false;
-
-	if (ifs_clm_para->mntr_time >= 1048) {
-		unit = IFS_CLM_16;
-		ifs_clm_time = IFS_CLM_PERIOD_MAX; /*65535 * 16us = 1048ms*/
-	} else if (ifs_clm_para->mntr_time >= 786) {/*65535 * 12us = 786 ms*/
-		unit = IFS_CLM_16;
-		ifs_clm_time = PHYDM_DIV(ifs_clm_para->mntr_time * MS_TO_US, 16);
-	} else if (ifs_clm_para->mntr_time >= 524) {
-		unit = IFS_CLM_12;
-		ifs_clm_time = PHYDM_DIV(ifs_clm_para->mntr_time * MS_TO_US, 12);
-	} else if (ifs_clm_para->mntr_time >= 262) {
-		unit = IFS_CLM_8;
-		ifs_clm_time = PHYDM_DIV(ifs_clm_para->mntr_time * MS_TO_US, 8);
-	} else {
-		unit = IFS_CLM_4;
-		ifs_clm_time = PHYDM_DIV(ifs_clm_para->mntr_time * MS_TO_US, 4);
-	}
-
-	phydm_ifs_clm_set(dm, ifs_clm_para->ifs_clm_app, ifs_clm_time, unit,
-			  ifs_clm_para->th_shift);
-
-	return true;
-}
-
-boolean
-phydm_ifs_clm_mntr_racing_chk(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u32 sys_return_time = 0;
-
-	if (ccx->ifs_clm_manual_ctrl) {
-		PHYDM_DBG(dm, DBG_ENV_MNTR, "IFS_CLM in manual ctrl\n");
-		return true;
-	}
-
-	sys_return_time = ccx->ifs_clm_trigger_time + MAX_ENV_MNTR_TIME;
-
-	if (ccx->ifs_clm_app != IFS_CLM_BACKGROUND &&
-	    (sys_return_time > dm->phydm_sys_up_time)) {
-		PHYDM_DBG(dm, DBG_ENV_MNTR,
-			  "ifs_clm_app=%d, trigger_time %d, sys_time=%d\n",
-			  ccx->ifs_clm_app, ccx->ifs_clm_trigger_time,
-			  dm->phydm_sys_up_time);
-
-		return true;
-	}
-
-	return false;
-}
-
-boolean
-phydm_ifs_clm_mntr_chk(void *dm_void, u16 monitor_time /*unit ms*/)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	struct ifs_clm_para_info ifs_clm_para = {0};
-	boolean ifs_clm_chk_result = false;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-
-	if (phydm_ifs_clm_mntr_racing_chk(dm))
-		return ifs_clm_chk_result;
-
-	/*[IFS CLM trigger setting]------------------------------------------*/
-	ifs_clm_para.ifs_clm_app = IFS_CLM_BACKGROUND;
-	ifs_clm_para.ifs_clm_lv = IFS_CLM_LV_1;
-	ifs_clm_para.mntr_time = monitor_time;
-	ifs_clm_para.th_shift = 0;
-
-	ifs_clm_chk_result = phydm_ifs_clm_mntr_set(dm, &ifs_clm_para);
-
-	return ifs_clm_chk_result;
-}
-
-boolean
-phydm_ifs_clm_mntr_result(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	boolean ifs_clm_chk_result = false;
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-
-	if (phydm_ifs_clm_mntr_racing_chk(dm))
-		return ifs_clm_chk_result;
-
-	/*[IFS CLM get result] ------------------------------------]*/
-	phydm_ifs_clm_get_result(dm);
-	phydm_ifs_clm_get_utility(dm);
-	ifs_clm_chk_result = true;
-
-	return ifs_clm_chk_result;
-}
-
 void phydm_ifs_clm_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -1096,97 +945,6 @@ void phydm_ifs_clm_init(void *dm_void)
 	ccx->ifs_clm_rpt_stamp = 0;
 }
 
-void phydm_ifs_clm_dbg(void *dm_void, char input[][16], u32 *_used,
-		       char *output, u32 *_out_len)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	struct ifs_clm_para_info ifs_clm_para;
-	char help[] = "-h";
-	u32 var1[10] = {0};
-	u32 used = *_used;
-	u32 out_len = *_out_len;
-	u8 result_tmp = 0;
-	u8 i = 0;
-	u16 th_shift = 0;
-
-	for (i = 0; i < 5; i++) {
-		if (input[i + 1])
-			PHYDM_SSCANF(input[i + 1], DCMD_DECIMAL,
-				     &var1[i]);
-	}
-
-	if ((strcmp(input[1], help) == 0)) {
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "IFS_CLM Basic-Trigger 960ms: {1}\n");
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "IFS_CLM Adv-Trigger: {2} {App:3 for dbg} {LV:1~4} {0~2096ms} {th_shift}\n");
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "IFS_CLM Get Result: {100}\n");
-	} else if (var1[0] == 100) { /*Get IFS_CLM results*/
-		phydm_ifs_clm_get_result(dm);
-
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			  "ECLM_Rpt[%d]: \nTx = %d \nEDCCA_exclude_CCA = %d\n",
-			  ccx->ifs_clm_rpt_stamp, ccx->ifs_clm_tx,
-			  ccx->ifs_clm_edcca_excl_cca);
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			  "[FA_cnt] {CCK, OFDM} = {%d, %d}\n",
-			  ccx->ifs_clm_cckfa, ccx->ifs_clm_ofdmfa);
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			  "[CCA_exclude_FA_cnt] {CCK, OFDM} = {%d, %d}\n",
-			  ccx->ifs_clm_cckcca_excl_fa,
-			  ccx->ifs_clm_ofdmcca_excl_fa);
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "CCATotal = %d\n", ccx->ifs_clm_total_cca);
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "Time:[his, avg, avg_cca]\n");
-		for (i = 0; i < IFS_CLM_NUM; i++)
-			PDM_SNPF(out_len, used, output + used, out_len - used,
-				  "T%d:[%d, %d, %d]\n", i + 1,
-				  ccx->ifs_clm_his[i], ccx->ifs_clm_avg[i],
-				  ccx->ifs_clm_avg_cca[i]);
-
-		phydm_ifs_clm_get_utility(dm);
-
-		ccx->ifs_clm_manual_ctrl = 0;
-	} else { /*IFS_CLM trigger*/
-		ccx->ifs_clm_manual_ctrl = 1;
-
-		if (var1[0] == 1) {
-			ifs_clm_para.ifs_clm_app = IFS_CLM_DBG;
-			ifs_clm_para.ifs_clm_lv = IFS_CLM_LV_4;
-			ifs_clm_para.mntr_time = 960;
-			ifs_clm_para.th_shift = 0;
-		} else {
-			ifs_clm_para.ifs_clm_app = (enum ifs_clm_application)var1[1];
-			ifs_clm_para.ifs_clm_lv = (enum phydm_ifs_clm_level)var1[2];
-			ifs_clm_para.mntr_time = (u16)var1[3];
-			ifs_clm_para.th_shift = (s16)var1[4];
-		}
-
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "app=%d, lv=%d, time=%d ms, th_shift=%s%d\n",
-			 ifs_clm_para.ifs_clm_app, ifs_clm_para.ifs_clm_lv,
-			 ifs_clm_para.mntr_time,
-			 (ifs_clm_para.th_shift > 0) ? "+" : "-",
-			 ifs_clm_para.th_shift);
-
-		if (phydm_ifs_clm_mntr_set(dm, &ifs_clm_para) == PHYDM_SET_SUCCESS)
-			phydm_ifs_clm_trigger(dm);
-
-		PDM_SNPF(out_len, used, output + used, out_len - used,
-			 "rpt_stamp=%d\n", ccx->ifs_clm_rpt_stamp);
-		for (i = 0; i < IFS_CLM_NUM; i++)
-			PDM_SNPF(out_len, used, output + used, out_len - used,
-				  "IFS_CLM_th%d[High Low] : [%d %d]\n", i + 1,
-			  	  ccx->ifs_clm_th_high[i],
-			  	  ccx->ifs_clm_th_low[i]);
-	}
-
-	*_used = used;
-	*_out_len = out_len;
-}
 #endif
 
 void phydm_env_monitor_init(void *dm_void)
@@ -1202,7 +960,6 @@ void phydm_env_monitor_init(void *dm_void)
 	#endif
 
 	#ifdef IFS_CLM_SUPPORT
-	phydm_ifs_clm_restart(dm);
 	phydm_ifs_clm_init(dm);
 	#endif
 }

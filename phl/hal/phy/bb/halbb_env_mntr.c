@@ -979,8 +979,6 @@ void halbb_clm_dbg(struct bb_info *bb, char input[][16], u32 *_used,
 	*_out_len = out_len;
 }
 
-#ifdef IFS_CLM_SUPPORT
-
 void halbb_ifs_clm_get_utility(struct bb_info *bb)
 {
 	struct bb_env_mntr_info *env = &bb->bb_env_mntr_i;
@@ -1263,6 +1261,7 @@ bool halbb_ifs_clm_set(struct bb_info *bb, struct ccx_para_info *para)
 
 	return HALBB_SET_SUCCESS;
 }
+#endif //NEO
 
 void halbb_ifs_clm_init(struct bb_info *bb)
 {
@@ -1270,21 +1269,16 @@ void halbb_ifs_clm_init(struct bb_info *bb)
 	struct bb_env_mntr_cr_info *cr = &env->bb_env_mntr_cr_i;
 	struct ccx_para_info para = {0};
 
-	BB_DBG(bb, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-
 	env->ifs_clm_app = IFS_CLM_INIT;
 	env->ifs_clm_mntr_time = 0;
 
-	/*if r_IFS_collect_en = 0, ifs_clm ready bit will always be 0.*/
-	halbb_set_reg_phy0_1(bb, cr->ifs_clm_en, cr->ifs_clm_en_m, true);
+	/* ifs clm restart */
+	halbb_set_reg(bb, 0x1ee4, BIT(29), 0);
+	halbb_set_reg(bb, 0x1ee4, BIT(29), 1);
 
-	/*Enable IFS cnt*/
-	halbb_set_reg_phy0_1(bb, cr->ifs_t1_en, cr->ifs_t1_en_m, true);
-	halbb_set_reg_phy0_1(bb, cr->ifs_t2_en, cr->ifs_t2_en_m, true);
-	halbb_set_reg_phy0_1(bb, cr->ifs_t3_en, cr->ifs_t3_en_m, true);
-	halbb_set_reg_phy0_1(bb, cr->ifs_t4_en, cr->ifs_t4_en_m, true);
 }
 
+#if 0 //NEO
 void halbb_ifs_clm_dbg(struct bb_info *bb, char input[][16], u32 *_used,
 		       char *output, u32 *_out_len)
 {
@@ -1429,7 +1423,6 @@ void halbb_ifs_clm_dbg(struct bb_info *bb, char input[][16], u32 *_used,
 	*_used = used;
 	*_out_len = out_len;
 }
-#endif
 
 u8 halbb_fahm_cal_wgt_avg(struct bb_info *bb, u8 start_i, u8 end_i, u16 n_sum)
 {
@@ -2519,10 +2512,8 @@ void halbb_env_mntr_init(struct bb_info *bb)
 #endif //NEO
 	halbb_clm_init(bb);
 	halbb_nhm_init(bb);
-#if 0 //NEO
-	halbb_ifs_clm_init(bb);
-#endif //NEO
 	halbb_fahm_init(bb);
+	halbb_ifs_clm_init(bb);
 #if 0 //NEO
 	halbb_edcca_clm_init(bb);
 	env->idle_pwr_physts= 0;
