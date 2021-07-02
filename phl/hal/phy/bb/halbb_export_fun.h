@@ -50,7 +50,9 @@
 #include "halbb_ra_ex.h"
 #include "halbb_cmn_rpt_ex.h"
 #include "halbb_ch_info_ex.h"
+#endif //NEO
 #include "halbb_math_lib_ex.h"
+#if 0 //NEO
 #include "halbb_edcca_ex.h"
 #include "halbb_dbcc_ex.h"
 #include "halbb_rua_tbl_ex.h"

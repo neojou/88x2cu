@@ -58,12 +58,10 @@
 #include "halbb_api.h"
 #include "halbb_api_ex.h"
 #endif // NEO
+
 #include "halbb_interface_ex.h"
-#if 0 //NEO
 #include "halbb_math_lib_ex.h"
 #include "halbb_math_lib.h"
-#endif // NEO
-
 #include "halbb_dbg.h"
 
 #if 0 //NEO

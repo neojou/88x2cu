@@ -797,8 +797,6 @@ void halbb_nhm_dbg(struct bb_info *bb, char input[][16], u32 *_used,
 	*_out_len = out_len;
 }
 
-#ifdef CLM_SUPPORT
-
 void halbb_clm_get_utility(struct bb_info *bb)
 {
 	struct bb_env_mntr_info *env = &bb->bb_env_mntr_i;
@@ -875,6 +873,8 @@ bool halbb_clm_set(struct bb_info *bb, struct ccx_para_info *para)
 	return HALBB_SET_SUCCESS;
 }
 
+#endif // NEO
+
 void halbb_clm_init(struct bb_info *bb)
 {
 	struct bb_env_mntr_info *env = &bb->bb_env_mntr_i;
@@ -883,7 +883,12 @@ void halbb_clm_init(struct bb_info *bb)
 	env->clm_input_opt = CLM_CCA_INIT;
 	env->clm_app = CLM_INIT;
 	env->clm_mntr_time = 0;
+
+	// set CLM period
+	halbb_set_reg(bb, 0x1e40, MASKLWORD, 65535);
 }
+
+#if 0 //NEO
 
 void halbb_clm_set_dbg_sel(struct bb_info *bb, u8 dbg_sel)
 {
@@ -973,8 +978,6 @@ void halbb_clm_dbg(struct bb_info *bb, char input[][16], u32 *_used,
 	*_used = used;
 	*_out_len = out_len;
 }
-
-#endif /*#ifdef CLM_SUPPORT*/
 
 #ifdef IFS_CLM_SUPPORT
 
@@ -2493,8 +2496,8 @@ void halbb_env_mntr_init(struct bb_info *bb)
 	halbb_env_monitor_init(bb);
 #if 0 //NEO
 	halbb_ccx_top_setting_init(bb);
-	halbb_clm_init(bb);
 #endif //NEO
+	halbb_clm_init(bb);
 	halbb_nhm_init(bb);
 #if 0 //NEO
 	halbb_ifs_clm_init(bb);

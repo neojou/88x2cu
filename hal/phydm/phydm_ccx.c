@@ -397,41 +397,6 @@ void phydm_clm_h2c(void *dm_void, u16 obs_time, u8 fw_clm_en)
 	odm_fill_h2c_cmd(dm, PHYDM_H2C_FW_CLM_MNTR, H2C_MAX_LENGTH, h2c_val);
 }
 
-void phydm_clm_setting(void *dm_void, u16 clm_period /*@4us sample 1 time*/)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-
-	if (ccx->clm_period != clm_period) {
-		odm_set_bb_reg(dm, R_0x1e40, MASKLWORD, clm_period);
-
-		ccx->clm_period = clm_period;
-		PHYDM_DBG(dm, DBG_ENV_MNTR,
-			  "Update CLM period ((%d)) -> ((%d))\n",
-			  ccx->clm_period, clm_period);
-	}
-
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "Set CLM period=%d * 4us\n",
-		  ccx->clm_period);
-}
-
-void phydm_clm_trigger(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u32 reg1 = 0;
-
-	reg1 = R_0x1e60;
-	PHYDM_DBG(dm, DBG_ENV_MNTR, "[%s]===>\n", __func__);
-
-	odm_set_bb_reg(dm, reg1, BIT(0), 0x0);
-	odm_set_bb_reg(dm, reg1, BIT(0), 0x1);
-
-	ccx->clm_trigger_time = dm->phydm_sys_up_time;
-	ccx->clm_rpt_stamp++;
-	ccx->clm_ongoing = true;
-}
-
 boolean
 phydm_clm_check_rdy(void *dm_void)
 {
@@ -566,7 +531,8 @@ void phydm_clm_init(void *dm_void)
 	ccx->clm_mntr_mode = CLM_DRIVER_MNTR;
 	ccx->clm_period = 0;
 	ccx->clm_rpt_stamp = 0;
-	phydm_clm_setting(dm, 65535);
+
+	ccx->clm_period = 65535;
 }
 
 #endif /*@#ifdef CLM_SUPPORT*/
