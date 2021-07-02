@@ -282,8 +282,6 @@ void halbb_ccx_edcca_opt_set(struct bb_info *bb, enum ccx_edcca_opt_sc_idx sc)
 	}
 }
 
-#ifdef NHM_SUPPORT
-
 void halbb_nhm_cal_wgt(struct bb_info *bb)
 {
 	struct bb_env_mntr_info *env = &bb->bb_env_mntr_i;
@@ -634,27 +632,46 @@ bool halbb_nhm_set(struct bb_info *bb, struct ccx_para_info *para)
 
 	return HALBB_SET_SUCCESS;
 }
+#endif //NEO
+
+#define BYTE_2_DWORD(B3, B2, B1, B0) \
+	(((B3) << 24) | ((B2) << 16) | ((B1) << 8) | (B0))
 
 void halbb_nhm_init(struct bb_info *bb)
 {
 	struct bb_env_mntr_info *env = &bb->bb_env_mntr_i;
 	struct bb_env_mntr_cr_info *cr = &env->bb_env_mntr_cr_i;
 	struct ccx_para_info para = {0};
-
-	BB_DBG(bb, DBG_ENV_MNTR, "[%s]===>\n", __func__);
+	u8 nhm_th[11];
+	u8 igi;
+	u8 th_step = 2;
+	u8 i;
+	u32 value32;
 
 	env->nhm_app = NHM_INIT;
 	env->nhm_include_cca = NHM_CCA_INIT;
 	env->nhm_mntr_time = 0;
 	env->nhm_pwr = 0;
 
-	/*if r_nhm_en = 0, nhm report will always be 0.*/
-	halbb_set_reg_phy0_1(bb, cr->nhm_en, cr->nhm_en_m, true);
+	igi = halbb_get_reg(bb, 0x1d70, 0x7F);
+	nhm_th[0] = igi << 1;
 
-	/*r_nhm_pwdb_method_sel[0]=1 : select max path*/
-	/*r_nhm_pwdb_method_sel[1] is dummy*/
-	halbb_set_reg_phy0_1(bb, cr->nhm_method_sel, cr->nhm_method_sel_m, 0x1);
+	for (i = 1; i <= 10; i++)
+		nhm_th[i] = nhm_th[0] + (u8)((th_step * i) << 1);
+
+	value32 = BYTE_2_DWORD(nhm_th[3], nhm_th[2], nhm_th[1], nhm_th[0]);
+	halbb_set_reg(bb, 0x1e44, MASKDWORD, value32);
+
+	value32 = BYTE_2_DWORD(nhm_th[7], nhm_th[6], nhm_th[5], nhm_th[4]);
+	halbb_set_reg(bb, 0x1e48, MASKDWORD, value32);
+
+	halbb_set_reg(bb, 0x1e5c, MASKDWORD, nhm_th[8]);
+
+	value32 = BYTE_2_DWORD(0, 0, nhm_th[10], nhm_th[9]);
+	halbb_set_reg(bb, 0x1e60, 0xffff0000, value32);
 }
+
+#if 0 //NEO
 
 void halbb_nhm_dbg(struct bb_info *bb, char input[][16], u32 *_used,
 		   char *output, u32 *_out_len)
@@ -780,7 +797,6 @@ void halbb_nhm_dbg(struct bb_info *bb, char input[][16], u32 *_used,
 	*_out_len = out_len;
 }
 
-#endif /*#ifdef NHM_SUPPORT*/
 #ifdef CLM_SUPPORT
 
 void halbb_clm_get_utility(struct bb_info *bb)
@@ -2478,7 +2494,9 @@ void halbb_env_mntr_init(struct bb_info *bb)
 #if 0 //NEO
 	halbb_ccx_top_setting_init(bb);
 	halbb_clm_init(bb);
+#endif //NEO
 	halbb_nhm_init(bb);
+#if 0 //NEO
 	halbb_ifs_clm_init(bb);
 	halbb_fahm_init(bb);
 	halbb_edcca_clm_init(bb);

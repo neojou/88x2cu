@@ -297,20 +297,7 @@ void phydm_nhm_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	struct ccx_info *ccx = &dm->dm_ccx_info;
-	boolean is_update = false;
 	u8 igi_curr = phydm_get_igi(dm, BB_PATH_A);
-	u8 nhm_igi_th_11k_low[NHM_TH_NUM] = {0x12, 0x15, 0x18, 0x1b, 0x1e,
-					     0x23, 0x28, 0x2c, 0x78,
-					     0x78, 0x78};
-	u8 nhm_igi_th_11k_high[NHM_TH_NUM] = {0x1e, 0x23, 0x28, 0x2d, 0x32,
-					      0x37, 0x78, 0x78, 0x78, 0x78,
-					      0x78};
-	u8 nhm_igi_th_xbox[NHM_TH_NUM] = {0x1a, 0x2c, 0x2e, 0x30, 0x32, 0x34,
-					  0x36, 0x38, 0x3a, 0x3c, 0x3d};
-	u8 i = 0;
-	u8 th_tmp = igi_curr - CCA_CAP;
-	u8 th_step = 2;
-
 
 	ccx->nhm_app = NHM_BACKGROUND;
 	ccx->nhm_igi = 0xff;
@@ -319,49 +306,7 @@ void phydm_nhm_init(void *dm_void)
 	ccx->nhm_ongoing = false;
 	ccx->nhm_set_lv = NHM_RELEASE;
 
-	if (igi_curr >= 0x10) { /* Protect for invalid IGI*/
-		if (ccx->nhm_igi != igi_curr) {
-			is_update = true;
-			ccx->nhm_igi = (u32)igi_curr;
-
-			#ifdef NHM_DYM_PW_TH_SUPPORT
-			if (ccx->nhm_dym_pw_th_en) {
-				th_tmp = MAX_2(igi_curr - DYM_PWTH_CCA_CAP, 0);
-				th_step = 3;
-			}
-			#endif
-
-			ccx->nhm_th[0] = (u8)IGI_2_NHM_TH(th_tmp);
-
-			for (i = 1; i <= 10; i++)
-				ccx->nhm_th[i] = ccx->nhm_th[0] +
-					    IGI_2_NHM_TH(th_step * i);
-
-		}
-	}
-
-	if (is_update) {
-		u32 reg1 = 0, reg2 = 0, reg3 = 0, reg4 = 0, reg4_bit = 0;
-		u32 val = 0;
-
-		reg1 = R_0x1e60;
-		reg2 = R_0x1e44;
-		reg3 = R_0x1e48;
-		reg4 = R_0x1e5c;
-		reg4_bit = MASKBYTE2;
-
-		/*Set NHM threshold*/ /*Unit: PWdB U(8,1)*/
-		val = BYTE_2_DWORD(ccx->nhm_th[3], ccx->nhm_th[2],
-			   	   ccx->nhm_th[1], ccx->nhm_th[0]);
-		pdm_set_reg(dm, reg2, MASKDWORD, val);
-		val = BYTE_2_DWORD(ccx->nhm_th[7], ccx->nhm_th[6],
-				   ccx->nhm_th[5], ccx->nhm_th[4]);
-		pdm_set_reg(dm, reg3, MASKDWORD, val);
-		pdm_set_reg(dm, reg4, reg4_bit, ccx->nhm_th[8]);
-		val = BYTE_2_DWORD(0, 0, ccx->nhm_th[10], ccx->nhm_th[9]);
-		pdm_set_reg(dm, reg1, 0xffff0000, val);
-	}
-
+	ccx->nhm_igi = (u32)igi_curr;
 	ccx->nhm_period = 0;
 
 	ccx->nhm_include_cca = NHM_CCA_INIT;
