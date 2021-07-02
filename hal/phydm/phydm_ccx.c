@@ -788,36 +788,12 @@ void phydm_ifs_clm_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	struct ccx_info *ccx = &dm->dm_ccx_info;
-	u8 i = 0;
-	u16 ifs_clm_th_low_bg[IFS_CLM_NUM] = {12, 5, 2, 0};
-	u16 ifs_clm_th_high_bg[IFS_CLM_NUM] = {64, 12, 5, 2};
-
 
 	ccx->ifs_clm_app = IFS_CLM_BACKGROUND;
 
 	/*Set IFS threshold*/
 	ccx->ifs_clm_ongoing = false;
 	ccx->ifs_clm_set_lv = IFS_CLM_RELEASE;
-
-	for (i = 0; i < IFS_CLM_NUM; i++) {
-		ccx->ifs_clm_th_en[i] = true;
-		ccx->ifs_clm_th_low[i] = ifs_clm_th_low_bg[i];
-		ccx->ifs_clm_th_high[i] = ifs_clm_th_high_bg[i];
-	}
-
-	odm_set_bb_reg(dm, R_0x1ed4, BIT(31), ccx->ifs_clm_th_en[0]);
-	odm_set_bb_reg(dm, R_0x1ed8, BIT(31), ccx->ifs_clm_th_en[1]);
-	odm_set_bb_reg(dm, R_0x1edc, BIT(31), ccx->ifs_clm_th_en[2]);
-	odm_set_bb_reg(dm, R_0x1ee0, BIT(31), ccx->ifs_clm_th_en[3]);
-	odm_set_bb_reg(dm, R_0x1ed4, 0x7fff0000, ccx->ifs_clm_th_low[0]);
-	odm_set_bb_reg(dm, R_0x1ed8, 0x7fff0000, ccx->ifs_clm_th_low[1]);
-	odm_set_bb_reg(dm, R_0x1edc, 0x7fff0000, ccx->ifs_clm_th_low[2]);
-	odm_set_bb_reg(dm, R_0x1ee0, 0x7fff0000, ccx->ifs_clm_th_low[3]);
-	odm_set_bb_reg(dm, R_0x1ed4, MASKLWORD, ccx->ifs_clm_th_high[0]);
-	odm_set_bb_reg(dm, R_0x1ed8, MASKLWORD, ccx->ifs_clm_th_high[1]);
-	odm_set_bb_reg(dm, R_0x1edc, MASKLWORD, ccx->ifs_clm_th_high[2]);
-	odm_set_bb_reg(dm, R_0x1ee0, MASKLWORD, ccx->ifs_clm_th_high[3]);
-
 	ccx->ifs_clm_period = 0;
 	ccx->ifs_clm_ctrl_unit = IFS_CLM_INIT;
 	ccx->ifs_clm_manual_ctrl = 0;

@@ -1268,6 +1268,8 @@ void halbb_ifs_clm_init(struct bb_info *bb)
 	struct bb_env_mntr_info *env = &bb->bb_env_mntr_i;
 	struct bb_env_mntr_cr_info *cr = &env->bb_env_mntr_cr_i;
 	struct ccx_para_info para = {0};
+	u16 ifs_clm_th_low[IFS_CLM_NUM] = {12, 5, 2, 0};
+	u16 ifs_clm_th_high[IFS_CLM_NUM] = {64, 12, 5, 2};
 
 	env->ifs_clm_app = IFS_CLM_INIT;
 	env->ifs_clm_mntr_time = 0;
@@ -1276,6 +1278,18 @@ void halbb_ifs_clm_init(struct bb_info *bb)
 	halbb_set_reg(bb, 0x1ee4, BIT(29), 0);
 	halbb_set_reg(bb, 0x1ee4, BIT(29), 1);
 
+	halbb_set_reg(bb, 0x1ed4, BIT(31), 1);
+	halbb_set_reg(bb, 0x1ed8, BIT(31), 1);
+	halbb_set_reg(bb, 0x1edc, BIT(31), 1);
+	halbb_set_reg(bb, 0x1ee0, BIT(31), 1);
+	halbb_set_reg(bb, 0x1ed4, 0x7fff0000, ifs_clm_th_low[0]);
+	halbb_set_reg(bb, 0x1ed8, 0x7fff0000, ifs_clm_th_low[1]);
+	halbb_set_reg(bb, 0x1edc, 0x7fff0000, ifs_clm_th_low[2]);
+	halbb_set_reg(bb, 0x1ee0, 0x7fff0000, ifs_clm_th_low[3]);
+	halbb_set_reg(bb, 0x1ed4, MASKLWORD, ifs_clm_th_high[0]);
+	halbb_set_reg(bb, 0x1ed8, MASKLWORD, ifs_clm_th_high[1]);
+	halbb_set_reg(bb, 0x1edc, MASKLWORD, ifs_clm_th_high[2]);
+	halbb_set_reg(bb, 0x1ee0, MASKLWORD, ifs_clm_th_high[3]);
 }
 
 #if 0 //NEO
