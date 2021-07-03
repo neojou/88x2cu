@@ -1782,9 +1782,6 @@ rtk_core += \
 
 $(MODULE_NAME)-y += $(rtk_core)
 
-$(MODULE_NAME)-$(CONFIG_WAPI_SUPPORT) += core/rtw_wapi.o	\
-					core/rtw_wapi_sms4.o
-
 $(MODULE_NAME)-y += $(_OS_INTFS_FILES)
 $(MODULE_NAME)-y += $(_HAL_INTFS_FILES)
 $(MODULE_NAME)-y += $(_PHYDM_FILES)

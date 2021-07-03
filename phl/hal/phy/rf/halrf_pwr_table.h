@@ -16,7 +16,7 @@
 #define _HALRF_PWR_TABLE_H_
 
 /*@--------------------------Define Parameters-------------------------------*/
-#define TX_PWR_BY_RATE_NUM_BAND 3
+#define TX_PWR_BY_RATE_NUM_BAND 2
 #define TX_PWR_BY_RATE_NUM_RF 4
 
 #define PW_LMT_MAX_2G_BANDWITH_NUM 2

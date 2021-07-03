@@ -671,7 +671,7 @@ void clear_cam_entry(_adapter *padapter, u8 id);
 void write_cam_cache(_adapter *adapter, u8 id, u16 ctrl, u8 *mac, u8 *key);
 void clear_cam_cache(_adapter *adapter, u8 id);
 
-void invalidate_cam_all(_adapter *padapter);
+void invalidate_cam_all(_adapter *padapter, bool do_hw);
 
 void flush_all_cam_entry(_adapter *padapter);
 

@@ -574,35 +574,30 @@ unsigned int decide_wait_for_beacon_timeout(unsigned int bcn_interval)
 		return bcn_interval << 2;
 }
 
-void invalidate_cam_all(_adapter *padapter)
+void invalidate_cam_all(_adapter *padapter, bool do_hw)
 {
 	struct dvobj_priv *dvobj = adapter_to_dvobj(padapter);
 	struct cam_ctl_t *cam_ctl = &dvobj->cam_ctl;
 	u8 bmc_id = rtw_iface_bcmc_id_get(padapter);
 	u8 val8 = 0;
 
-	rtw_hal_set_hwreg(padapter, HW_VAR_CAM_INVALID_ALL, &val8);
+	if (do_hw)
+		rtw_hal_set_hwreg(padapter, HW_VAR_CAM_INVALID_ALL, &val8);
 
 	_rtw_spinlock_bh(&cam_ctl->lock);
 
 	rtw_sec_cam_map_clr_all(&cam_ctl->used);
 
-#ifndef SEC_DEFAULT_KEY_SEARCH
 	/* for BMC data TX with force camid */
+	pr_info("%s NEO bmc_id=0x%x\n", bmc_id);
 	if (bmc_id != INVALID_SEC_MAC_CAM_ID) {
 		rtw_sec_cam_map_set(&cam_ctl->used, bmc_id);
 		if (_rtw_camctl_chk_cap(padapter, SEC_CAP_CHK_EXTRA_SEC))
 			rtw_sec_cam_map_set(&cam_ctl->used, bmc_id + 1);
 	}
-#endif
 
 	_rtw_memset(dvobj->cam_cache, 0, sizeof(struct sec_cam_ent) * SEC_CAM_ENT_NUM_SW_LIMIT);
 	_rtw_spinunlock_bh(&cam_ctl->lock);
-
-#ifdef SEC_DEFAULT_KEY_SEARCH//!BMC TX force camid
-	/* clear default key related key search setting */
-	rtw_hal_set_hwreg(padapter, HW_VAR_SEC_DK_CFG, (u8 *)_FALSE);
-#endif
 }
 
 void _clear_cam_entry(_adapter *padapter, u8 entry)
@@ -1260,6 +1255,7 @@ void rtw_clean_hw_dk_cam(_adapter *adapter)
 void flush_all_cam_entry(_adapter *padapter)
 {
 #ifdef CONFIG_CONCURRENT_MODE
+aa
 	struct mlme_ext_priv *pmlmeext = &padapter->mlmeextpriv;
 	struct mlme_ext_info *pmlmeinfo = &(pmlmeext->mlmext_info);
 	struct mlme_priv *pmlmepriv = &(padapter->mlmepriv);
@@ -1309,7 +1305,7 @@ void flush_all_cam_entry(_adapter *padapter)
 
 #else /*NON CONFIG_CONCURRENT_MODE*/
 
-	invalidate_cam_all(padapter);
+	invalidate_cam_all(padapter, true);
 #endif
 }
 

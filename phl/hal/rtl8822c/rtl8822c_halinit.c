@@ -318,6 +318,28 @@ hal_fast_init_fail:
 	return hal_status;
 }
 
+static void rtw_hal_init_misc(struct hal_info_t *hal)
+{
+	u16 value16;
+	u32 value32;
+
+	/* invalidate cam all */
+	value32 = BIT(31) | BIT(30);
+	hal_write32(hal->hal_com, REG_CAMCMD, value32);
+	
+	/* clear RCR/ICV bit */
+	value32 = hal_read32(hal->hal_com, REG_RCR);
+	value32 &= ~(BIT(8) | BIT(9));
+	hal_write32(hal->hal_com, REG_RCR, value32);
+
+	/* clear rx ctrl frame */
+	hal_write16(hal->hal_com, REG_RXFLTMAP1, 0);
+
+	/* enable mac security engine */
+	value16 = hal_read16(hal->hal_com, REG_CR);
+	value16 |= BIT(9);
+	hal_write16(hal->hal_com, REG_CR, value16);
+}
 
 enum rtw_hal_status hal_start_8822c(struct rtw_phl_com_t *phl_com,
 				   struct hal_info_t *hal,
@@ -365,6 +387,7 @@ enum rtw_hal_status hal_start_8822c(struct rtw_phl_com_t *phl_com,
 	rtw_hal_btc_init_coex_cfg_ntfy(hal);
 #endif
 #endif // if 0 NEO
+
 	/* start watchdog/dm */
 	rtw_hal_rf_dm_init(hal);
 	rtw_hal_bb_dm_init(hal);
@@ -387,8 +410,8 @@ enum rtw_hal_status hal_start_8822c(struct rtw_phl_com_t *phl_com,
 		//phl_com->accept_icv_err = true;
 	}
 
-#if 0 // NEO
 
+#if 0 // NEO
 #ifdef RTW_WKARD_HW_MGNT_GCMP_256_DISABLE
 	rtw_hal_mac_config_hw_mgnt_sec(hal, false);
 #endif
@@ -413,6 +436,8 @@ enum rtw_hal_status hal_start_8822c(struct rtw_phl_com_t *phl_com,
 	hal_fw_en_basic_log(hal->hal_com);
 
 #endif // if 0 NEO
+
+	rtw_hal_init_misc(hal);
 
 	return RTW_HAL_STATUS_SUCCESS;
 

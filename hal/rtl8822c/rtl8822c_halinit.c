@@ -231,16 +231,7 @@ void rtl8822c_init_misc(PADAPTER adapter)
 
 
 	/* initial security setting */
-	invalidate_cam_all(adapter);
-
-	/* check RCR/ICV bit */
-	rtw_hal_rcr_clear(adapter, BIT_ACRC32_8822C | BIT_AICV_8822C);
-
-	/* clear rx ctrl frame */
-	rtw_write16(adapter, REG_RXFLTMAP1_8822C, 0);
-
-	/*Enable MAC security engine*/
-	rtw_write16(adapter, REG_CR, (rtw_read16(adapter, REG_CR) | BIT_MAC_SEC_EN));
+	invalidate_cam_all(adapter, false);
 
 #ifdef CONFIG_XMIT_ACK
 	/* ack for xmit mgmt frames. */
