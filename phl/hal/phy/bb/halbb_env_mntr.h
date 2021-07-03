@@ -389,6 +389,7 @@ struct bb_env_mntr_info {
 
 /*--------------------------[Prptotype]-------------------------------------*/
 struct bb_info;
+struct physts_rxd;
 
 u32 halbb_ccx_idx_cnt_2_us(struct bb_info *bb, u16 idx_cnt);
 

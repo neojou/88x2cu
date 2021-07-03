@@ -2518,8 +2518,6 @@ void halbb_env_mntr_init(struct bb_info *bb)
 {
 	struct bb_env_mntr_info *env = &bb->bb_env_mntr_i;
 
-	pr_info("%s NEO start\n", __func__);
-
 	halbb_env_monitor_init(bb);
 #if 0 //NEO
 	halbb_ccx_top_setting_init(bb);

@@ -1085,7 +1085,6 @@ void halbb_dig_init(struct bb_info *bb)
 	struct bb_dig_info *bb_dig = &bb->bb_dig_i;
 	u8 igi_new;
 
-	pr_info("%s NEO start\n", __func__);
 	halbb_dig_igi_init(bb);
 }
 

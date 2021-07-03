@@ -223,7 +223,6 @@ enum rtw_hal_status halrf_dm_init(void *rf_void)
 		return RTW_HAL_STATUS_FAILURE;
 	}
 
-	pr_info("%s NEO doing\n", __func__);
 #if 0 //NEO
 	halrf_cmn_info_self_init(rf);
 	halrf_dbg_setting_init(rf);

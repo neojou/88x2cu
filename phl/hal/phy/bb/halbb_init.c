@@ -332,7 +332,6 @@ enum rtw_hal_status halbb_dm_init(struct bb_info *bb)
 		return RTW_HAL_STATUS_FAILURE;
 	}
 
-	pr_info("%s NEO start\n", __func__);
 #if 0 //NEO
 	if (!bb->bb_cmn_info_init_ready) {
 		BB_WARNING("bb_cmn_info_init_ready = false");
@@ -362,9 +361,9 @@ enum rtw_hal_status halbb_dm_init(struct bb_info *bb)
 	#ifdef HALBB_STATISTICS_SUPPORT
 	halbb_statistics_init(bb);
 	#endif
-	#ifdef HALBB_LA_MODE_SUPPORT
+#endif //NEO
 	halbb_la_init(bb);
-	#endif
+#if 0 //NEO
 	#ifdef HALBB_PSD_SUPPORT
 	halbb_psd_init(bb);
 	#endif

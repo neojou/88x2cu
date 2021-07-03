@@ -22,6 +22,7 @@ halbb-y += $(path_halbb_d1)/halbb.o \
 		$(path_halbb_d1)/halbb_env_mntr.o \
 		$(path_halbb_d1)/halbb_init.o \
 		$(path_halbb_d1)/halbb_ra.o \
+		$(path_halbb_d1)/halbb_la_mode.o \
 		$(path_halbb_d1)/halbb_interface.o
 
 #halbb-y += $(path_halbb_d1)/halbb.o \
@@ -37,7 +38,6 @@ halbb-y += $(path_halbb_d1)/halbb.o \
 			$(path_halbb_d1)/halbb_edcca.o \
 			$(path_halbb_d1)/halbb_hw_cfg.o \
 			$(path_halbb_d1)/halbb_init.o \
-			$(path_halbb_d1)/halbb_la_mode.o \
 			$(path_halbb_d1)/halbb_math_lib.o \
 			$(path_halbb_d1)/halbb_mp.o \
 			$(path_halbb_d1)/halbb_plcp_gen.o \

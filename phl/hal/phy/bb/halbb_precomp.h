@@ -82,8 +82,10 @@
 #include "halbb_plcp_tx_ex.h"
 #include "halbb_plcp_tx.h"
 #include "halbb_plcp_gen.h"
+#endif // NEO
 #include "halbb_la_mode_ex.h"
 #include "halbb_la_mode.h"
+#if 0 //NEO
 #include "halbb_psd.h"
 #include "halbb_pwr_ctrl_ex.h"
 #include "halbb_pwr_ctrl.h"

@@ -180,9 +180,9 @@ struct bb_cmn_info {
 #ifdef HALBB_PSD_SUPPORT
 	struct bb_psd_info	bb_psd_i;
 #endif
-#ifdef HALBB_LA_MODE_SUPPORT
+#endif //NEO
 	struct bb_la_mode_info	bb_la_mode_i;
-#endif
+#if 0 //NEO
 #ifdef HALBB_DYN_CSI_RSP_SUPPORT
 	struct bf_ch_raw_info bf_ch_raw_i;
 #endif

@@ -1522,8 +1522,6 @@ void halbb_ra_init(struct bb_info *bb)
 	struct bb_ra_info *bb_ra = NULL;
 	u8 macid = 0;
 
-	pr_info("%s NEO enter\n", __func__);
-
 	for (macid = 0; macid < PHL_MAX_STA_NUM; macid ++) {
 		bb_ra = &bb->bb_ra_i[macid];
 		if (!bb_ra)

@@ -46,7 +46,9 @@
 #include "halbb_mp_ex.h"
 #include "halbb_plcp_tx_ex.h"
 #include "halbb_pmac_setting_ex.h"
+#endif //NEO
 #include "halbb_la_mode_ex.h"
+#if 0 //NEO
 #include "halbb_ra_ex.h"
 #include "halbb_cmn_rpt_ex.h"
 #include "halbb_ch_info_ex.h"

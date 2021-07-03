@@ -947,10 +947,6 @@ void phydm_la_set_buff_mode(void *dm_void, enum la_buff_mode mode)
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
 	struct rt_adcsmp *smp = &dm->adcsmp;
 	struct rt_adcsmp_string *buf = &smp->adc_smp_buf;
-#if (DM_ODM_SUPPORT_TYPE == ODM_AP)
-	struct rtl8192cd_priv		*priv = dm->priv;
-	u8 normal_LA_on = priv->pmib->miscEntry.normal_LA_on;
-#endif
 	u32 buff_size_base = 0;
 	u32 end_pos_tmp = 0;
 
@@ -959,13 +955,6 @@ void phydm_la_set_buff_mode(void *dm_void, enum la_buff_mode mode)
 	end_pos_tmp = 0x40000;
 
 	buf->buffer_size = buff_size_base;
-
-	if (mode == ADCSMP_BUFF_HALF) {
-		odm_set_mac_reg(dm, R_0x7cc, BIT(30), 0);
-	} else {
-		buf->buffer_size = buf->buffer_size << 1;
-		odm_set_mac_reg(dm, R_0x7cc, BIT(30), 1);
-	}
 
 	buf->end_pos = end_pos_tmp;
 	buf->start_pos = end_pos_tmp - buf->buffer_size;
