@@ -229,19 +229,8 @@ void rtl8822c_init_misc(PADAPTER adapter)
 
 	hal = GET_HAL_DATA(adapter);
 
-
 	/* initial security setting */
 	invalidate_cam_all(adapter, false);
-
-#ifdef CONFIG_XMIT_ACK
-	/* ack for xmit mgmt frames. */
-	rtw_write32(adapter, REG_FWHW_TXQ_CTRL_8822C,
-		rtw_read32(adapter, REG_FWHW_TXQ_CTRL_8822C) | BIT_EN_QUEUE_RPT_8822C(BIT(4)));
-#endif /* CONFIG_XMIT_ACK */
-
-#ifdef CONFIG_TCP_CSUM_OFFLOAD_RX
-	rtw_hal_rcr_add(adapter, BIT_TCPOFLD_EN_8822C);
-#endif /* CONFIG_TCP_CSUM_OFFLOAD_RX*/
 }
 
 u32 rtl8822c_init(PADAPTER adapter)

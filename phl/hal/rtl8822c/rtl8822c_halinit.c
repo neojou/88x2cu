@@ -339,6 +339,11 @@ static void rtw_hal_init_misc(struct hal_info_t *hal)
 	value16 = hal_read16(hal->hal_com, REG_CR);
 	value16 |= BIT(9);
 	hal_write16(hal->hal_com, REG_CR, value16);
+
+	/* tcp check sum offload */
+	value32 = hal_read32(hal->hal_com, REG_RCR);
+	value32 |= BIT(25);
+	hal_write32(hal->hal_com, REG_RCR, value32);
 }
 
 enum rtw_hal_status hal_start_8822c(struct rtw_phl_com_t *phl_com,
