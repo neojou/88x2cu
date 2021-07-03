@@ -517,7 +517,6 @@ uint rtk_hal_init(_adapter *padapter)
 	status = padapter->hal_func.hal_init(padapter);
 
 	if(pHalData ->phydm_init_result) {
-
 		status = _FAIL;
 		RTW_ERR("%s phydm init fail reason=%u \n",
 			__func__,
@@ -525,33 +524,12 @@ uint rtk_hal_init(_adapter *padapter)
 	}
 
 	if (status == _SUCCESS) {
-		RTW_INFO("%s set hw init completed\n", __func__);
 		rtw_set_hw_init_completed(padapter, _TRUE);
 		if (padapter->registrypriv.notch_filter == 1)
 			rtw_hal_notch_filter(padapter, 1);
 		rtw_led_control(padapter, LED_CTL_POWER_ON);
 		init_hw_mlme_ext(padapter);
-		#ifdef CONFIG_RF_POWER_TRIM
-		rtw_bb_rf_gain_offset(padapter);
-		#endif /*CONFIG_RF_POWER_TRIM*/
-		//NEO
-		//GET_PRIMARY_ADAPTER(padapter)->bup = _TRUE; /*temporary*/
-		#ifdef CONFIG_MI_WITH_MBSSID_CAM
-		rtw_mi_set_mbid_cam(padapter);
-		#endif
-		#ifdef CONFIG_SUPPORT_MULTI_BCN
-		rtw_ap_multi_bcn_cfg(padapter);
-		#endif
-		#if (RTL8822B_SUPPORT == 1) || (RTL8192F_SUPPORT == 1)
-		#ifdef CONFIG_DYNAMIC_SOML
-		rtw_dyn_soml_config(padapter);
-		#endif
-		#endif
-		#ifdef CONFIG_TDMADIG
-		rtw_phydm_tdmadig(padapter, TDMADIG_INIT);
-		#endif/*CONFIG_TDMADIG*/
 		rtw_phydm_dyn_rrsr_en(padapter,padapter->registrypriv.en_dyn_rrsr);
-		RTW_INFO("%s: padapter->registrypriv.set_rrsr_value=0x%x\n", __func__,padapter->registrypriv.set_rrsr_value);
 		if(padapter->registrypriv.set_rrsr_value != 0xFFFFFFFF)
 			rtw_phydm_set_rrsr(padapter, padapter->registrypriv.set_rrsr_value, TRUE);
 	} else {
