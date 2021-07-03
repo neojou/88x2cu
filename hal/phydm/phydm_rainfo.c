@@ -1824,19 +1824,6 @@ void phydm_rrsr_en(void *dm_void, boolean en_rrsr)
 	ra_tab->dynamic_rrsr_en = en_rrsr;
 }
 
-void phydm_arfr_table_init(void *dm_void)
-{
-	struct dm_struct *dm = (struct dm_struct *)dm_void;
-
-	/*ARFR table3(2.4g ac 2ss) for rate_id = 16*/
-	odm_set_mac_reg(dm, R_0x494, MASKDWORD, 0xfe01f015);
-	odm_set_mac_reg(dm, R_0x498, MASKDWORD, 0x40000000);
-
-	/*ARFR table5(2.4g ac 1ss) for rate_id = 18*/
-	odm_set_mac_reg(dm, R_0x4a4, MASKDWORD, 0x3ff015);
-	odm_set_mac_reg(dm, R_0x4a8, MASKDWORD, 0x40000000);
-}
-
 void phydm_ra_info_init(void *dm_void)
 {
 	struct dm_struct *dm = (struct dm_struct *)dm_void;
@@ -1850,8 +1837,6 @@ void phydm_ra_info_init(void *dm_void)
 	ra_tab->dynamic_rrsr_en = false;
 	ra_tab->ra_trigger_mode = 1; // default TBTT RA
 	ra_tab->ra_tx_cls_th = 255;
-
-	phydm_arfr_table_init(dm);
 
 	phydm_rate_adaptive_mask_init(dm);
 }

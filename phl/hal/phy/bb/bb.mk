@@ -21,6 +21,7 @@ halbb-y += $(path_halbb_d1)/halbb.o \
 		$(path_halbb_d1)/halbb_dig.o  \
 		$(path_halbb_d1)/halbb_env_mntr.o \
 		$(path_halbb_d1)/halbb_init.o \
+		$(path_halbb_d1)/halbb_ra.o \
 		$(path_halbb_d1)/halbb_interface.o
 
 #halbb-y += $(path_halbb_d1)/halbb.o \
@@ -45,7 +46,6 @@ halbb-y += $(path_halbb_d1)/halbb.o \
 			$(path_halbb_d1)/halbb_psd.o \
 			$(path_halbb_d1)/halbb_physts.o \
 			$(path_halbb_d1)/halbb_pwr_ctrl.o \
-			$(path_halbb_d1)/halbb_ra.o \
 			$(path_halbb_d1)/halbb_statistics.o \
 			$(path_halbb_d1)/halbb_ant_div.o \
 			$(path_halbb_d1)/halbb_fwofld.o \
