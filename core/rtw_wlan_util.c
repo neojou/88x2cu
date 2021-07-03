@@ -589,7 +589,7 @@ void invalidate_cam_all(_adapter *padapter, bool do_hw)
 	rtw_sec_cam_map_clr_all(&cam_ctl->used);
 
 	/* for BMC data TX with force camid */
-	pr_info("%s NEO bmc_id=0x%x\n", bmc_id);
+	pr_info("%s NEO bmc_id=0x%x\n", __func__, bmc_id);
 	if (bmc_id != INVALID_SEC_MAC_CAM_ID) {
 		rtw_sec_cam_map_set(&cam_ctl->used, bmc_id);
 		if (_rtw_camctl_chk_cap(padapter, SEC_CAP_CHK_EXTRA_SEC))
