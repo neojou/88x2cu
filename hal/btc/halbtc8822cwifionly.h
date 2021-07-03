@@ -16,10 +16,6 @@
 #define __INC_HAL8822CWIFIONLYHWCFG_H
 
 VOID
-ex_hal8822c_wifi_only_hw_config(
-	IN struct wifi_only_cfg *pwifionlycfg
-	);
-VOID
 ex_hal8822c_wifi_only_scannotify(
 	IN struct wifi_only_cfg *pwifionlycfg,
 	IN u1Byte  is_5g

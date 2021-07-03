@@ -265,9 +265,6 @@ u32 rtl8822c_init(PADAPTER adapter)
 		return _FAIL;
 
 	rtl8822c_phy_init_haldm(adapter);
-
-	rtw_btcoex_wifionly_hw_config(adapter);
-
 	rtl8822c_init_misc(adapter);
 
 	return _SUCCESS;

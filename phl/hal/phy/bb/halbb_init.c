@@ -323,6 +323,17 @@ void halbb_dm_deinit(struct rtw_phl_com_t *phl_com, void *bb_phy_0)
 }
 #endif //NEO
 
+static void halbb_btc_wifi_only(struct bb_info *bb)
+{
+	halbb_set_reg(bb, 0x70, 0xff000000, 0x0e);
+	/*gnt_wl=1 , gnt_bt=0*/
+	halbb_set_reg(bb, 0x1704, 0xffffffff, 0x7700);
+	halbb_set_reg(bb, 0x1700, 0xffffffff, 0xc00f0038);
+
+	halbb_set_reg(bb, 0x6c0, 0xffffffff, 0xaaaaaaaa);
+	halbb_set_reg(bb, 0x6c4, 0xffffffff, 0xaaaaaaaa);
+}
+
 enum rtw_hal_status halbb_dm_init(struct bb_info *bb)
 {
 	enum rtw_hal_status hal_status = RTW_HAL_STATUS_SUCCESS;
@@ -399,6 +410,8 @@ enum rtw_hal_status halbb_dm_init(struct bb_info *bb)
 	#endif
 	halbb_reset_adc(bb);
 #endif //NEO
+	halbb_btc_wifi_only(bb);
+
 	bb->bb_dm_init_ready = true;
 	BB_DBG(bb, DBG_INIT, "bb_init_ready = %d\n", bb->bb_dm_init_ready);
 

@@ -1051,9 +1051,8 @@ enum rtw_hal_status rtw_hal_init(void *drv_priv,
 error_bcn_init:
 	rtw_hal_btc_deinit(phl_com, hal_info);
 #endif
-#endif // if 0 NEO
-
 error_btc_init:
+#endif // if 0 NEO
 	rtw_hal_rf_deinit(phl_com, hal_info);
 
 error_rf_init:

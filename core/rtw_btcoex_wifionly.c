@@ -31,11 +31,6 @@ void rtw_btcoex_wifionly_connect_notify(PADAPTER padapter)
 	hal_btcoex_wifionly_connect_notify(padapter);
 }
 
-void rtw_btcoex_wifionly_hw_config(PADAPTER padapter)
-{
-	hal_btcoex_wifionly_hw_config(padapter);
-}
-
 void rtw_btcoex_wifionly_initialize(PADAPTER padapter)
 {
 	hal_btcoex_wifionly_initlizevariables(padapter);

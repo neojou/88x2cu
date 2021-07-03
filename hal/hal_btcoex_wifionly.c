@@ -204,42 +204,6 @@ void hal_btcoex_wifionly_connect_notify(PADAPTER padapter)
 #endif
 }
 
-void hal_btcoex_wifionly_hw_config(PADAPTER padapter)
-{
-	struct wifi_only_cfg *pwifionlycfg = &GLBtCoexistWifiOnly;
-
-	if (IS_HARDWARE_TYPE_8723B(padapter)) {
-#ifdef CONFIG_RTL8723B
-		ex_hal8723b_wifi_only_hw_config(pwifionlycfg);
-#endif
-	}
-
-#ifdef CONFIG_RTL8822B
-	else if (IS_HARDWARE_TYPE_8822B(padapter))
-		ex_hal8822b_wifi_only_hw_config(pwifionlycfg);
-#endif
-
-#ifdef CONFIG_RTL8821C
-	else if (IS_HARDWARE_TYPE_8821C(padapter))
-		ex_hal8821c_wifi_only_hw_config(pwifionlycfg);
-#endif
-
-#ifdef CONFIG_RTL8822C
-	else if (IS_HARDWARE_TYPE_8822C(padapter))
-		ex_hal8822c_wifi_only_hw_config(pwifionlycfg);
-#endif
-
-#ifdef CONFIG_RTL8814B
-	else if (IS_HARDWARE_TYPE_8814B(padapter))
-		ex_hal8814b_wifi_only_hw_config(pwifionlycfg);
-#endif
-
-#ifdef CONFIG_RTL8723F
-	else if (IS_HARDWARE_TYPE_8723F(padapter))
-		ex_hal8723f_wifi_only_hw_config(pwifionlycfg);
-#endif
-}
-
 void hal_btcoex_wifionly_initlizevariables(PADAPTER padapter)
 {
 	struct wifi_only_cfg		*pwifionlycfg = &GLBtCoexistWifiOnly;

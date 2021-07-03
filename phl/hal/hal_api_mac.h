@@ -321,6 +321,7 @@ rtw_hal_mac_chan_info_cfg(struct hal_info_t *hal_info,
 #endif
 
 #ifdef CONFIG_PHL_DFS
+struct mac_ax_dfs_rpt;
 enum rtw_hal_status
 rtw_hal_mac_dfs_rpt_cfg(struct hal_info_t *hal_info,
 				bool rpt_en, u8 rpt_num, u8 rpt_to);
